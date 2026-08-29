@@ -1,0 +1,266 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+/*
+ * Mapps Creation design system — navy / maroon / gold.
+ * All colors are oklch tokens. Never hardcode colors in components.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-navy: var(--navy-deep);
+  --color-maroon: var(--maroon-wine);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-ivory: var(--ivory);
+  --color-ink: var(--ink);
+}
+
+:root {
+  --radius: 0.25rem;
+
+  /* Brand palette (sampled from logo) */
+  --navy-deep: oklch(0.219 0.042 258.4); /* #0F2038 */
+  --maroon-wine: oklch(0.295 0.077 5.5); /* #481B2C */
+  --gold: oklch(0.729 0.073 79.6); /* #C9A66B */
+  --gold-bright: oklch(0.893 0.035 88.5); /* #E8DCC0 */
+  --ivory: oklch(0.964 0.011 91); /* #F7F3EA */
+  --ink: oklch(0.219 0.013 60); /* #201A15 */
+
+  /* Semantic mapping — dark navy site */
+  --background: var(--navy-deep);
+  --foreground: var(--ivory);
+  --card: oklch(0.255 0.04 258.4);
+  --card-foreground: var(--ivory);
+  --popover: oklch(0.255 0.04 258.4);
+  --popover-foreground: var(--ivory);
+  --primary: var(--gold);
+  --primary-foreground: var(--navy-deep);
+  --secondary: var(--maroon-wine);
+  --secondary-foreground: var(--gold-bright);
+  --muted: oklch(0.29 0.035 258.4);
+  --muted-foreground: oklch(0.75 0.02 90);
+  --accent: var(--gold-bright);
+  --accent-foreground: var(--navy-deep);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: var(--ivory);
+  --border: oklch(0.729 0.073 79.6 / 22%);
+  --input: oklch(0.729 0.073 79.6 / 28%);
+  --ring: var(--gold);
+
+  --gradient-silk: linear-gradient(135deg, var(--navy-deep) 0%, oklch(0.24 0.05 300) 55%, var(--maroon-wine) 100%);
+  --gradient-gold: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
+  --shadow-elegant: 0 30px 80px -40px oklch(0 0 0 / 70%);
+  --shadow-gold: 0 0 40px -10px oklch(0.729 0.073 79.6 / 45%);
+  --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-ui: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Warm, consistent cast across sourced stock photography — ties disparate
+     images together under one "brand light" instead of looking stock-mixed. */
+  img {
+    filter: saturate(1.05) brightness(0.99) contrast(1.02);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .custom-cursor-active,
+    .custom-cursor-active * {
+      cursor: none;
+    }
+  }
+
+  /* Cormorant Garamond defaults to old-style figures (uneven baseline,
+     descenders) — fine for running prose but reads as broken in stat
+     numbers, years and step counters. Force lining + tabular figures
+     anywhere the display face is used. */
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: var(--font-display);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 300;
+  }
+
+  ::selection {
+    background: var(--gold);
+    color: var(--navy-deep);
+  }
+}
+
+/* Light ivory section on a dark site */
+@utility surface-ivory {
+  background-color: var(--ivory);
+  color: var(--ink);
+  --foreground: var(--ink);
+  --muted-foreground: oklch(0.45 0.015 60);
+  --card: oklch(0.99 0.006 91);
+  --card-foreground: var(--ink);
+  --border: oklch(0.219 0.013 60 / 14%);
+}
+
+@utility silk {
+  background-image: var(--gradient-silk);
+}
+
+@utility grain {
+  position: relative;
+  isolation: isolate;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+}
+
+@utility hairline {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0.729 0.073 79.6 / 55%) 30%,
+    oklch(0.729 0.073 79.6 / 55%) 70%,
+    transparent
+  );
+}
+
+@utility text-gold-gradient {
+  background-image: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility label-caps {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+@utility display-xl {
+  font-family: var(--font-display);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: clamp(2.75rem, 8vw, 7.25rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+@utility display-lg {
+  font-family: var(--font-display);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+@utility shadow-elevate {
+  box-shadow: var(--shadow-elegant);
+}
+
+@utility shadow-glow-gold {
+  box-shadow: var(--shadow-gold);
+}
+
+@utility safe-bottom {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+}
+
+@utility marquee-track {
+  animation: marquee 28s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes attention-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.07);
+  }
+}
+
+@utility attention-pulse {
+  animation: attention-pulse 2.4s var(--ease-ui) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
