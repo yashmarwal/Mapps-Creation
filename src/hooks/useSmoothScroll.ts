@@ -16,6 +16,11 @@ export function useSmoothScroll() {
       const lenis = new Lenis({
         duration: 1.2,
         easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        // Without this, Lenis hijacks scroll/touch globally and any nested
+        // overflow-y-auto panel (the Ask-AI chat's message list, etc.) can't
+        // scroll natively — Lenis detects real nested-scroll containers and
+        // lets them handle their own scroll instead.
+        allowNestedScroll: true,
       });
       instance = { raf: (time) => lenis.raf(time), destroy: () => lenis.destroy() };
       const loop = (time: number) => {

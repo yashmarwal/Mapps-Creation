@@ -150,7 +150,7 @@ function RootComponent() {
       <IntroProvider>
         <TopMarquee visible={marqueeVisible} text={marquee.text} />
         <Navigation marqueeVisible={marqueeVisible} />
-        <main className="pb-23 md:pb-0">
+        <main>
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <AnimatePresence mode="wait" initial={false}>
             <motion.div

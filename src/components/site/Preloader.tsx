@@ -65,7 +65,12 @@ export function IntroProvider({ children }: { children: ReactNode }) {
         {state.show && (
           <motion.div
             key="preloader"
-            className="bg-background fixed inset-0 z-[200] flex flex-col items-center justify-center"
+            // pointer-events-none: it's a solid full-screen backdrop with no
+            // interactive content of its own, so this only matters during
+            // its 0.5s exit fade — without it, the invisible-but-still-
+            // mounted div swallows any tap/click made right after the site
+            // finishes loading, before the fade visually completes.
+            className="bg-background pointer-events-none fixed inset-0 z-[200] flex flex-col items-center justify-center"
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: EASE_REVEAL }}
           >

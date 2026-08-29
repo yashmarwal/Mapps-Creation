@@ -12,7 +12,7 @@ const DEVELOPER_WHATSAPP = `https://wa.me/918595475007?text=${encodeURIComponent
 
 export function Footer() {
   return (
-    <footer id="site-footer" className="border-border border-t">
+    <footer id="site-footer" className="border-border border-t pb-23 md:pb-0">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-4 md:px-10 md:py-20">
         <div className="md:col-span-2">
           <div className="flex items-center gap-3">
