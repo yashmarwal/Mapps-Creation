@@ -19,7 +19,7 @@ export function WordReveal({ text, className }: { text: string; className?: stri
             className="inline-block"
             initial={{ opacity: 0, y: reduced ? 0 : 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
+            viewport={{ once: true, amount: 0.1, margin: "0px 0px -30px 0px" }}
             transition={{ duration: 0.5, ease: EASE_REVEAL, delay: i * 0.035 }}
           >
             {word}
@@ -49,8 +49,8 @@ export function Reveal({
       className={className}
       initial={{ opacity: 0, y: reduced ? 0 : y }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ duration: 0.7, ease: EASE_REVEAL, delay: (index % 6) * 0.05 }}
+      viewport={{ once: true, amount: 0.1, margin: "0px 0px -30px 0px" }}
+      transition={{ duration: 0.6, ease: EASE_REVEAL, delay: (index % 6) * 0.05 }}
     >
       {children}
     </motion.div>

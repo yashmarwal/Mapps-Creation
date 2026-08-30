@@ -2,8 +2,8 @@ export const SITE = {
   name: "Mapps Creation",
   tagline: "Knitting Dreams Into Reality",
   city: "Surat, Gujarat",
-  phone: "+917949338795",
-  phoneDisplay: "+91 79493 38795",
+  phone: "+917046009423",
+  phoneDisplay: "+91 70460 09423",
   url: "https://mappscreation.com",
   ogImage: "https://mappscreation.com/og-image.png",
 } as const;

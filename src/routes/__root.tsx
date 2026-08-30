@@ -152,17 +152,14 @@ function RootComponent() {
         <Navigation marqueeVisible={marqueeVisible} />
         <main>
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, marginTop: 12 }}
-              animate={{ opacity: 1, marginTop: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.35, ease: EASE_UI }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25, ease: EASE_UI }}
+          >
+            <Outlet />
+          </motion.div>
         </main>
         <Footer />
         <WhatsAppButton />
