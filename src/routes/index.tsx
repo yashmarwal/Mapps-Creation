@@ -170,7 +170,7 @@ function Home() {
           <motion.p
             className="label-caps text-primary"
             initial={{ opacity: 0, y: 12 }}
-            animate={ready ? { opacity: 1, y: 0 } : {}}
+            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
             transition={{ duration: 0.7, ease: EASE_REVEAL, delay: base }}
           >
             Mapps Creation · Surat, Gujarat
@@ -188,7 +188,7 @@ function Home() {
           <motion.p
             className="text-muted-foreground mt-7 max-w-xl text-base leading-relaxed md:text-lg"
             initial={{ opacity: 0, y: 16 }}
-            animate={ready ? { opacity: 1, y: 0 } : {}}
+            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
             transition={{ duration: 0.8, ease: EASE_REVEAL, delay: base + 0.45 }}
           >
             Mapps Creation supplies premium Lycra, knitted, and polyester-lycra fabrics to garment
@@ -198,7 +198,7 @@ function Home() {
           <motion.div
             className="mt-9 flex flex-wrap items-center gap-3"
             initial={{ opacity: 0, y: 16 }}
-            animate={ready ? { opacity: 1, y: 0 } : {}}
+            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
             transition={{ duration: 0.8, ease: EASE_REVEAL, delay: base + 0.6 }}
           >
             <MagneticButton
@@ -220,7 +220,7 @@ function Home() {
           <motion.ul
             className="border-border text-muted-foreground mt-12 flex flex-wrap gap-x-8 gap-y-3 border-t pt-6 text-xs tracking-[0.18em] uppercase"
             initial={{ opacity: 0 }}
-            animate={ready ? { opacity: 1 } : {}}
+            animate={ready ? { opacity: 1 } : { opacity: 0 }}
             transition={{ duration: 0.9, ease: EASE_REVEAL, delay: base + 0.8 }}
           >
             {TRUST.map((item) => (
@@ -288,6 +288,7 @@ function Home() {
 
         {/* Mobile: compact horizontal row */}
         <div
+          data-lenis-prevent
           className="mt-12 flex gap-4 overflow-x-auto pb-2 sm:hidden [&::-webkit-scrollbar]:hidden"
           style={{ scrollbarWidth: "none" }}
         >

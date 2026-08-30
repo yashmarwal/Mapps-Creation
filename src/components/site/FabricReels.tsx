@@ -104,6 +104,19 @@ export function FabricReels() {
     }, RESUME_DELAY_MS);
   };
 
+  useEffect(() => {
+    if (openIndex === null) return;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenIndex(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [openIndex]);
+
   return (
     <section className="border-border border-y py-16 md:py-20">
       <Reveal className="mx-auto max-w-7xl px-5 text-center md:px-10">
@@ -113,6 +126,7 @@ export function FabricReels() {
 
       <div
         ref={trackRef}
+        data-lenis-prevent
         onPointerDown={pause}
         onPointerUp={resumeSoon}
         onPointerLeave={resumeSoon}
@@ -138,6 +152,7 @@ export function FabricReels() {
       <AnimatePresence>
         {openIndex !== null && (
           <motion.div
+            data-lenis-prevent
             className="fixed inset-0 z-[190] flex items-center justify-center bg-black/85 px-5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

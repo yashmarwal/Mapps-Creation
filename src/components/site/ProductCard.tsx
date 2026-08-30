@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Mail, MessageCircle, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EASE_REVEAL, EASE_UI, Reveal } from "./motion";
 import type { Product } from "@/data/catalog";
 import { SITE, whatsappLink } from "@/lib/seo";
@@ -17,6 +17,19 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
   const spring = { stiffness: 220, damping: 22, mass: 0.6 };
   const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [7, -7]), spring);
   const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-7, 7]), spring);
+
+  useEffect(() => {
+    if (!preview) return;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPreview(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [preview]);
 
   const fine = () =>
     typeof window !== "undefined" &&
@@ -125,6 +138,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
             onClick={() => setPreview(false)}
           >
             <motion.div
+              data-lenis-prevent
               className="border-border bg-card relative grid max-h-[90vh] w-full max-w-2xl overflow-y-auto border sm:grid-cols-2"
               initial={{ opacity: 0, scale: 0.94, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

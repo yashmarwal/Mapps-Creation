@@ -216,8 +216,15 @@ export function AskUsChat({
     if (!open) return;
     window.history.pushState({ chatOpen: true }, "");
     const onPop = () => onOpenChange(false);
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onOpenChange(false);
+    };
     window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, [open, onOpenChange]);
 
   const send = (text: string) => {
@@ -232,12 +239,12 @@ export function AskUsChat({
       <AnimatePresence>
         {open && (
           <motion.div
+            data-lenis-prevent
             initial={{ opacity: 0, y: 40, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.98 }}
             transition={{ duration: 0.3, ease: EASE_UI }}
-            className="border-border bg-card safe-bottom fixed inset-x-0 bottom-0 z-[96] flex flex-col border shadow-2xl md:inset-x-auto md:bottom-24 md:left-6 md:h-[440px] md:w-[320px]"
-            style={{ height: "72vh" }}
+            className="border-border bg-card safe-bottom fixed inset-x-0 bottom-0 z-[96] flex h-[72vh] flex-col border shadow-2xl md:h-[440px] md:w-[320px] md:inset-x-auto md:bottom-24 md:left-6"
           >
             <div className="border-border bg-background/60 flex items-start justify-between gap-3 border-b p-4">
               <div>
@@ -257,6 +264,7 @@ export function AskUsChat({
             </div>
 
             <div
+              data-lenis-prevent
               className="flex-1 space-y-3 overflow-y-auto p-4"
               style={{ overscrollBehavior: "contain" }}
             >

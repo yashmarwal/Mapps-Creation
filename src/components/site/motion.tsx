@@ -82,15 +82,22 @@ export function StampHeading({
   play?: boolean;
 }) {
   const reduced = useReducedMotion();
-  const animateProps = play ? { animate: reduced ? { opacity: 1 } : { y: "0%" } } : {};
+  const animateTarget = play
+    ? reduced
+      ? { opacity: 1 }
+      : { opacity: 1, y: "0%" }
+    : reduced
+      ? { opacity: 0 }
+      : { opacity: 0, y: "110%" };
+
   return (
     <Tag className={className}>
       {lines.map((line, i) => (
         <span key={line} className="block overflow-hidden pb-[0.08em]">
           <motion.span
             className={`block ${lineClassName ?? ""}`}
-            initial={reduced ? { opacity: 0 } : { y: "110%" }}
-            {...animateProps}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, y: "110%" }}
+            animate={animateTarget}
             transition={{ duration: 0.9, ease: EASE_REVEAL, delay: delay + i * 0.12 }}
           >
             {line}

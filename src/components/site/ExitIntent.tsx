@@ -31,10 +31,24 @@ export function ExitIntent() {
     return () => window.removeEventListener("mouseout", onMouseLeave);
   }, [isMobile]);
 
+  useEffect(() => {
+    if (!show) return;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShow(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [show]);
+
   return (
     <AnimatePresence>
       {show && (
         <motion.div
+          data-lenis-prevent
           className="fixed inset-0 z-[190] flex items-center justify-center bg-black/70 px-5 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

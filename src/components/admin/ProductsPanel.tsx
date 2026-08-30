@@ -332,7 +332,7 @@ export function ProductsPanel() {
         </form>
       )}
 
-      <div className="mt-8 overflow-x-auto">
+      <div data-lenis-prevent className="mt-8 overflow-x-auto">
         {loading ? (
           <p className="text-muted-foreground text-sm">Loading...</p>
         ) : products.length === 0 ? (

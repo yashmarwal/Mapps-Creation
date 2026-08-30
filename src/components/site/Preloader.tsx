@@ -2,7 +2,8 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { EASE_REVEAL } from "./motion";
+import { EASE_REVEAL, EASE_UI } from "./motion";
+import { LogoMark } from "./LogoMark";
 
 const IntroContext = createContext({ ready: false, base: 0 });
 
@@ -11,101 +12,100 @@ export function useIntro() {
   return useContext(IntroContext);
 }
 
-const HOLD_MS = 1500;
-
-function KineticText({
-  text,
-  delay,
-  charDelay = 0.02,
-  className,
-}: {
-  text: string;
-  delay: number;
-  charDelay?: number;
-  className?: string;
-}) {
-  return (
-    <span className={className} aria-label={text}>
-      {[...text].map((ch, i) => (
-        <motion.span
-          key={i}
-          className="inline-block"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: EASE_REVEAL, delay: delay + i * charDelay }}
-        >
-          {ch === " " ? " " : ch}
-        </motion.span>
-      ))}
-    </span>
-  );
-}
+const HOLD_MS = 1000;
 
 export function IntroProvider({ children }: { children: ReactNode }) {
   const reduced = useReducedMotion();
-  const [state, setState] = useState<{ show: boolean; ready: boolean; base: number }>({
-    show: false,
-    ready: false,
-    base: 0,
-  });
+
+  // IMPORTANT: show starts as TRUE so there is NO initial blank frame or hero flash
+  const [show, setShow] = useState(true);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (reduced) {
-      setState({ show: false, ready: true, base: 0 });
+      setShow(false);
+      setReady(true);
       return;
     }
-    setState({ show: true, ready: false, base: 0.15 });
-    const t = window.setTimeout(() => setState({ show: false, ready: true, base: 0.15 }), HOLD_MS);
-    return () => window.clearTimeout(t);
+
+    // Step 1: At HOLD_MS (1000ms), preloader split curtain exit begins (show: false)
+    const exitTimer = window.setTimeout(() => {
+      setShow(false);
+    }, HOLD_MS);
+
+    // Step 2: 120ms into split exit, trigger hero text reveal (ready: true)
+    const readyTimer = window.setTimeout(() => {
+      setReady(true);
+    }, HOLD_MS + 120);
+
+    return () => {
+      window.clearTimeout(exitTimer);
+      window.clearTimeout(readyTimer);
+    };
   }, [reduced]);
 
   return (
-    <IntroContext.Provider value={{ ready: state.ready, base: state.base }}>
+    <IntroContext.Provider value={{ ready, base: 0.1 }}>
       <AnimatePresence>
-        {state.show && (
+        {show && (
           <motion.div
-            key="preloader"
-            // pointer-events-none: it's a solid full-screen backdrop with no
-            // interactive content of its own, so this only matters during
-            // its 0.5s exit fade — without it, the invisible-but-still-
-            // mounted div swallows any tap/click made right after the site
-            // finishes loading, before the fade visually completes.
-            className="bg-background pointer-events-none fixed inset-0 z-[200] flex flex-col items-center justify-center"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: EASE_REVEAL }}
+            key="preloader-wrapper"
+            className="fixed inset-0 z-[200] overflow-hidden pointer-events-none select-none"
           >
-            <div className="text-center">
-              <KineticText
-                text="MAPPS CREATION"
-                delay={0.15}
-                charDelay={0.025}
-                className="font-display text-foreground block text-[clamp(1.6rem,5vw,2.6rem)] tracking-[0.1em]"
-              />
-
-              <motion.div
-                className="bg-primary mx-auto mt-5 h-px"
-                initial={{ width: 0 }}
-                animate={{ width: 48 }}
-                transition={{ duration: 0.5, ease: EASE_REVEAL, delay: 0.6 }}
-              />
-
-              <div className="mt-5">
-                <KineticText
-                  text="KNITTING DREAMS INTO REALITY"
-                  delay={0.8}
-                  charDelay={0.012}
-                  className="label-caps text-muted-foreground block text-[10px] md:text-xs"
-                />
-              </div>
-            </div>
-
-            {/* Loading bar */}
+            {/* Top Half Shutter Panel — Splits UPWARDS */}
             <motion.div
-              className="bg-primary absolute bottom-0 left-0 h-[2px]"
-              initial={{ width: "0%" }}
-              animate={{ width: "100%" }}
-              transition={{ duration: HOLD_MS / 1000, ease: "linear" }}
-            />
+              key="top-shutter"
+              className="absolute top-0 inset-x-0 h-1/2 bg-[#0F2038] z-[200] border-b border-[var(--gold)]/20"
+              initial={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ duration: 0.7, ease: EASE_REVEAL }}
+            >
+              <div className="absolute inset-0 silk opacity-40" />
+              <div className="grain absolute inset-0 opacity-30" />
+            </motion.div>
+
+            {/* Bottom Half Shutter Panel — Splits DOWNWARDS */}
+            <motion.div
+              key="bottom-shutter"
+              className="absolute bottom-0 inset-x-0 h-1/2 bg-[#0F2038] z-[200] border-t border-[var(--gold)]/20"
+              initial={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: 0.7, ease: EASE_REVEAL }}
+            >
+              <div className="absolute inset-0 silk opacity-40" />
+              <div className="grain absolute inset-0 opacity-30" />
+            </motion.div>
+
+            {/* Pure Minimalist Centralized Brand Emblem */}
+            <motion.div
+              className="relative z-[205] flex h-full items-center justify-center"
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.25, ease: EASE_UI }}
+            >
+              <div className="relative flex items-center justify-center w-24 h-24 sm:w-32 sm:h-32">
+                {/* Rotating Dashed Halo */}
+                <motion.div
+                  className="absolute w-36 h-36 sm:w-48 sm:h-48 rounded-full border border-dashed border-[var(--gold)]/35"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 12, ease: "linear", repeat: Infinity }}
+                />
+                {/* Breathing Ambient Ring */}
+                <motion.div
+                  className="absolute w-48 h-48 sm:w-60 sm:h-60 rounded-full border border-[var(--gold)]/15"
+                  animate={{ scale: [1, 1.06, 1] }}
+                  transition={{ duration: 2.5, ease: "easeInOut", repeat: Infinity }}
+                />
+                {/* Central Gold Monogram Glass Badge */}
+                <motion.div
+                  initial={{ scale: 0.6, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, ease: EASE_REVEAL }}
+                  className="relative flex items-center justify-center w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-[#0F2038]/85 backdrop-blur-md border border-[var(--gold)]/40 shadow-[0_0_30px_rgba(201,166,107,0.25)]"
+                >
+                  <LogoMark size={48} className="sm:h-14" />
+                </motion.div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
