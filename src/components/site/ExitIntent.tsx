@@ -49,7 +49,7 @@ export function ExitIntent() {
       {show && (
         <motion.div
           data-lenis-prevent
-          className="fixed inset-0 z-[190] flex items-center justify-center bg-black/70 px-5 backdrop-blur-sm"
+          className="fixed inset-0 z-[190] flex items-center justify-center bg-black/80 px-5 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -57,37 +57,44 @@ export function ExitIntent() {
           onClick={() => setShow(false)}
         >
           <motion.div
-            className="silk grain border-border relative max-w-md border p-8 text-center md:p-10"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.5, ease: EASE_REVEAL }}
+            className="border-border/80 bg-[#0A1628]/95 text-foreground relative max-w-md w-full border rounded-2xl p-8 md:p-10 text-center shadow-2xl backdrop-blur-2xl overflow-hidden"
+            initial={{ opacity: 0, scale: 0.94, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            transition={{ duration: 0.4, ease: EASE_REVEAL }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setShow(false)}
               aria-label="Close"
-              className="text-muted-foreground hover:text-primary absolute top-4 right-4"
+              className="border-border/60 bg-background/80 text-foreground hover:bg-primary hover:text-primary-foreground absolute top-4 right-4 z-10 flex h-9 w-9 items-center justify-center border rounded-full backdrop-blur transition-all active:scale-95 cursor-pointer"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
-            <p className="label-caps text-primary">Before You Go</p>
-            <h2 className="font-display relative mt-4 text-3xl md:text-4xl">
+
+            <span className="bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/50 text-[10px] font-bold tracking-widest label-caps px-3.5 py-1 rounded-full uppercase inline-flex items-center gap-1.5">
+              <MessageCircle className="h-3.5 w-3.5 fill-[#25D366]" /> Instant Rate Check
+            </span>
+
+            <h2 className="font-serif mt-4 text-2xl md:text-3xl font-bold text-foreground">
               Get today's fabric rate on WhatsApp
             </h2>
-            <p className="text-muted-foreground relative mt-4 text-sm leading-relaxed">
+
+            <p className="text-muted-foreground/90 mt-3 text-xs md:text-sm leading-relaxed">
               Share your fabric type and quantity — we'll reply with swatches and a firm quote the
               same working day, no obligation.
             </p>
+
             <a
               href={whatsappLink(
                 "Hi Mapps Creation, can you share today's rate for my fabric requirement?",
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-primary text-primary-foreground label-caps relative mt-7 inline-flex min-h-[52px] items-center gap-2 px-7"
+              className="bg-[#25D366] text-black font-semibold label-caps mt-7 inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl active:scale-98 transition-all cursor-pointer text-xs tracking-wider shadow-md hover:brightness-105"
             >
-              <MessageCircle className="h-4 w-4" /> WhatsApp Us Now
+              <MessageCircle className="h-4 w-4 fill-current" />
+              <span>WhatsApp Us Now</span>
             </a>
           </motion.div>
         </motion.div>

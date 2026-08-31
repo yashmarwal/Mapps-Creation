@@ -295,6 +295,17 @@ function Home() {
             <ProductCard key={product.id} product={product} index={i} />
           ))}
         </div>
+
+        {/* Centered CTA button after 6 products */}
+        <Reveal className="mt-10 sm:mt-14 flex justify-center">
+          <Link
+            to="/catalogue"
+            className="bg-primary text-primary-foreground font-semibold label-caps inline-flex min-h-[50px] items-center justify-center gap-3 px-8 rounded-full shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer text-xs tracking-wider group"
+          >
+            <span>View Full Catalogue</span>
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+        </Reveal>
       </section>
 
       <FabricReels />

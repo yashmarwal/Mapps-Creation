@@ -42,6 +42,26 @@ export function QuoteDrawer() {
     setMounted(true);
   }, []);
 
+  // Close drawer on mobile/browser back button instead of navigating away
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.history.pushState({ quoteDrawerOpen: true }, "");
+
+    const handlePopState = () => {
+      setIsOpen(false);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      if (typeof window !== "undefined" && window.history.state?.quoteDrawerOpen) {
+        window.history.back();
+      }
+    };
+  }, [isOpen, setIsOpen]);
+
   const targetBody = typeof document !== "undefined" ? document.body : null;
 
   const printDocument =
