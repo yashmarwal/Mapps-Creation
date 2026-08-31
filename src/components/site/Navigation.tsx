@@ -93,33 +93,36 @@ export function Navigation({ marqueeVisible = false }: { marqueeVisible?: boolea
             ))}
             <Link
               to="/wholesale"
-              className="bg-primary text-primary-foreground label-caps flex items-center px-4 py-2.5 transition-opacity duration-300 hover:opacity-90"
+              className="bg-slate-900 border border-[var(--gold)]/50 text-[var(--gold)] hover:bg-[var(--gold)] hover:text-slate-950 label-caps flex items-center px-4 py-2.5 rounded-full font-bold transition-all duration-300 active:scale-95 cursor-pointer text-xs shadow-xs"
             >
               Wholesale
             </Link>
             <a
               href={`tel:${SITE.phone}`}
-              className="border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground label-caps flex items-center gap-2 border px-4 py-2.5 transition-colors duration-300"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 label-caps flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-300 active:scale-95 cursor-pointer text-xs"
             >
-              <Phone className="h-3.5 w-3.5" /> Call Now
+              <Phone className="h-3.5 w-3.5" /> Call {SITE.phoneDisplay}
             </a>
           </div>
 
-          {/* Mobile Buttons */}
-          <div className="flex items-center gap-2 md:hidden">
+          {/* Mobile Header Call & Menu Buttons */}
+          <div className="flex items-center gap-2.5 md:hidden">
             <a
               href={`tel:${SITE.phone}`}
               aria-label="Call Mapps Creation"
-              className="bg-primary text-primary-foreground flex h-10 w-10 items-center justify-center rounded-sm"
+              className="border border-[var(--gold)]/50 text-[var(--gold)] bg-[#0A1628]/80 backdrop-blur-md flex h-9 px-3 items-center justify-center gap-1.5 rounded-full active:scale-95 transition-all shadow-xs cursor-pointer"
             >
-              <Phone className="h-4 w-4" />
+              <Phone className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-bold tracking-wider uppercase label-caps">
+                Call
+              </span>
             </a>
             <button
               aria-label={open ? "Close menu" : "Open menu"}
               onClick={() => setOpen((v) => !v)}
-              className="border-border text-foreground flex h-10 w-10 items-center justify-center border bg-background/50 rounded-sm"
+              className="border-border text-foreground flex h-9 w-9 items-center justify-center border bg-background/80 rounded-full cursor-pointer backdrop-blur-md"
             >
-              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
           </div>
         </nav>
@@ -184,15 +187,15 @@ export function Navigation({ marqueeVisible = false }: { marqueeVisible?: boolea
                 <Link
                   to="/wholesale"
                   onClick={() => setOpen(false)}
-                  className="bg-[var(--gold)] text-[#0F2038] label-caps flex min-h-[50px] items-center justify-center font-medium tracking-widest uppercase shadow-md"
+                  className="bg-primary text-primary-foreground font-semibold label-caps flex min-h-[48px] items-center justify-center rounded-lg tracking-widest uppercase active:scale-98 cursor-pointer transition-all"
                 >
                   Wholesale Enquiry
                 </Link>
                 <a
                   href={`tel:${SITE.phone}`}
-                  className="border border-[var(--gold)]/40 text-[var(--gold)] label-caps flex min-h-[50px] items-center justify-center gap-2 uppercase tracking-widest"
+                  className="bg-amber-500/10 border border-amber-500/40 text-amber-400 label-caps flex min-h-[50px] items-center justify-center gap-2 rounded-xl font-bold uppercase tracking-widest hover:bg-amber-500 hover:text-slate-950 transition-all cursor-pointer shadow-sm"
                 >
-                  <Phone className="h-4 w-4" /> Direct Call: {SITE.phone}
+                  <Phone className="h-4 w-4" /> Direct Call: {SITE.phoneDisplay}
                 </a>
               </motion.div>
             </div>

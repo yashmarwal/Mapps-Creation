@@ -96,7 +96,16 @@ export function Footer() {
       <div className="hairline" />
       <div className="text-muted-foreground mx-auto flex max-w-7xl flex-col gap-2 px-5 py-6 text-xs md:flex-row md:items-center md:justify-between md:px-10">
         <p>© {new Date().getFullYear()} Mapps Creation. All rights reserved.</p>
-        <p>Inquiry-only B2B · Wholesale &amp; bulk supply from Surat</p>
+        <p className="flex flex-wrap items-center gap-x-2">
+          <span>Inquiry-only B2B · Wholesale &amp; bulk supply from Surat</span>
+          <span aria-hidden="true">·</span>
+          <Link
+            to="/privacy"
+            className="hover:text-foreground underline underline-offset-2 transition-colors"
+          >
+            Privacy Policy
+          </Link>
+        </p>
       </div>
 
       <div className="border-border text-muted-foreground border-t py-4 text-center text-xs">

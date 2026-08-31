@@ -227,6 +227,18 @@
   padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
 }
 
+/* Hides the native number-input spinner — for inputs that already have
+   their own +/- stepper buttons, so the browser's arrows don't duplicate it. */
+@utility no-spinner {
+  -moz-appearance: textfield;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
 @utility marquee-track {
   animation: marquee 28s linear infinite;
 }

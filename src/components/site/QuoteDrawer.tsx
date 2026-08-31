@@ -335,7 +335,7 @@ export function QuoteDrawer() {
                     <FileText className="h-12 w-12 text-[var(--gold)]/40 mx-auto" />
                     <h4 className="font-display text-xl">Your Quote List is Empty</h4>
                     <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                      Browse our Catalogue and click "+ Add to Bulk Quote" to build an itemized
+                      Browse our Catalogue and click "Add to Bulk Quote" to build an itemized
                       quotation.
                     </p>
                   </div>
@@ -397,7 +397,7 @@ export function QuoteDrawer() {
                               onChange={(e) =>
                                 updateQuantity(item.id, parseInt(e.target.value) || 0)
                               }
-                              className="w-full text-center text-xs font-mono bg-transparent text-foreground outline-none py-1"
+                              className="no-spinner w-full text-center text-xs font-mono bg-transparent text-foreground outline-none py-1"
                             />
                             <button
                               type="button"
@@ -480,35 +480,35 @@ export function QuoteDrawer() {
                     {/* Action Buttons */}
                     <div className="pt-3 flex flex-col gap-2">
                       <div className="grid grid-cols-2 gap-2">
-                        {/* Option 1: WhatsApp */}
+                        {/* Option 1: WhatsApp — text summary only */}
                         <button
                           type="button"
                           onClick={handleWhatsAppSend}
                           style={{ cursor: "pointer" }}
-                          className="bg-[#25D366] text-black font-semibold label-caps py-2.5 px-3 rounded-lg flex items-center justify-center gap-1.5 hover:brightness-105 transition-all text-xs tracking-wider shadow-md cursor-pointer"
+                          className="bg-[#25D366] text-black font-semibold label-caps py-2.5 px-3 rounded-lg flex items-center justify-center gap-1.5 hover:brightness-105 active:scale-95 transition-all text-xs tracking-wider cursor-pointer"
                         >
                           <MessageCircle className="h-4 w-4 fill-current" />
-                          Send via WhatsApp
+                          Send WhatsApp Summary
                         </button>
 
-                        {/* Option 2: Download PDF Quote */}
+                        {/* Option 2: Print / Save PDF */}
                         <button
                           type="button"
                           onClick={handlePrintPdf}
                           style={{ cursor: "pointer" }}
-                          className="bg-[#0F2038] text-[var(--gold)] border border-[var(--gold)]/50 font-semibold label-caps py-2.5 px-3 rounded-lg flex items-center justify-center gap-1.5 hover:bg-[var(--gold)]/10 transition-all text-xs tracking-wider cursor-pointer"
+                          className="bg-[#0F2038] text-[var(--gold)] border border-[var(--gold)]/50 font-semibold label-caps py-2.5 px-3 rounded-lg flex items-center justify-center gap-1.5 hover:bg-[var(--gold)]/10 active:scale-95 transition-all text-xs tracking-wider cursor-pointer"
                         >
                           <Download className="h-4 w-4 text-[var(--gold)]" />
-                          Download PDF Quote
+                          Download / Save PDF
                         </button>
                       </div>
 
-                      {/* Option 3: Send via Email & PDF */}
+                      {/* Option 3: Send via Email */}
                       <button
                         type="submit"
                         disabled={status === "submitting"}
                         style={{ cursor: "pointer" }}
-                        className="w-full bg-primary text-primary-foreground font-semibold label-caps py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 hover:brightness-105 transition-all text-xs tracking-wider shadow-[var(--shadow-gold)] disabled:opacity-60 cursor-pointer"
+                        className="w-full bg-primary text-primary-foreground font-semibold label-caps py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 hover:brightness-105 active:scale-98 transition-all text-xs tracking-wider disabled:opacity-60 cursor-pointer"
                       >
                         {status === "submitting" ? (
                           <>
@@ -517,10 +517,16 @@ export function QuoteDrawer() {
                         ) : (
                           <>
                             <Mail className="h-4 w-4" />
-                            Send via Email & Download PDF
+                            Send Quote via Email
                           </>
                         )}
                       </button>
+
+                      <p className="text-[10px] text-muted-foreground/80 leading-relaxed text-center pt-1">
+                        WhatsApp and Email send a text summary only — neither can carry a file
+                        attachment automatically. Use "Print / Save as PDF" to save a copy, then
+                        attach it yourself if you'd like to include one.
+                      </p>
                     </div>
 
                     {emailSuccess && (
@@ -530,7 +536,7 @@ export function QuoteDrawer() {
                         className="bg-primary/10 border border-primary/30 text-foreground p-3 rounded-lg flex items-center gap-2 text-xs"
                       >
                         <CheckCircle className="h-4 w-4 text-primary shrink-0" />
-                        <span>Quote sent via Email! Download document loaded.</span>
+                        <span>Quote summary sent — check your email app.</span>
                       </motion.div>
                     )}
                   </form>

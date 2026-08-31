@@ -195,11 +195,11 @@ function WholesaleForm() {
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="bg-primary text-primary-foreground label-caps mt-4 inline-flex min-h-[52px] items-center justify-center gap-3 px-8 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-2"
+        className="bg-primary text-primary-foreground font-semibold label-caps mt-4 inline-flex min-h-[52px] items-center justify-center gap-3 px-8 rounded-lg active:scale-98 transition-all disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-2 cursor-pointer text-sm tracking-wider"
       >
         {status === "submitting" ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" /> Submitting...
+            <Loader2 className="h-4 w-4 animate-spin" /> Submitting Registration...
           </>
         ) : (
           "Submit Registration"

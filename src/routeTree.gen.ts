@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CatalogueRouteImport } from './routes/catalogue'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as WholesaleRouteImport } from './routes/wholesale'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -49,6 +50,11 @@ const FaqRoute = FaqRouteImport.update({
   path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WholesaleRoute = WholesaleRouteImport.update({
   id: '/wholesale',
   path: '/wholesale',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/catalogue': typeof CatalogueRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/privacy': typeof PrivacyRoute
   '/wholesale': typeof WholesaleRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/catalogue': typeof CatalogueRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/privacy': typeof PrivacyRoute
   '/wholesale': typeof WholesaleRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/catalogue': typeof CatalogueRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
+  '/privacy': typeof PrivacyRoute
   '/wholesale': typeof WholesaleRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/catalogue'
     | '/contact'
     | '/faq'
+    | '/privacy'
     | '/wholesale'
     | '/admin/login'
     | '/admin/'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/catalogue'
     | '/contact'
     | '/faq'
+    | '/privacy'
     | '/wholesale'
     | '/admin/login'
     | '/admin'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/catalogue'
     | '/contact'
     | '/faq'
+    | '/privacy'
     | '/wholesale'
     | '/admin/login'
     | '/admin/'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   CatalogueRoute: typeof CatalogueRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
+  PrivacyRoute: typeof PrivacyRoute
   WholesaleRoute: typeof WholesaleRoute
 }
 
@@ -187,6 +200,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wholesale': {
       id: '/wholesale'
       path: '/wholesale'
@@ -230,6 +250,7 @@ const rootRouteChildren: RootRouteChildren = {
   CatalogueRoute: CatalogueRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
+  PrivacyRoute: PrivacyRoute,
   WholesaleRoute: WholesaleRoute,
 }
 export const routeTree = rootRouteImport

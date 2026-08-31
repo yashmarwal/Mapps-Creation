@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ChevronDown } from "lucide-react";
 import { CATEGORIES, PRODUCTS } from "@/data/catalog";
 import { ProductCard } from "@/components/site/ProductCard";
 import { Reveal } from "@/components/site/motion";
@@ -65,13 +66,36 @@ function Catalogue() {
         </Reveal>
 
         <Reveal className="mt-10">
-          <div className="flex flex-wrap gap-2">
+          {/* Mobile: a single dropdown — too many long category names to
+              show as pills without wrapping into a cluttered grid. */}
+          <div className="relative md:hidden">
+            <label htmlFor="category-filter" className="sr-only">
+              Filter by category
+            </label>
+            <select
+              id="category-filter"
+              value={category ?? ""}
+              onChange={(e) => setCategory(e.target.value || undefined)}
+              className="label-caps border-border bg-card text-foreground focus:border-primary min-h-[48px] w-full appearance-none border px-4 pr-11 outline-none transition-colors"
+            >
+              <option value="">All Fabrics</option>
+              {categoriesInUse.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2" />
+          </div>
+
+          {/* Desktop: full pill row — plenty of width, no wrapping issue. */}
+          <div className="hidden flex-wrap gap-2 md:flex">
             <button
               onClick={() => setCategory(undefined)}
-              className={`label-caps min-h-[44px] border px-4 transition-colors duration-300 ${
+              className={`label-caps min-h-[40px] px-4 rounded-full border transition-all duration-300 active:scale-95 cursor-pointer text-xs ${
                 !category
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border text-muted-foreground hover:text-primary hover:border-primary/60"
+                  ? "bg-primary text-primary-foreground font-semibold border-primary shadow-xs"
+                  : "border-border/80 text-muted-foreground hover:text-primary hover:border-primary/60 bg-card/60"
               }`}
             >
               All Fabrics
@@ -80,10 +104,10 @@ function Catalogue() {
               <button
                 key={item}
                 onClick={() => setCategory(item)}
-                className={`label-caps min-h-[44px] border px-4 transition-colors duration-300 ${
+                className={`label-caps min-h-[40px] px-4 rounded-full border transition-all duration-300 active:scale-95 cursor-pointer text-xs ${
                   category === item
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "border-border text-muted-foreground hover:text-primary hover:border-primary/60"
+                    ? "bg-primary text-primary-foreground font-semibold border-primary shadow-xs"
+                    : "border-border/80 text-muted-foreground hover:text-primary hover:border-primary/60 bg-card/60"
                 }`}
               >
                 {item}
@@ -92,7 +116,7 @@ function Catalogue() {
           </div>
         </Reveal>
 
-        <div className="mt-12 grid grid-cols-2 gap-4 pb-24 sm:gap-6 lg:grid-cols-3 md:pb-32">
+        <div className="mt-12 grid grid-cols-1 gap-4 pb-24 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 md:pb-32">
           {products.map((product, i) => (
             <ProductCard key={product.id} product={product} index={i} />
           ))}

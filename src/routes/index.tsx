@@ -282,20 +282,14 @@ function Home() {
           </Link>
         </Reveal>
 
-        {/* Mobile: compact horizontal row */}
-        <div
-          data-lenis-prevent
-          className="mt-12 flex gap-4 overflow-x-auto pb-2 sm:hidden [&::-webkit-scrollbar]:hidden"
-          style={{ scrollbarWidth: "none" }}
-        >
+        {/* Mobile: 1-Column Vertical List (< 640px) */}
+        <div className="mt-8 space-y-4 sm:hidden">
           {featured.map((product, i) => (
-            <div key={product.id} className="w-[75%] shrink-0">
-              <ProductCard product={product} index={i} />
-            </div>
+            <ProductCard key={product.id} product={product} index={i} />
           ))}
         </div>
 
-        {/* Tablet / desktop: grid */}
+        {/* Tablet / Desktop: Grid (>= 640px) */}
         <div className="mt-12 hidden gap-6 sm:grid sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((product, i) => (
             <ProductCard key={product.id} product={product} index={i} />
