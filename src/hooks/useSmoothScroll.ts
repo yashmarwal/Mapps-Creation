@@ -1,16 +1,35 @@
 "use client";
 
 import { useEffect } from "react";
+import type Lenis from "lenis";
+
+declare global {
+  interface Window {
+    // Exposed so other code (e.g. the root route's scroll-to-top-on-navigate
+    // effect) can drive the same Lenis instance instead of fighting it with
+    // native window.scrollTo.
+    __lenis?: Lenis;
+  }
+}
 
 /** Lenis-driven inertia scroll, skipped when reduced motion is requested. */
 export function useSmoothScroll() {
   useEffect(() => {
-    if (typeof window === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (
+      typeof window === "undefined" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
 
     let raf = 0;
     let destroyed = false;
     let observer: MutationObserver | null = null;
-    let instance: { raf: (t: number) => void; destroy: () => void; stop: () => void; start: () => void } | null = null;
+    let instance: {
+      raf: (t: number) => void;
+      destroy: () => void;
+      stop: () => void;
+      start: () => void;
+    } | null = null;
 
     import("lenis").then(({ default: Lenis }) => {
       if (destroyed) return;
@@ -19,13 +38,21 @@ export function useSmoothScroll() {
         easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         allowNestedScroll: true,
         prevent: (node) => {
-          return !!(node instanceof HTMLElement && (node.hasAttribute("data-lenis-prevent") || node.closest("[data-lenis-prevent]")));
+          return !!(
+            node instanceof HTMLElement &&
+            (node.hasAttribute("data-lenis-prevent") || node.closest("[data-lenis-prevent]"))
+          );
         },
       });
 
+      window.__lenis = lenis;
+
       instance = {
         raf: (time) => lenis.raf(time),
-        destroy: () => lenis.destroy(),
+        destroy: () => {
+          delete window.__lenis;
+          lenis.destroy();
+        },
         stop: () => lenis.stop(),
         start: () => lenis.start(),
       };
@@ -61,4 +88,3 @@ export function useSmoothScroll() {
     };
   }, []);
 }
-

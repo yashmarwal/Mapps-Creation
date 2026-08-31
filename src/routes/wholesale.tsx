@@ -1,8 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { AlertCircle, Award, Boxes, CheckCircle, Loader2, ShieldCheck, Truck } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  AlertCircle,
+  Award,
+  Boxes,
+  Check,
+  CheckCircle,
+  Loader2,
+  ShieldCheck,
+  Truck,
+  X,
+} from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { EASE_REVEAL, Reveal, StampHeading, WordReveal } from "@/components/site/motion";
+import { EASE_REVEAL, EASE_UI, Reveal, StampHeading, WordReveal } from "@/components/site/motion";
+import { LogoMark } from "@/components/site/LogoMark";
 import { CATEGORIES } from "@/data/catalog";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
 import { breadcrumbSchema, buildPageHead, serviceSchema } from "@/lib/seo";
@@ -219,6 +230,172 @@ function WholesaleForm() {
   );
 }
 
+function ComparisonSection() {
+  const [tab, setTab] = useState<"mapps" | "typical">("mapps");
+
+  return (
+    <section className="mx-auto max-w-6xl px-5 py-24 md:px-10 md:py-32">
+      <Reveal>
+        <p className="label-caps text-primary">The Difference</p>
+        <h2 className="display-lg mt-4">Mapps Creation vs. a typical fabric supplier</h2>
+      </Reveal>
+
+      {/* ================= MOBILE VIEW (Tab Switcher) ================= */}
+      <Reveal index={1} className="mt-10 md:hidden">
+        {/* Toggle Pills */}
+        <div className="flex items-center gap-2 p-1.5 border border-border/80 bg-background/80 rounded-full mb-6 max-w-md mx-auto">
+          <button
+            type="button"
+            onClick={() => setTab("mapps")}
+            className={`relative flex-1 py-2.5 px-4 text-xs uppercase tracking-wider font-medium rounded-full transition-colors text-center ${
+              tab === "mapps"
+                ? "text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {tab === "mapps" && (
+              <motion.div
+                layoutId="activeComparisonTab"
+                className="absolute inset-0 bg-primary rounded-full shadow-[var(--shadow-gold)]"
+                transition={{ duration: 0.3, ease: EASE_UI }}
+              />
+            )}
+            <span className="relative z-10 flex items-center justify-center gap-1.5">
+              <LogoMark size={14} className="shrink-0" /> Mapps Creation
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTab("typical")}
+            className={`relative flex-1 py-2.5 px-4 text-xs uppercase tracking-wider font-medium rounded-full transition-colors text-center ${
+              tab === "typical" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {tab === "typical" && (
+              <motion.div
+                layoutId="activeComparisonTab"
+                className="absolute inset-0 bg-muted/80 border border-border rounded-full"
+                transition={{ duration: 0.3, ease: EASE_UI }}
+              />
+            )}
+            <span className="relative z-10">Typical Supplier</span>
+          </button>
+        </div>
+
+        {/* Content Card */}
+        <AnimatePresence mode="wait">
+          {tab === "mapps" ? (
+            <motion.div
+              key="mapps-card"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.3, ease: EASE_UI }}
+              className="border border-[var(--gold)]/40 bg-[#0F2038]/90 backdrop-blur-xl p-6 rounded-2xl shadow-xl space-y-5"
+            >
+              <div className="flex items-center justify-between border-b border-[var(--gold)]/20 pb-3">
+                <span className="label-caps text-primary text-xs tracking-widest uppercase font-semibold flex items-center gap-2">
+                  <LogoMark size={16} className="shrink-0" /> The Mapps Creation Advantage
+                </span>
+                <span className="text-[10px] text-primary/80 border border-primary/30 px-2 py-0.5 rounded uppercase font-mono">
+                  Surat Direct
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {COMPARISON.map(([label, ours]) => (
+                  <div
+                    key={label}
+                    className="border-b border-border/30 pb-3.5 last:border-0 last:pb-0"
+                  >
+                    <div className="flex items-center gap-2 text-xs font-display text-primary tracking-wider uppercase mb-1">
+                      <Check className="h-4 w-4 text-primary shrink-0" />
+                      <span>{label}</span>
+                    </div>
+                    <p className="text-sm text-foreground/90 leading-relaxed font-light pl-6">
+                      {ours}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="typical-card"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.3, ease: EASE_UI }}
+              className="border border-border/80 bg-background/80 backdrop-blur-md p-6 rounded-2xl shadow-md space-y-5"
+            >
+              <div className="flex items-center justify-between border-b border-border/50 pb-3">
+                <span className="label-caps text-muted-foreground text-xs tracking-widest uppercase font-medium">
+                  Typical Fabric Supplier Standard
+                </span>
+                <span className="text-[10px] text-muted-foreground border border-border px-2 py-0.5 rounded uppercase font-mono">
+                  Industry Standard
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {COMPARISON.map(([label, , theirs]) => (
+                  <div
+                    key={label}
+                    className="border-b border-border/30 pb-3.5 last:border-0 last:pb-0"
+                  >
+                    <div className="flex items-center gap-2 text-xs font-display text-muted-foreground tracking-wider uppercase mb-1">
+                      <X className="h-4 w-4 text-destructive/80 shrink-0" />
+                      <span>{label}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed font-light pl-6">
+                      {theirs}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Reveal>
+
+      {/* ================= DESKTOP VIEW (3-Column Table) ================= */}
+      <Reveal index={1} className="mt-14 hidden md:block overflow-x-auto">
+        <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+          <thead>
+            <tr>
+              <th className="label-caps text-muted-foreground w-1/5 border-b border-border pb-4 pr-4 font-normal">
+                &nbsp;
+              </th>
+              <th className="label-caps text-primary border-b border-primary/40 pb-4 pr-6 font-normal">
+                <span className="flex items-center gap-2">
+                  <LogoMark size={18} className="shrink-0" /> Mapps Creation
+                </span>
+              </th>
+              <th className="label-caps text-muted-foreground border-b border-border pb-4 font-normal">
+                Typical Fabric Supplier
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {COMPARISON.map(([label, ours, theirs], i) => (
+              <tr key={label} className={i < COMPARISON.length - 1 ? "border-b border-border" : ""}>
+                <td className="font-display py-5 pr-4 text-base align-top">{label}</td>
+                <td className="border-l border-primary/20 bg-primary/5 py-5 pr-6 pl-4 align-top leading-relaxed text-foreground">
+                  {ours}
+                </td>
+                <td className="text-muted-foreground py-5 pl-4 align-top leading-relaxed">
+                  {theirs}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Reveal>
+    </section>
+  );
+}
+
 function Wholesale() {
   return (
     <>
@@ -273,46 +450,7 @@ function Wholesale() {
       </section>
 
       {/* Comparison */}
-      <section className="mx-auto max-w-6xl px-5 py-24 md:px-10 md:py-32">
-        <Reveal>
-          <p className="label-caps text-primary">The Difference</p>
-          <h2 className="display-lg mt-4">Mapps Creation vs. a typical fabric supplier</h2>
-        </Reveal>
-
-        <Reveal index={1} className="mt-14 overflow-x-auto">
-          <table className="w-full min-w-[720px] border-collapse text-left text-sm">
-            <thead>
-              <tr>
-                <th className="label-caps text-muted-foreground w-1/5 border-b border-border pb-4 pr-4 font-normal">
-                  &nbsp;
-                </th>
-                <th className="label-caps text-primary border-b border-primary/40 pb-4 pr-6 font-normal">
-                  Mapps Creation
-                </th>
-                <th className="label-caps text-muted-foreground border-b border-border pb-4 font-normal">
-                  Typical Fabric Supplier
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON.map(([label, ours, theirs], i) => (
-                <tr
-                  key={label}
-                  className={i < COMPARISON.length - 1 ? "border-b border-border" : ""}
-                >
-                  <td className="font-display py-5 pr-4 text-base align-top">{label}</td>
-                  <td className="border-l border-primary/20 bg-primary/5 py-5 pr-6 pl-4 align-top leading-relaxed text-foreground">
-                    {ours}
-                  </td>
-                  <td className="text-muted-foreground py-5 pl-4 align-top leading-relaxed">
-                    {theirs}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Reveal>
-      </section>
+      <ComparisonSection />
 
       {/* Process */}
       <section className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-32">

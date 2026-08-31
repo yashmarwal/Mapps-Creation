@@ -3,8 +3,6 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Check, MessageCircle } from "lucide-react";
 import { useRef } from "react";
 
-import heroDesktop from "@/assets/hero-desktop.jpg";
-import heroMobile from "@/assets/hero-mobile.jpg";
 import heroDesktopVideo from "@/assets/hero-desktop.mp4";
 import heroMobileVideo from "@/assets/hero-mobile.mp4";
 import warehouse from "@/assets/warehouse.jpg";
@@ -149,7 +147,6 @@ function Home() {
           <div className="absolute inset-0 md:hidden">
             <SiteMedia
               src={heroVideoMobileSrc}
-              poster={heroMobile}
               alt="Draped navy and maroon lycra fabric"
               className="h-full w-full object-cover"
             />
@@ -157,7 +154,6 @@ function Home() {
           <div className="absolute inset-0 hidden md:block">
             <SiteMedia
               src={heroVideoDesktopSrc}
-              poster={heroDesktop}
               alt="Draped navy and maroon lycra fabric"
               className="h-full w-full object-cover"
             />

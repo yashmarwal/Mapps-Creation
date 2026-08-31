@@ -1,16 +1,20 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Mail, MessageCircle, X } from "lucide-react";
+import { FileText, Mail, MessageCircle, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { EASE_REVEAL, EASE_UI, Reveal } from "./motion";
 import type { Product } from "@/data/catalog";
 import { SITE, whatsappLink } from "@/lib/seo";
+import { useQuoteBasket } from "@/hooks/useQuoteBasket";
 
 export function ProductCard({ product, index }: { product: Product; index: number }) {
   const ref = useRef<HTMLElement>(null);
   const [sheen, setSheen] = useState({ x: 50, y: 50, active: false });
   const [preview, setPreview] = useState(false);
+  const { addItem, items } = useQuoteBasket();
+
+  const isAdded = items.some((i) => i.id === product.id);
 
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -65,6 +69,11 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
 
+  const handleAddQuote = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addItem(product);
+  };
+
   return (
     <>
       <Reveal index={index}>
@@ -74,37 +83,55 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
           onMouseLeave={onLeave}
           onClick={() => setPreview(true)}
           style={{ rotateX, rotateY, transformPerspective: 900 }}
-          className="border-border bg-card group h-full cursor-pointer overflow-hidden border transition-shadow duration-500 hover:shadow-elevate"
+          className="border-border bg-card group h-full cursor-pointer overflow-hidden border transition-shadow duration-500 hover:shadow-elevate flex flex-col justify-between"
         >
-          <div className="relative aspect-[4/3] overflow-hidden">
-            <img
-              src={product.image}
-              alt={`${product.name} — ${product.category} fabric from Mapps Creation, Surat`}
-              loading="lazy"
-              width={1024}
-              height={768}
-              className="h-full w-full object-cover transition-transform duration-[2000ms] ease-out group-hover:scale-110"
-            />
-            {/* Specular sheen tracking the cursor */}
-            <div
-              className="pointer-events-none absolute inset-0 transition-opacity duration-300"
-              style={{
-                opacity: sheen.active ? 1 : 0,
-                background: `radial-gradient(circle at ${sheen.x}% ${sheen.y}%, oklch(0.893 0.035 88.5 / 30%), transparent 55%)`,
-              }}
-            />
-            <span className="bg-background/80 text-primary label-caps absolute top-2 left-2 px-2 py-1 text-[9px] tracking-[0.18em] backdrop-blur sm:top-3 sm:left-3 sm:px-3 sm:py-1.5 sm:text-[11px] sm:tracking-[0.28em]">
-              {product.category}
-            </span>
+          <div>
+            <div className="relative aspect-[4/3] overflow-hidden">
+              <img
+                src={product.image}
+                alt={`${product.name} — ${product.category} fabric from Mapps Creation, Surat`}
+                loading="lazy"
+                width={1024}
+                height={768}
+                className="h-full w-full object-cover transition-transform duration-[2000ms] ease-out group-hover:scale-110"
+              />
+              {/* Specular sheen tracking the cursor */}
+              <div
+                className="pointer-events-none absolute inset-0 transition-opacity duration-300"
+                style={{
+                  opacity: sheen.active ? 1 : 0,
+                  background: `radial-gradient(circle at ${sheen.x}% ${sheen.y}%, oklch(0.893 0.035 88.5 / 30%), transparent 55%)`,
+                }}
+              />
+              <span className="bg-background/80 text-primary label-caps absolute top-2 left-2 px-2 py-1 text-[9px] tracking-[0.18em] backdrop-blur sm:top-3 sm:left-3 sm:px-3 sm:py-1.5 sm:text-[11px] sm:tracking-[0.28em]">
+                {product.category}
+              </span>
+            </div>
+            <div className="p-3 sm:p-5" style={{ transform: "translateZ(20px)" }}>
+              <h3 className="text-foreground text-lg sm:text-2xl">{product.name}</h3>
+              <p className="text-muted-foreground mt-1 text-xs sm:text-sm">{product.spec}</p>
+              <div className="hairline my-3 sm:my-4" />
+              <p className="text-primary text-sm">
+                ₹{product.price} <span className="text-muted-foreground">/ {product.unit}</span>
+              </p>
+            </div>
           </div>
-          <div className="p-3 sm:p-5" style={{ transform: "translateZ(20px)" }}>
-            <h3 className="text-foreground text-lg sm:text-2xl">{product.name}</h3>
-            <p className="text-muted-foreground mt-1 text-xs sm:text-sm">{product.spec}</p>
-            <div className="hairline my-3 sm:my-4" />
-            <p className="text-primary text-sm">
-              ₹{product.price} <span className="text-muted-foreground">/ {product.unit}</span>
-            </p>
-            <div className="mt-3 flex gap-1.5 sm:mt-5 sm:gap-2">
+
+          <div className="p-3 pt-0 sm:p-5 sm:pt-0" style={{ transform: "translateZ(20px)" }}>
+            <button
+              type="button"
+              onClick={handleAddQuote}
+              className={`w-full mb-2 label-caps flex min-h-[38px] items-center justify-center gap-1.5 text-[10px] sm:text-[11px] border transition-colors ${
+                isAdded
+                  ? "bg-primary/20 text-primary border-primary/50"
+                  : "border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground"
+              }`}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              {isAdded ? "Added to Quote List" : "+ Add to Bulk Quote"}
+            </button>
+
+            <div className="flex gap-1.5 sm:gap-2">
               <a
                 href={wa}
                 target="_blank"

@@ -8,7 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import appCss from "../styles.css?url";
@@ -23,6 +23,8 @@ import { AskUsChat } from "@/components/site/AskUsChat";
 import { MobileActionBar } from "@/components/site/MobileActionBar";
 import { TopMarquee, useMarqueeSettings } from "@/components/site/TopMarquee";
 import { PromoPopup } from "@/components/site/PromoPopup";
+import { QuoteDrawer } from "@/components/site/QuoteDrawer";
+import { QuoteBasketProvider } from "@/hooks/useQuoteBasket";
 import { EASE_UI } from "@/components/site/motion";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 
@@ -137,6 +139,11 @@ function RootComponent() {
   const [askOpen, setAskOpen] = useState(false);
   useSmoothScroll();
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    window.__lenis?.scrollTo(0, { immediate: true });
+  }, [pathname]);
+
   if (isAdmin) {
     return (
       <QueryClientProvider client={queryClient}>
@@ -147,29 +154,32 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <IntroProvider>
-        <TopMarquee visible={marqueeVisible} text={marquee.text} />
-        <Navigation marqueeVisible={marqueeVisible} />
-        <main>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <motion.div
-            key={pathname}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.25, ease: EASE_UI }}
-          >
-            <Outlet />
-          </motion.div>
-        </main>
-        <Footer />
-        <WhatsAppButton />
-        <StickyCta />
-        <ExitIntent />
-        <PromoPopup />
-        <AskUsChat open={askOpen} onOpenChange={setAskOpen} />
-        <MobileActionBar onOpenAsk={() => setAskOpen(true)} />
-        <CustomCursor />
-      </IntroProvider>
+      <QuoteBasketProvider>
+        <IntroProvider>
+          <TopMarquee visible={marqueeVisible} text={marquee.text} />
+          <Navigation marqueeVisible={marqueeVisible} />
+          <main>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              <Outlet />
+            </motion.div>
+          </main>
+          <Footer />
+          <WhatsAppButton />
+          <StickyCta />
+          <ExitIntent />
+          <PromoPopup />
+          <QuoteDrawer />
+          <AskUsChat open={askOpen} onOpenChange={setAskOpen} />
+          <MobileActionBar onOpenAsk={() => setAskOpen(true)} />
+          <CustomCursor />
+        </IntroProvider>
+      </QuoteBasketProvider>
     </QueryClientProvider>
   );
 }

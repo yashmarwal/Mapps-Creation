@@ -3,17 +3,33 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, MessageSquare, ShieldCheck, Truck } from "lucide-react";
 import { useState } from "react";
-import { SITE } from "@/lib/seo";
+import { whatsappLink } from "@/lib/seo";
 import { EASE_REVEAL, EASE_UI } from "./motion";
 
 /** India's standard zonal council groupings — used so "pan-India" reads as
  * genuinely comprehensive rather than a curated shortlist of cities. */
 const ZONES = [
-  { name: "North", states: ["Delhi", "Punjab", "Haryana", "Rajasthan", "Himachal Pradesh"], hub: "Delhi, Ludhiana & Jaipur Hubs" },
+  {
+    name: "North",
+    states: ["Delhi", "Punjab", "Haryana", "Rajasthan", "Himachal Pradesh"],
+    hub: "Delhi, Ludhiana & Jaipur Hubs",
+  },
   { name: "West", states: ["Gujarat", "Maharashtra", "Goa"], hub: "Surat, Mumbai & Pune Hubs" },
-  { name: "Central", states: ["Madhya Pradesh", "Uttar Pradesh", "Chhattisgarh", "Uttarakhand"], hub: "Kanpur, Indore & Lucknow Hubs" },
-  { name: "East", states: ["West Bengal", "Bihar", "Jharkhand", "Odisha"], hub: "Kolkata & Cuttack Hubs" },
-  { name: "South", states: ["Karnataka", "Tamil Nadu", "Telangana", "Andhra Pradesh", "Kerala"], hub: "Tirupur, Bengaluru & Hyderabad Hubs" },
+  {
+    name: "Central",
+    states: ["Madhya Pradesh", "Uttar Pradesh", "Chhattisgarh", "Uttarakhand"],
+    hub: "Kanpur, Indore & Lucknow Hubs",
+  },
+  {
+    name: "East",
+    states: ["West Bengal", "Bihar", "Jharkhand", "Odisha"],
+    hub: "Kolkata & Cuttack Hubs",
+  },
+  {
+    name: "South",
+    states: ["Karnataka", "Tamil Nadu", "Telangana", "Andhra Pradesh", "Kerala"],
+    hub: "Tirupur, Bengaluru & Hyderabad Hubs",
+  },
   { name: "Northeast", states: ["Assam", "Tripura", "Meghalaya", "Manipur"], hub: "Guwahati Hub" },
 ] as const;
 
@@ -21,10 +37,13 @@ export function SupplyTree() {
   const reduced = useReducedMotion();
   const [activeZone, setActiveZone] = useState(0);
 
-  const selectedZone = ZONES[activeZone];
-  const whatsappUrl = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
-    `Hi Mapps Creation, I am inquiring about wholesale fabric dispatch from Surat to ${selectedZone.name} Zone (${selectedZone.states.join(", ")}).`
-  )}`;
+  // ZONES is a non-empty literal array and activeZone only ever comes from
+  // mapping over it, but noUncheckedIndexedAccess can't prove that — the
+  // fallback to ZONES[0] just satisfies the type, it never actually applies.
+  const selectedZone = ZONES[activeZone] ?? ZONES[0]!;
+  const whatsappUrl = whatsappLink(
+    `Hi Mapps Creation, I am inquiring about wholesale fabric dispatch from Surat to ${selectedZone.name} Zone (${selectedZone.states.join(", ")}).`,
+  );
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -41,8 +60,12 @@ export function SupplyTree() {
             />
           )}
         </span>
-        <span className="font-display text-2xl md:text-3xl text-foreground tracking-wide">Surat</span>
-        <span className="label-caps text-primary text-xs md:text-sm tracking-widest uppercase">Origin</span>
+        <span className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
+          Surat
+        </span>
+        <span className="label-caps text-primary text-xs md:text-sm tracking-widest uppercase">
+          Origin
+        </span>
       </div>
 
       {/* Trunk Line */}
@@ -158,7 +181,9 @@ export function SupplyTree() {
             }`}
           >
             <span className="block font-display text-sm text-foreground">{zone.name}</span>
-            <span className="text-[10px] text-muted-foreground block mt-0.5">{zone.states.length} States</span>
+            <span className="text-[10px] text-muted-foreground block mt-0.5">
+              {zone.states.length} States
+            </span>
           </button>
         ))}
       </div>
