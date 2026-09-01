@@ -4,6 +4,7 @@ export const SITE = {
   city: "Surat, Gujarat",
   phone: "+917046009423",
   phoneDisplay: "+91 70460 09423",
+  email: "mappscreation@gmail.com",
   url: "https://mappscreation.com",
   ogImage: "https://mappscreation.com/og-image.png",
 } as const;

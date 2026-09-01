@@ -2,7 +2,7 @@
 
 import { Link, useLocation } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Phone, X } from "lucide-react";
+import { Download, Menu, Phone, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SITE } from "@/lib/seo";
 import { EASE_REVEAL } from "./motion";
@@ -15,7 +15,13 @@ const LINKS = [
   { to: "/contact", label: "Contact" },
 ] as const;
 
-export function Navigation({ marqueeVisible = false }: { marqueeVisible?: boolean }) {
+export function Navigation({
+  marqueeVisible = false,
+  onOpenCatalog,
+}: {
+  marqueeVisible?: boolean;
+  onOpenCatalog?: () => void;
+}) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const pathname = useLocation({ select: (l) => l.pathname });
@@ -78,12 +84,12 @@ export function Navigation({ marqueeVisible = false }: { marqueeVisible?: boolea
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden items-center gap-4 lg:gap-8 md:flex">
+          <div className="hidden items-center gap-3 lg:gap-6 md:flex">
             {LINKS.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className="label-caps text-muted-foreground hover:text-foreground group relative py-2 transition-colors"
+                className="label-caps text-muted-foreground hover:text-foreground group relative py-2 transition-colors text-xs"
                 activeProps={{ className: "text-primary" }}
                 activeOptions={{ exact: link.to === "/" }}
               >
@@ -91,9 +97,22 @@ export function Navigation({ marqueeVisible = false }: { marqueeVisible?: boolea
                 <span className="bg-primary absolute bottom-0 left-0 h-px w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-full" />
               </Link>
             ))}
+
+            {onOpenCatalog && (
+              <button
+                type="button"
+                onClick={onOpenCatalog}
+                className="btn-enquire btn-enquire-gold !min-h-[38px] !py-1.5 !px-4 !text-xs !rounded-full shrink-0"
+              >
+                <span>
+                  <Download className="h-3.5 w-3.5" /> PDF Catalogue
+                </span>
+              </button>
+            )}
+
             <Link
               to="/wholesale"
-              className="bg-slate-900 border border-[var(--gold)]/50 text-[var(--gold)] hover:bg-[var(--gold)] hover:text-slate-950 label-caps flex items-center px-4 py-2.5 rounded-full font-bold transition-all duration-300 active:scale-95 cursor-pointer text-xs shadow-xs"
+              className="bg-slate-900 border border-[var(--gold)]/50 text-[var(--gold)] hover:bg-[var(--gold)] hover:text-slate-950 label-caps flex items-center px-4 py-2 rounded-full font-bold transition-all duration-300 active:scale-95 cursor-pointer text-xs shadow-xs"
             >
               Wholesale
             </Link>
@@ -106,7 +125,17 @@ export function Navigation({ marqueeVisible = false }: { marqueeVisible?: boolea
           </div>
 
           {/* Mobile Header Call & Menu Buttons */}
-          <div className="flex items-center gap-2.5 md:hidden">
+          <div className="flex items-center gap-2 md:hidden">
+            {onOpenCatalog && (
+              <button
+                type="button"
+                onClick={onOpenCatalog}
+                aria-label="Download PDF Catalogue"
+                className="border border-amber-500/40 text-amber-400 bg-[#0A1628]/90 backdrop-blur-md flex h-9 px-2.5 items-center justify-center gap-1 rounded-full active:scale-95 transition-all shadow-xs cursor-pointer text-[10px] font-bold"
+              >
+                <Download className="h-3.5 w-3.5" /> PDF
+              </button>
+            )}
             <a
               href={`tel:${SITE.phone}`}
               aria-label="Call Mapps Creation"
@@ -118,9 +147,9 @@ export function Navigation({ marqueeVisible = false }: { marqueeVisible?: boolea
               </span>
             </a>
             <button
-              aria-label={open ? "Close menu" : "Open menu"}
-              onClick={() => setOpen((v) => !v)}
-              className="border-border text-foreground flex h-9 w-9 items-center justify-center border bg-background/80 rounded-full cursor-pointer backdrop-blur-md"
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle Menu"
+              className="border-border text-foreground hover:bg-card flex h-10 w-10 items-center justify-center border rounded-full backdrop-blur transition-all active:scale-95 cursor-pointer"
             >
               {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
@@ -128,77 +157,71 @@ export function Navigation({ marqueeVisible = false }: { marqueeVisible?: boolea
         </nav>
       </header>
 
-      {/* Full-Screen Mobile Drawer */}
+      {/* Mobile Drawer Navigation */}
       <AnimatePresence>
         {open && (
           <motion.div
-            key="mobile-drawer"
-            data-lenis-prevent
-            className="bg-[#0F2038] text-foreground fixed inset-0 z-[300] flex flex-col overflow-y-auto md:hidden"
-            initial={{ opacity: 0, y: "-100%" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "-100%" }}
-            transition={{ duration: 0.4, ease: EASE_REVEAL }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-background/95 fixed inset-0 z-[99] flex flex-col justify-between px-8 pt-28 pb-12 backdrop-blur-2xl md:hidden"
           >
-            <div className="silk absolute inset-0 min-h-full opacity-40" />
-
-            {/* Drawer Header */}
-            <div className="relative z-10 flex h-16 items-center justify-between px-5 border-b border-[var(--gold)]/20">
-              <Link to="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
-                <LogoMark size={36} />
-                <span className="font-display text-[#F7F3EA] text-lg tracking-wider uppercase font-light">
-                  Mapps Creation
-                </span>
-              </Link>
-              <button
-                aria-label="Close menu"
-                onClick={() => setOpen(false)}
-                className="flex h-10 w-10 items-center justify-center text-[#F7F3EA] border border-[var(--gold)]/30 rounded-sm bg-background/20"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Drawer Body */}
-            <div className="relative z-10 flex flex-1 flex-col justify-center px-8 py-10 gap-2">
-              {LINKS.map((link, i) => (
+            <div className="flex flex-col gap-5">
+              {LINKS.map((link, idx) => (
                 <motion.div
                   key={link.to}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.45, ease: EASE_REVEAL, delay: 0.08 * i }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.08, ease: EASE_REVEAL }}
                 >
                   <Link
                     to={link.to}
                     onClick={() => setOpen(false)}
-                    className="font-display text-[#F7F3EA] block border-b border-[var(--gold)]/20 py-4 text-3xl font-light tracking-wider"
+                    className="font-serif text-3xl font-bold tracking-tight transition-colors hover:text-amber-400"
+                    activeProps={{ className: "text-amber-400" }}
+                    activeOptions={{ exact: link.to === "/" }}
                   >
                     {link.label}
                   </Link>
                 </motion.div>
               ))}
-
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.45, ease: EASE_REVEAL, delay: 0.35 }}
-                className="mt-8 flex flex-col gap-3"
-              >
-                <Link
-                  to="/wholesale"
-                  onClick={() => setOpen(false)}
-                  className="bg-primary text-primary-foreground font-semibold label-caps flex min-h-[48px] items-center justify-center rounded-lg tracking-widest uppercase active:scale-98 cursor-pointer transition-all"
-                >
-                  Wholesale Enquiry
-                </Link>
-                <a
-                  href={`tel:${SITE.phone}`}
-                  className="bg-amber-500/10 border border-amber-500/40 text-amber-400 label-caps flex min-h-[50px] items-center justify-center gap-2 rounded-xl font-bold uppercase tracking-widest hover:bg-amber-500 hover:text-slate-950 transition-all cursor-pointer shadow-sm"
-                >
-                  <Phone className="h-4 w-4" /> Direct Call: {SITE.phoneDisplay}
-                </a>
-              </motion.div>
             </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, ease: EASE_REVEAL }}
+              className="flex flex-col gap-3"
+            >
+              {onOpenCatalog && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    onOpenCatalog();
+                  }}
+                  className="btn-enquire btn-enquire-gold w-full !min-h-[48px] !text-xs"
+                >
+                  <span>
+                    <Download className="h-4 w-4" /> Download PDF Catalogue
+                  </span>
+                </button>
+              )}
+              <Link
+                to="/wholesale"
+                onClick={() => setOpen(false)}
+                className="btn-enquire btn-enquire-navy w-full !min-h-[48px] !text-xs"
+              >
+                <span>Wholesale Enquiry</span>
+              </Link>
+              <a
+                href={`tel:${SITE.phone}`}
+                className="bg-amber-500/10 border border-amber-500/40 text-amber-400 label-caps flex min-h-[50px] items-center justify-center gap-2 rounded-xl font-bold uppercase tracking-widest hover:bg-amber-500 hover:text-slate-950 transition-all cursor-pointer shadow-sm"
+              >
+                <Phone className="h-4 w-4" /> Direct Call: {SITE.phoneDisplay}
+              </a>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

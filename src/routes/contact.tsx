@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { MapPin, MessageCircle, Phone, Send } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Phone, Send } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { EASE_UI, Reveal, StampHeading } from "@/components/site/motion";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
@@ -65,16 +65,19 @@ function Contact() {
           <Reveal index={1} className="md:col-span-2">
             <div className="space-y-6">
               <a
-                href={whatsappLink("Hi Mapps Creation, I'd like to discuss a fabric requirement.")}
+                href={whatsappLink(
+                  "Hi Mapps Creation, I would like to make a fabric requirement enquiry. Please share details.",
+                )}
                 target="_blank"
                 rel="noopener noreferrer"
+                title="Enquire on WhatsApp"
                 className="border-border hover:border-primary/60 group flex items-center gap-4 border p-5 transition-colors"
               >
                 <span className="bg-primary text-primary-foreground flex h-11 w-11 shrink-0 items-center justify-center">
                   <MessageCircle className="h-5 w-5" />
                 </span>
                 <span>
-                  <span className="label-caps text-muted-foreground block">WhatsApp</span>
+                  <span className="label-caps text-muted-foreground block">Enquire Now</span>
                   <span className="text-foreground group-hover:text-primary text-lg transition-colors">
                     {SITE.phoneDisplay}
                   </span>
@@ -92,6 +95,21 @@ function Contact() {
                   <span className="label-caps text-muted-foreground block">Call Now</span>
                   <span className="text-foreground group-hover:text-primary text-lg transition-colors">
                     {SITE.phoneDisplay}
+                  </span>
+                </span>
+              </a>
+
+              <a
+                href={`mailto:${SITE.email}`}
+                className="border-border hover:border-primary/60 group flex items-center gap-4 border p-5 transition-colors"
+              >
+                <span className="bg-primary text-primary-foreground flex h-11 w-11 shrink-0 items-center justify-center">
+                  <Mail className="h-5 w-5" />
+                </span>
+                <span>
+                  <span className="label-caps text-muted-foreground block">Email Us</span>
+                  <span className="text-foreground group-hover:text-primary text-base sm:text-lg transition-colors">
+                    {SITE.email}
                   </span>
                 </span>
               </a>
@@ -154,17 +172,16 @@ function Contact() {
                 />
               </label>
 
-              <motion.button
+              <button
                 type="submit"
                 disabled={status === "submitting"}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.3, ease: EASE_UI }}
-                className="bg-primary text-primary-foreground label-caps inline-flex min-h-[52px] items-center gap-2 px-7 disabled:cursor-not-allowed disabled:opacity-60"
+                className="btn-enquire btn-enquire-gold !min-h-[52px] !text-xs !px-7 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <Send className="h-4 w-4" />
-                {status === "submitting" ? "Sending..." : "Send Enquiry"}
-              </motion.button>
+                <span>
+                  <Send className="h-4 w-4" />
+                  {status === "submitting" ? "Sending..." : "Send Enquiry"}
+                </span>
+              </button>
 
               {status === "success" && (
                 <p className="text-primary text-sm">

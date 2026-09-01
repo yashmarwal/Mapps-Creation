@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Instagram, MapPin, Phone } from "lucide-react";
+import { Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { CATEGORIES } from "@/data/catalog";
 import { SITE } from "@/lib/seo";
 import { LogoMark } from "./LogoMark";
@@ -30,6 +30,12 @@ export function Footer() {
               className="text-foreground hover:text-primary flex items-center gap-2 transition-colors"
             >
               <Phone className="h-4 w-4" /> {SITE.phoneDisplay}
+            </a>
+            <a
+              href={`mailto:${SITE.email}`}
+              className="text-foreground hover:text-primary flex items-center gap-2 transition-colors"
+            >
+              <Mail className="h-4 w-4" /> {SITE.email}
             </a>
             <p className="text-muted-foreground flex items-center gap-2">
               <MapPin className="h-4 w-4" /> {SITE.city}, India

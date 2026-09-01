@@ -9,8 +9,14 @@ import { EASE_UI } from "./motion";
 
 const MESSAGES = [
   { text: "Request Catalogue", to: "/catalogue" as const },
-  { text: "WhatsApp Us", whatsapp: "Hi Mapps Creation, I'd like to enquire about your fabrics." },
-  { text: "Get Free Samples", whatsapp: "Hi Mapps Creation, can I get fabric samples?" },
+  {
+    text: "Enquire Now",
+    whatsapp: "Hi Mapps Creation, I'd like to enquire about your wholesale fabrics.",
+  },
+  {
+    text: "Request Swatches",
+    whatsapp: "Hi Mapps Creation, I'd like to request fabric swatch samples.",
+  },
   { text: "Talk to Our Team", to: "/contact" as const },
 ];
 

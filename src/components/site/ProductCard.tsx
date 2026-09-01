@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Check, Mail, MessageCircle, Plus, X } from "lucide-react";
+import { Check, Mail, MessageCircle, Plus, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { EASE_REVEAL, EASE_UI, Reveal } from "./motion";
 import type { Product } from "@/data/catalog";
@@ -59,12 +59,12 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
   const imageLine = product.image.startsWith("http") ? `\nImage: ${product.image}` : "";
 
   const wa = whatsappLink(
-    `Hi Mapps Creation, I'm interested in this fabric:\n\n*${product.name}*\nCategory: ${product.category}\nSpec: ${product.spec}\nPrice: ₹${product.price} / ${product.unit}${imageLine}\n\nProduct link: ${productUrl}\n\nPlease share more details and a quotation.`,
+    `Hi Mapps Creation, I would like to enquire about this fabric:\n\n*Fabric*: ${product.name}\n*Category*: ${product.category}\n*Spec*: ${product.spec}\n*Price*: ₹${product.price} / ${product.unit}${imageLine}\n\n*Product Link*: ${productUrl}\n\nPlease share available shades, stock availability & wholesale quotation.`,
   );
   const mailto = `mailto:mappscreation@gmail.com?subject=${encodeURIComponent(
-    `Enquiry: ${product.name}`,
+    `Wholesale Fabric Enquiry: ${product.name}`,
   )}&body=${encodeURIComponent(
-    `Hello Mapps Creation,\n\nI'd like a quotation for the following fabric:\n\n${product.name}\nCategory: ${product.category}\nSpec: ${product.spec}\nPrice: ₹${product.price} / ${product.unit}${imageLine}\n\nProduct link: ${productUrl}\n\nQuantity required:\nDelivery city:\n\nThank you.`,
+    `Hello Mapps Creation,\n\nI would like to enquire about the following fabric:\n\n- Fabric Name: ${product.name}\n- Category: ${product.category}\n- Specification: ${product.spec}\n- Price: ₹${product.price} / ${product.unit}${imageLine}\n- Product Link: ${productUrl}\n\nMy Order Requirements:\n- Required Quantity:\n- Delivery Location / City:\n- Preferred Colors / Shades:\n\nPlease reply with fabric swatches and an official proforma quotation.\n\nThank you.`,
   )}`;
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
@@ -138,19 +138,26 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={stop}
-                  className="bg-primary text-primary-foreground font-semibold label-caps py-1.5 px-2 flex items-center justify-center gap-1 text-[10px] tracking-wider rounded-md cursor-pointer transition-all active:scale-95 group/enquire relative overflow-hidden"
+                  title={`Enquire about ${product.name}`}
+                  aria-label={`Enquire about ${product.name}`}
+                  className="btn-enquire w-full !text-[10px] !py-1.5"
                 >
-                  <MessageCircle className="h-3.5 w-3.5 transition-transform duration-500 ease-out group-hover/enquire:scale-110" />
-                  <span>Enquire</span>
+                  <span>
+                    <MessageCircle className="h-3.5 w-3.5 fill-current" />
+                    Enquire
+                  </span>
                 </a>
                 <a
                   href={mailto}
                   onClick={stop}
-                  aria-label={`Email enquiry about ${product.name}`}
-                  className="border-border text-muted-foreground hover:text-primary hover:border-primary/60 border py-1.5 px-2 rounded-md flex items-center justify-center gap-1 text-[10px] font-semibold label-caps cursor-pointer transition-colors active:scale-95"
+                  title={`Email enquiry for ${product.name}`}
+                  aria-label={`Email enquiry for ${product.name}`}
+                  className="btn-enquire btn-enquire-navy w-full !text-[10px] !py-1.5"
                 >
-                  <Mail className="h-3.5 w-3.5" />
-                  <span>Email</span>
+                  <span>
+                    <Mail className="h-3.5 w-3.5" />
+                    Email
+                  </span>
                 </a>
               </div>
             </div>
@@ -224,19 +231,26 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={stop}
-                className="bg-primary text-primary-foreground font-semibold label-caps flex min-h-[44px] items-center justify-center gap-1.5 text-[10px] sm:text-[11px] tracking-wider rounded-md cursor-pointer transition-all active:scale-98 group/enquire relative overflow-hidden"
+                title={`Enquire about ${product.name}`}
+                aria-label={`Enquire about ${product.name}`}
+                className="btn-enquire w-full !text-[11px] !min-h-[44px]"
               >
-                <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-500 ease-out group-hover/enquire:scale-110" />
-                <span>Enquire</span>
+                <span>
+                  <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-current" />
+                  Enquire
+                </span>
               </a>
               <a
                 href={mailto}
                 onClick={stop}
-                aria-label={`Email enquiry about ${product.name}`}
-                className="border-border text-muted-foreground hover:text-primary hover:border-primary/60 flex min-h-[44px] items-center justify-center gap-1.5 text-[10px] sm:text-[11px] font-semibold label-caps border rounded-md transition-colors cursor-pointer active:scale-95"
+                title={`Email enquiry for ${product.name}`}
+                aria-label={`Email enquiry for ${product.name}`}
+                className="btn-enquire btn-enquire-navy w-full !text-[11px] !min-h-[44px]"
               >
-                <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span>Email</span>
+                <span>
+                  <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  Email
+                </span>
               </a>
             </div>
           </div>
@@ -322,18 +336,25 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                     href={wa}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-primary text-primary-foreground font-semibold label-caps flex min-h-[46px] items-center justify-center gap-1.5 text-xs tracking-wider rounded-xl cursor-pointer transition-all active:scale-98 group/popupEnquire relative overflow-hidden"
+                    title={`Enquire about ${product.name}`}
+                    aria-label={`Enquire about ${product.name}`}
+                    className="btn-enquire w-full !text-xs !min-h-[46px]"
                   >
-                    <MessageCircle className="h-4 w-4 transition-transform duration-500 ease-out group-hover/popupEnquire:scale-110" />
-                    <span>Enquire</span>
+                    <span>
+                      <MessageCircle className="h-4 w-4 fill-current" />
+                      Enquire Now
+                    </span>
                   </a>
                   <a
                     href={mailto}
-                    aria-label={`Email enquiry about ${product.name}`}
-                    className="border-border text-muted-foreground hover:text-primary hover:border-primary/60 flex min-h-[46px] items-center justify-center gap-1.5 text-xs font-semibold label-caps border rounded-xl transition-colors cursor-pointer active:scale-95"
+                    title={`Email enquiry for ${product.name}`}
+                    aria-label={`Email enquiry for ${product.name}`}
+                    className="btn-enquire btn-enquire-navy w-full !text-xs !min-h-[46px]"
                   >
-                    <Mail className="h-4 w-4" />
-                    <span>Email</span>
+                    <span>
+                      <Mail className="h-4 w-4" />
+                      Email
+                    </span>
                   </a>
                 </div>
               </div>

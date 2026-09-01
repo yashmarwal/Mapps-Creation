@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Check, MessageCircle } from "lucide-react";
+import { ArrowRight, Check, MessageCircle, Send } from "lucide-react";
 import { useRef } from "react";
 
 import heroDesktopVideo from "@/assets/hero-desktop.mp4";
@@ -197,14 +197,18 @@ function Home() {
             animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
             transition={{ duration: 0.8, ease: EASE_REVEAL, delay: base + 0.6 }}
           >
-            <MagneticButton
+            <a
               href={whatsappLink("Hi Mapps Creation, I'd like to discuss a fabric requirement.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-primary text-primary-foreground label-caps inline-flex min-h-[52px] items-center gap-2 px-7"
+              title="WhatsApp Us"
+              className="btn-enquire !min-h-[52px] !text-xs !px-7"
             >
-              <MessageCircle className="h-4 w-4" /> WhatsApp Us
-            </MagneticButton>
+              <span>
+                <MessageCircle className="h-4 w-4 fill-current" />
+                WhatsApp Us
+              </span>
+            </a>
             <Link
               to="/catalogue"
               className="border-primary/60 text-primary hover:bg-primary hover:text-primary-foreground label-caps hidden min-h-[52px] items-center gap-2 border px-7 transition-colors duration-500 sm:inline-flex"
@@ -424,19 +428,23 @@ function Home() {
               the same working day.
             </p>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
-              <MagneticButton
+              <a
                 href={whatsappLink("Hi Mapps Creation, please share a quotation.")}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-primary text-primary-foreground label-caps inline-flex min-h-[52px] items-center gap-2 px-7"
+                title="WhatsApp Us"
+                className="btn-enquire !min-h-[52px] !text-xs !px-7"
               >
-                <MessageCircle className="h-4 w-4" /> WhatsApp Us
-              </MagneticButton>
+                <span>
+                  <MessageCircle className="h-4 w-4 fill-current" />
+                  WhatsApp Us
+                </span>
+              </a>
               <Link
                 to="/contact"
-                className="border-primary/60 text-primary hover:bg-primary hover:text-primary-foreground label-caps inline-flex min-h-[52px] items-center px-7 transition-colors duration-500"
+                className="btn-enquire btn-enquire-navy !min-h-[52px] !text-xs !px-7"
               >
-                Send an Enquiry
+                <span>Send an Enquiry</span>
               </Link>
             </div>
           </Reveal>

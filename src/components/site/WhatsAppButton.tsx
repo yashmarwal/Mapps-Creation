@@ -6,9 +6,10 @@ import { WhatsAppIcon } from "./icons/WhatsAppIcon";
 export function WhatsAppButton() {
   return (
     <a
-      href={whatsappLink("Hi Mapps Creation, I'd like to enquire about your fabrics.")}
+      href={whatsappLink("Hi Mapps Creation, I would like to make a wholesale fabric enquiry.")}
       target="_blank"
       rel="noopener noreferrer"
+      title="WhatsApp Us"
       aria-label="Chat with Mapps Creation on WhatsApp"
       className="group fixed right-6 bottom-6 z-[95] hidden items-center md:flex"
     >

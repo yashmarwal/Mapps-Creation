@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, MessageSquare, ShieldCheck, Truck } from "lucide-react";
+import { ArrowRight, MessageSquare, Send, ShieldCheck, Truck } from "lucide-react";
 import { useState } from "react";
 import { whatsappLink } from "@/lib/seo";
 import { EASE_REVEAL, EASE_UI } from "./motion";
@@ -159,9 +159,12 @@ export function SupplyTree() {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-primary text-primary-foreground label-caps flex min-h-[48px] items-center justify-center gap-2.5 rounded-lg font-medium tracking-wider uppercase text-xs sm:text-sm shadow-md transition-opacity hover:opacity-90 mt-2"
+                title={`Inquiry For ${selectedZone.name} Supply`}
+                className="btn-enquire btn-enquire-gold mt-2 w-full !min-h-[48px] !text-xs sm:!text-sm"
               >
-                <MessageSquare className="h-4.5 w-4.5" /> Inquiry For {selectedZone.name} Supply
+                <span>
+                  <MessageSquare className="h-4 w-4" /> Inquiry For {selectedZone.name} Supply
+                </span>
               </a>
             </div>
           </div>

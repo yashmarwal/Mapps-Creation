@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { whatsappLink } from "@/lib/seo";
@@ -87,14 +87,17 @@ export function ExitIntent() {
 
             <a
               href={whatsappLink(
-                "Hi Mapps Creation, can you share today's rate for my fabric requirement?",
+                "Hi Mapps Creation, can you share today's rate and quotation for my fabric requirement?",
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#25D366] text-black font-semibold label-caps mt-7 inline-flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl active:scale-98 transition-all cursor-pointer text-xs tracking-wider shadow-md hover:brightness-105"
+              title="WhatsApp Us Now"
+              className="btn-enquire mt-7 w-full !min-h-[50px] !rounded-xl !text-sm"
             >
-              <MessageCircle className="h-4 w-4 fill-current" />
-              <span>WhatsApp Us Now</span>
+              <span>
+                <MessageCircle className="h-4 w-4 fill-current" />
+                WhatsApp Us Now
+              </span>
             </a>
           </motion.div>
         </motion.div>

@@ -24,6 +24,7 @@ import { MobileActionBar } from "@/components/site/MobileActionBar";
 import { TopMarquee, useMarqueeSettings } from "@/components/site/TopMarquee";
 import { PromoPopup } from "@/components/site/PromoPopup";
 import { QuoteDrawer } from "@/components/site/QuoteDrawer";
+import { DownloadCatalogModal } from "@/components/site/DownloadCatalogModal";
 import { QuoteBasketProvider } from "@/hooks/useQuoteBasket";
 import { EASE_UI } from "@/components/site/motion";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
@@ -137,6 +138,7 @@ function RootComponent() {
   const isAdmin = pathname.startsWith("/admin");
   const { settings: marquee, visible: marqueeVisible } = useMarqueeSettings();
   const [askOpen, setAskOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
   useSmoothScroll();
 
   useEffect(() => {
@@ -157,7 +159,7 @@ function RootComponent() {
       <QuoteBasketProvider>
         <IntroProvider>
           <TopMarquee visible={marqueeVisible} text={marquee.text} />
-          <Navigation marqueeVisible={marqueeVisible} />
+          <Navigation marqueeVisible={marqueeVisible} onOpenCatalog={() => setCatalogOpen(true)} />
           <main>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <motion.div
@@ -175,7 +177,12 @@ function RootComponent() {
           <ExitIntent />
           <PromoPopup />
           <QuoteDrawer />
-          <AskUsChat open={askOpen} onOpenChange={setAskOpen} />
+          <AskUsChat
+            open={askOpen}
+            onOpenChange={setAskOpen}
+            onOpenCatalog={() => setCatalogOpen(true)}
+          />
+          <DownloadCatalogModal open={catalogOpen} onClose={() => setCatalogOpen(false)} />
           <MobileActionBar onOpenAsk={() => setAskOpen(true)} />
           <CustomCursor />
         </IntroProvider>

@@ -527,19 +527,20 @@ export function QuoteDrawer() {
                       <button
                         type="submit"
                         disabled={status === "submitting"}
-                        style={{ cursor: "pointer" }}
-                        className="w-full bg-primary text-primary-foreground font-semibold label-caps py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 hover:brightness-105 active:scale-98 transition-all text-xs tracking-wider disabled:opacity-60 cursor-pointer"
+                        className="btn-enquire btn-enquire-navy w-full !py-2.5 !text-xs disabled:opacity-60"
                       >
-                        {status === "submitting" ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" /> Sending Email...
-                          </>
-                        ) : (
-                          <>
-                            <Mail className="h-4 w-4" />
-                            Send Quote via Email
-                          </>
-                        )}
+                        <span>
+                          {status === "submitting" ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" /> Sending Email...
+                            </>
+                          ) : (
+                            <>
+                              <Mail className="h-4 w-4" />
+                              Send Quote via Email
+                            </>
+                          )}
+                        </span>
                       </button>
 
                       <p className="text-[10px] text-muted-foreground/80 leading-relaxed text-center pt-1">
