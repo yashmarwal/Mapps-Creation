@@ -317,7 +317,28 @@
   }
 }
 
-/* Brand-tailored Enquire button effect inspired by Uiverse.io skewed overlay hover animation */
+@keyframes marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee-scroll {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 35s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-scroll:hover,
+.animate-marquee-scroll:active {
+  animation-play-state: paused;
+}
+
+/* Brand-tailored Enquire button with official WhatsApp gradient */
 .btn-enquire,
 .cssbuttons-io {
   position: relative;
@@ -328,40 +349,64 @@
   text-transform: uppercase;
   border-radius: 0.75rem;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(135deg, #25D366 0%, #059669 100%);
-  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: #ffffff !important;
   overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
   line-height: 1.2;
-  box-shadow: 0 4px 18px rgba(37, 211, 102, 0.3);
-  transition: transform 0.25s var(--ease-ui), box-shadow 0.25s var(--ease-ui);
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.35);
+  transition: transform 0.25s var(--ease-ui), filter 0.25s var(--ease-ui), box-shadow 0.25s var(--ease-ui);
+}
+
+.btn-enquire:hover,
+.cssbuttons-io:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 22px rgba(37, 211, 102, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-enquire:active,
+.cssbuttons-io:active {
+  transform: scale(0.97);
 }
 
 .btn-enquire-gold,
 .cssbuttons-io-gold {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: #ffffff;
+  color: #ffffff !important;
   border: 1px solid rgba(253, 230, 138, 0.4);
-  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+}
+
+.btn-enquire-gold:hover,
+.cssbuttons-io-gold:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.45);
 }
 
 .btn-enquire-navy {
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color: #ffffff;
+  color: #ffffff !important;
   border: 1px solid rgba(201, 166, 107, 0.4);
-  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.4);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.4);
+}
+
+.btn-enquire-navy:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.5);
 }
 
 .btn-enquire svg,
 .cssbuttons-io svg {
-  width: 1.15em;
-  height: 1.15em;
+  width: 1.25em;
+  height: 1.25em;
   margin-right: 0.45em;
   flex-shrink: 0;
+  fill: currentColor;
 }
 
 .btn-enquire span,
@@ -375,36 +420,5 @@
   justify-content: center;
   padding: 0.65em 1.2em;
   white-space: nowrap;
-  transition: color 0.3s var(--ease-ui);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-.btn-enquire:hover span,
-.cssbuttons-io:hover span {
-  color: #ffffff !important;
-}
-
-.btn-enquire::before,
-.cssbuttons-io::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -20%;
-  width: 140%;
-  height: 100%;
-  z-index: 1;
-  background: #0A1628;
-  transform: skew(28deg);
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.btn-enquire:hover::before,
-.cssbuttons-io:hover::before {
-  transform: translate3d(105%, 0, 0);
-}
-
-.btn-enquire:active,
-.cssbuttons-io:active {
-  transform: scale(0.96);
 }
 

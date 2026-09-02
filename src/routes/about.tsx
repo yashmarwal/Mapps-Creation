@@ -6,12 +6,14 @@ import { useSiteImage } from "@/hooks/useSiteImage";
 import { SiteMedia } from "@/components/site/SiteMedia";
 import { breadcrumbSchema, buildPageHead } from "@/lib/seo";
 
+import { FounderSection } from "@/components/site/FounderSection";
+
 export const Route = createFileRoute("/about")({
   head: () =>
     buildPageHead({
       title: "About Mapps Creation — Fabric Wholesaler in Surat",
       description:
-        "Established 2024 in Surat, Mapps Creation is a GST-registered wholesale trader and distributor of Lycra, knitted and polyester-lycra fabrics, led by proprietor P Agarwal.",
+        "Mapps Creation is a GST-registered wholesale trader and distributor of Lycra, knitted and polyester-lycra fabrics in Surat, trusted by 1000+ buyers across India, led by proprietor P Agarwal.",
       path: "/about",
       jsonLd: breadcrumbSchema([
         { name: "Home", path: "/" },
@@ -22,10 +24,10 @@ export const Route = createFileRoute("/about")({
 });
 
 const FACTS = [
-  { label: "Established", value: "2024" },
+  { label: "Clients Served", value: "1000+" },
   { label: "Structure", value: "GST-Registered Proprietorship" },
-  { label: "Proprietor", value: "P Agarwal" },
-  { label: "Team", value: "Up to 10" },
+  { label: "Proprietor / Co-Founder", value: "Pratham Aggarwal" },
+  { label: "Dispatch Coverage", value: "Pan India" },
   { label: "Based in", value: "Surat, Gujarat" },
   { label: "Model", value: "Wholesale & Bulk Supply" },
 ] as const;
@@ -102,6 +104,9 @@ function About() {
         </div>
       </section>
 
+      {/* FOUNDER SECTION */}
+      <FounderSection />
+
       {/* PILLARS */}
       <section className="surface-ivory grain relative py-24 md:py-32">
         <div className="relative mx-auto max-w-7xl px-5 md:px-10">
@@ -132,15 +137,15 @@ function About() {
       <section className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-32">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {[
-            { value: 8, suffix: "", label: "Fabric categories" },
-            { value: 2024, suffix: "", label: "Established", raw: true },
-            { value: 10, suffix: "+", label: "Team members" },
+            { value: 500, suffix: "+", label: "Fabric Varieties" },
+            { value: 1000, suffix: "+", label: "Clients Served" },
+            { text: "Pan India", label: "Dispatch Coverage" },
             { value: 100, suffix: "%", label: "Rolls quality checked" },
           ].map((stat, i) => (
             <Reveal key={stat.label} index={i}>
               <div className="text-center md:text-left">
                 <p className="font-display text-primary text-[clamp(2.4rem,5vw,3.8rem)] leading-none">
-                  {stat.raw ? stat.value : <CountUp to={stat.value} suffix={stat.suffix} />}
+                  {"text" in stat ? stat.text : <CountUp to={stat.value} suffix={stat.suffix} />}
                 </p>
                 <p className="label-caps text-muted-foreground mt-3">{stat.label}</p>
               </div>

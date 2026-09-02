@@ -95,9 +95,9 @@ const COMPARISON: [string, string, string][] = [
 ];
 
 const QUICK_STATS: [string, string][] = [
-  ["8", "Fabric categories"],
-  ["2024", "Established"],
-  ["10+", "Team members"],
+  ["500+", "Fabric Varieties"],
+  ["1000+", "Clients Served"],
+  ["Pan India", "Dispatch Coverage"],
   ["100%", "Rolls quality checked"],
 ];
 

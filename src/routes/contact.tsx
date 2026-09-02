@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { EASE_UI, Reveal, StampHeading } from "@/components/site/motion";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
 import { breadcrumbSchema, buildPageHead, SITE, whatsappLink } from "@/lib/seo";
+import { WhatsAppIcon } from "@/components/site/icons/WhatsAppIcon";
 
 export const Route = createFileRoute("/contact")({
   head: () =>
@@ -73,8 +74,8 @@ function Contact() {
                 title="Enquire on WhatsApp"
                 className="border-border hover:border-primary/60 group flex items-center gap-4 border p-5 transition-colors"
               >
-                <span className="bg-primary text-primary-foreground flex h-11 w-11 shrink-0 items-center justify-center">
-                  <MessageCircle className="h-5 w-5" />
+                <span className="bg-[#25D366] text-white flex h-11 w-11 shrink-0 items-center justify-center rounded-lg">
+                  <WhatsAppIcon className="h-5 w-5 fill-current" />
                 </span>
                 <span>
                   <span className="label-caps text-muted-foreground block">Enquire Now</span>

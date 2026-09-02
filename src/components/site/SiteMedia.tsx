@@ -3,6 +3,7 @@ import { isVideoUrl } from "@/lib/media";
 /**
  * Renders whatever an admin-managed section resolves to — image or video —
  * without the page needing to know which one it'll get.
+ * Optimized with GPU hardware acceleration to prevent scroll jittering.
  */
 export function SiteMedia({
   src,
@@ -27,7 +28,8 @@ export function SiteMedia({
         playsInline
         preload="metadata"
         aria-label={alt}
-        className={className}
+        className={`transform-gpu will-change-transform ${className || ""}`}
+        style={{ transform: "translateZ(0)" }}
       />
     );
   }

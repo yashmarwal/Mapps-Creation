@@ -92,9 +92,9 @@ export function Footer() {
           <p className="text-muted-foreground mt-6 text-xs leading-relaxed">
             GST-registered proprietorship
             <br />
-            Established 2024
+            1000+ Clients Served
             <br />
-            Proprietor: P Agarwal
+            Proprietor: Pratham Aggarwal
           </p>
         </div>
       </div>

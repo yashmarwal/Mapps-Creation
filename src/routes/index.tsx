@@ -16,6 +16,8 @@ import {
   StampHeading,
   WordReveal,
 } from "@/components/site/motion";
+import { FounderSection } from "@/components/site/FounderSection";
+import { WhatsAppIcon } from "@/components/site/icons/WhatsAppIcon";
 import { useIntro } from "@/components/site/Preloader";
 import { SupplyTree } from "@/components/site/SupplyTree";
 import { FabricReels } from "@/components/site/FabricReels";
@@ -48,7 +50,12 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const TRUST = ["GST Registered", "Est. 2024", "Surat, Gujarat", "Wholesale & Bulk Supply"] as const;
+const TRUST = [
+  "GST Registered",
+  "1000+ Clients Served",
+  "Surat, Gujarat",
+  "Wholesale & Bulk Supply",
+] as const;
 
 const WHY = [
   {
@@ -143,7 +150,10 @@ function Home() {
     <>
       {/* HERO */}
       <section ref={heroRef} className="relative flex min-h-[100svh] items-end overflow-hidden">
-        <motion.div className="absolute inset-x-0 -top-[8%] h-[118%]" style={{ y: heroY }}>
+        <motion.div
+          className="absolute inset-x-0 -top-[8%] h-[118%] transform-gpu will-change-transform"
+          style={{ y: heroY, transform: "translateZ(0)" }}
+        >
           <div className="absolute inset-0 md:hidden">
             <SiteMedia
               src={heroVideoMobileSrc}
@@ -205,7 +215,7 @@ function Home() {
               className="btn-enquire !min-h-[52px] !text-xs !px-7"
             >
               <span>
-                <MessageCircle className="h-4 w-4 fill-current" />
+                <WhatsAppIcon className="h-4 w-4 fill-current" />
                 WhatsApp Us
               </span>
             </a>
@@ -339,15 +349,15 @@ function Home() {
 
           <div className="mt-20 grid grid-cols-2 gap-8 md:grid-cols-4">
             {[
-              { value: 8, suffix: "", label: "Fabric categories" },
-              { value: 2024, suffix: "", label: "Established", raw: true },
-              { value: 10, suffix: "+", label: "Team members" },
+              { value: 500, suffix: "+", label: "Fabric Varieties" },
+              { value: 1000, suffix: "+", label: "Clients Served" },
+              { text: "Pan India", label: "Dispatch Coverage" },
               { value: 100, suffix: "%", label: "Rolls quality checked" },
             ].map((stat, i) => (
               <Reveal key={stat.label} index={i}>
                 <div className="text-center md:text-left">
                   <p className="font-display text-secondary text-[clamp(2.4rem,5vw,3.8rem)] leading-none">
-                    {stat.raw ? stat.value : <CountUp to={stat.value} suffix={stat.suffix} />}
+                    {"text" in stat ? stat.text : <CountUp to={stat.value} suffix={stat.suffix} />}
                   </p>
                   <p className="label-caps text-muted-foreground mt-3">{stat.label}</p>
                 </div>
@@ -409,6 +419,9 @@ function Home() {
         </div>
       </section>
 
+      {/* MEET THE FOUNDER */}
+      <FounderSection />
+
       {/* CTA BAND */}
       <section className="relative overflow-hidden">
         <img
@@ -436,7 +449,7 @@ function Home() {
                 className="btn-enquire !min-h-[52px] !text-xs !px-7"
               >
                 <span>
-                  <MessageCircle className="h-4 w-4 fill-current" />
+                  <WhatsAppIcon className="h-4 w-4 fill-current" />
                   WhatsApp Us
                 </span>
               </a>

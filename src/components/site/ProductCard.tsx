@@ -7,6 +7,7 @@ import { EASE_REVEAL, EASE_UI, Reveal } from "./motion";
 import type { Product } from "@/data/catalog";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { useQuoteBasket } from "@/hooks/useQuoteBasket";
+import { WhatsAppIcon } from "./icons/WhatsAppIcon";
 
 export function ProductCard({ product, index }: { product: Product; index: number }) {
   const ref = useRef<HTMLElement>(null);
@@ -236,7 +237,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                 className="btn-enquire w-full !text-[11px] !min-h-[44px]"
               >
                 <span>
-                  <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-current" />
+                  <WhatsAppIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-current" />
                   Enquire
                 </span>
               </a>
@@ -341,7 +342,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                     className="btn-enquire w-full !text-xs !min-h-[46px]"
                   >
                     <span>
-                      <MessageCircle className="h-4 w-4 fill-current" />
+                      <WhatsAppIcon className="h-4 w-4 fill-current" />
                       Enquire Now
                     </span>
                   </a>
