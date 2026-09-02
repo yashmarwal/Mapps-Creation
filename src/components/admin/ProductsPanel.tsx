@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, EyeOff, Pencil, Plus, Star, StarOff, Trash2 } from "lucide-react";
 import { CATEGORIES, PRODUCTS } from "@/data/catalog";
 import { checkUploadSize } from "@/lib/media";
 import { supabase, type ProductRow } from "@/lib/supabase";
@@ -27,6 +27,8 @@ export function ProductsPanel() {
   const [uploading, setUploading] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -115,6 +117,12 @@ export function ProductsPanel() {
   const remove = async (id: string) => {
     if (!confirm("Delete this product?")) return;
     await supabase.from("products").delete().eq("id", id);
+    setSelectedIds((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
     load();
   };
 
@@ -132,6 +140,87 @@ export function ProductsPanel() {
     }
     setError(null);
     await supabase.from("products").update({ is_featured: !row.is_featured }).eq("id", row.id);
+    load();
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) =>
+      prev.size === products.length ? new Set() : new Set(products.map((p) => p.id)),
+    );
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const bulkSetActive = async (active: boolean) => {
+    if (selectedIds.size === 0) return;
+    setBulkBusy(true);
+    setError(null);
+    const { error: bulkError } = await supabase
+      .from("products")
+      .update({ is_active: active })
+      .in("id", [...selectedIds]);
+    setBulkBusy(false);
+    if (bulkError) {
+      setError(bulkError.message);
+      return;
+    }
+    clearSelection();
+    load();
+  };
+
+  const bulkSetFeatured = async (featured: boolean) => {
+    if (selectedIds.size === 0) return;
+    if (featured) {
+      const alreadyFeaturedElsewhere = products.filter(
+        (p) => p.is_featured && !selectedIds.has(p.id),
+      ).length;
+      if (alreadyFeaturedElsewhere + selectedIds.size > MAX_FEATURED) {
+        const room = Math.max(0, MAX_FEATURED - alreadyFeaturedElsewhere);
+        setError(
+          `Only ${MAX_FEATURED} products can be featured at once — you have room for ${room} more. Unfeature some first or select fewer.`,
+        );
+        return;
+      }
+    }
+    setBulkBusy(true);
+    setError(null);
+    const { error: bulkError } = await supabase
+      .from("products")
+      .update({ is_featured: featured })
+      .in("id", [...selectedIds]);
+    setBulkBusy(false);
+    if (bulkError) {
+      setError(bulkError.message);
+      return;
+    }
+    clearSelection();
+    load();
+  };
+
+  const bulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Delete ${selectedIds.size} selected product(s)? This can't be undone.`)) return;
+    setBulkBusy(true);
+    setError(null);
+    const { error: bulkError } = await supabase
+      .from("products")
+      .delete()
+      .in("id", [...selectedIds]);
+    setBulkBusy(false);
+    if (bulkError) {
+      setError(bulkError.message);
+      return;
+    }
+    clearSelection();
     load();
   };
 
@@ -332,7 +421,57 @@ export function ProductsPanel() {
         </form>
       )}
 
-      <div data-lenis-prevent className="mt-8 overflow-x-auto">
+      {selectedIds.size > 0 && (
+        <div className="border-primary/40 bg-primary/5 mt-6 flex flex-wrap items-center gap-3 border p-4">
+          <span className="label-caps text-foreground">{selectedIds.size} selected</span>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => bulkSetActive(true)}
+              disabled={bulkBusy}
+              className="border-border text-muted-foreground hover:text-primary label-caps flex items-center gap-1.5 border px-3 py-2 disabled:opacity-60"
+            >
+              <Check className="h-3.5 w-3.5" /> Activate
+            </button>
+            <button
+              onClick={() => bulkSetActive(false)}
+              disabled={bulkBusy}
+              className="border-border text-muted-foreground hover:text-primary label-caps flex items-center gap-1.5 border px-3 py-2 disabled:opacity-60"
+            >
+              <EyeOff className="h-3.5 w-3.5" /> Deactivate
+            </button>
+            <button
+              onClick={() => bulkSetFeatured(true)}
+              disabled={bulkBusy}
+              className="border-border text-muted-foreground hover:text-primary label-caps flex items-center gap-1.5 border px-3 py-2 disabled:opacity-60"
+            >
+              <Star className="h-3.5 w-3.5" /> Feature
+            </button>
+            <button
+              onClick={() => bulkSetFeatured(false)}
+              disabled={bulkBusy}
+              className="border-border text-muted-foreground hover:text-primary label-caps flex items-center gap-1.5 border px-3 py-2 disabled:opacity-60"
+            >
+              <StarOff className="h-3.5 w-3.5" /> Unfeature
+            </button>
+            <button
+              onClick={bulkDelete}
+              disabled={bulkBusy}
+              className="border-destructive/50 text-destructive hover:bg-destructive hover:text-white label-caps flex items-center gap-1.5 border px-3 py-2 disabled:opacity-60"
+            >
+              <Trash2 className="h-3.5 w-3.5" /> Delete
+            </button>
+            <button
+              onClick={clearSelection}
+              disabled={bulkBusy}
+              className="text-muted-foreground hover:text-foreground label-caps px-3 py-2 disabled:opacity-60"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div data-lenis-prevent className="mt-6 overflow-x-auto">
         {loading ? (
           <p className="text-muted-foreground text-sm">Loading...</p>
         ) : products.length === 0 ? (
@@ -343,6 +482,14 @@ export function ProductsPanel() {
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
               <tr className="border-border text-muted-foreground label-caps border-b">
+                <th className="py-3 pr-2">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all products"
+                    checked={selectedIds.size === products.length}
+                    onChange={toggleSelectAll}
+                  />
+                </th>
                 <th className="py-3">Name</th>
                 <th className="py-3">Category</th>
                 <th className="py-3">Price</th>
@@ -354,6 +501,14 @@ export function ProductsPanel() {
             <tbody>
               {products.map((row) => (
                 <tr key={row.id} className="border-border border-b">
+                  <td className="py-3 pr-2">
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${row.name}`}
+                      checked={selectedIds.has(row.id)}
+                      onChange={() => toggleSelected(row.id)}
+                    />
+                  </td>
                   <td className="py-3">{row.name}</td>
                   <td className="text-muted-foreground py-3">{row.category}</td>
                   <td className="py-3">
