@@ -80,11 +80,8 @@ function fetchBlobFallback(fullUrl: string, resolve: (res: string | null) => voi
     .catch(() => resolve(null));
 }
 
-// Set this to the real GSTIN once available — left blank rather than a
-// placeholder, since a fabricated GST number on a document buyers actually
-// receive would be a real compliance problem. Blank omits the GSTIN line
-// entirely (see drawHeader) instead of printing something false.
-const GST_NUMBER = "";
+// Real GSTIN, from the business's GST registration certificate.
+const GST_NUMBER = "24ACAFM4732F1ZL";
 
 /**
  * Live B2B PDF Catalogue Generator with 100% Reliable Image Rendering & Full Product Sync
