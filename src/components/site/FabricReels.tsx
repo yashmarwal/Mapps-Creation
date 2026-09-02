@@ -19,9 +19,11 @@ export type ReelSettings = { urls: string[] };
 export const REEL_DEFAULT: ReelSettings = { urls: [] };
 
 export const DEFAULT_VIDEOS = [v1, v2, v3, v4, v5, v6, v7, v8];
+const AUTO_SCROLL_SPEED = 0.04; // px per ms
+const RESUME_DELAY_MS = 2000;
 
 /** Plays video smoothly when scrolled into view without layout jittering */
-function AutoplayCard({ src, onOpen }: { src: string; onOpen: () => void }) {
+function AutoplayCard({ src, onOpen }: { src: string; onOpen: (e: React.MouseEvent) => void }) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -42,9 +44,9 @@ function AutoplayCard({ src, onOpen }: { src: string; onOpen: () => void }) {
   }, []);
 
   return (
-    <button
+    <div
       onClick={onOpen}
-      className="group border-border/80 relative aspect-[9/16] w-[170px] sm:w-[200px] shrink-0 overflow-hidden border rounded-2xl bg-slate-950 transform-gpu will-change-transform shadow-md cursor-pointer transition-transform duration-300 hover:scale-[1.02]"
+      className="group border-border/80 relative aspect-[9/16] w-[170px] sm:w-[200px] shrink-0 overflow-hidden border rounded-2xl bg-slate-950 transform-gpu will-change-transform shadow-md cursor-pointer transition-transform duration-300 hover:scale-[1.02] select-none"
       aria-label="Play fabric reel"
     >
       <video
@@ -54,14 +56,14 @@ function AutoplayCard({ src, onOpen }: { src: string; onOpen: () => void }) {
         loop
         playsInline
         preload="metadata"
-        className="h-full w-full object-cover transform-gpu will-change-transform pointer-events-none"
+        className="h-full w-full object-cover transform-gpu will-change-transform pointer-events-none select-none"
         style={{ transform: "translateZ(0)" }}
       />
-      <div className="absolute inset-0 bg-black/10 transition-colors duration-300 group-hover:bg-black/30" />
-      <span className="bg-amber-500 text-slate-950 absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100 shadow-lg">
+      <div className="absolute inset-0 bg-black/10 transition-colors duration-300 group-hover:bg-black/30 pointer-events-none" />
+      <span className="bg-amber-500 text-slate-950 absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100 shadow-lg pointer-events-none">
         <Play className="ml-0.5 h-4 w-4 fill-slate-950" />
       </span>
-    </button>
+    </div>
   );
 }
 
@@ -69,6 +71,133 @@ export function FabricReels() {
   const { value: reelSettings } = useSiteSetting<ReelSettings>("reel_videos", REEL_DEFAULT);
   const videos = reelSettings.urls.length > 0 ? reelSettings.urls : DEFAULT_VIDEOS;
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const userPaused = useRef(false);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeftStart = useRef(0);
+  const resumeTimer = useRef<number | undefined>(undefined);
+  const isInView = useRef(false);
+  const isWindowScrolling = useRef(false);
+  const hasMovedDuringDrag = useRef(false);
+
+  // Detect vertical page scrolling — HALT auto-scroll completely during page scroll to prevent jittering
+  useEffect(() => {
+    let scrollTimeout: number | undefined;
+
+    const handleWindowScroll = () => {
+      isWindowScrolling.current = true;
+      if (scrollTimeout) window.clearTimeout(scrollTimeout);
+      scrollTimeout = window.setTimeout(() => {
+        isWindowScrolling.current = false;
+      }, 250);
+    };
+
+    window.addEventListener("scroll", handleWindowScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleWindowScroll);
+      if (scrollTimeout) window.clearTimeout(scrollTimeout);
+    };
+  }, []);
+
+  // Section Visibility IntersectionObserver
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInView.current = !!entry?.isIntersecting;
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const pauseUser = () => {
+    userPaused.current = true;
+    if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+  };
+
+  const resumeUserSoon = () => {
+    if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+    resumeTimer.current = window.setTimeout(() => {
+      userPaused.current = false;
+    }, RESUME_DELAY_MS);
+  };
+
+  // Auto-Scroll Loop — Only mutates scrollLeft when page is NOT scrolling vertically
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    let rafId = 0;
+    let lastTime = performance.now();
+
+    const step = (now: number) => {
+      const dt = now - lastTime;
+      lastTime = now;
+
+      // CRITICAL: Skip scrollLeft mutation if window is scrolling vertically, or user is dragging/interacting
+      if (
+        isInView.current &&
+        !isWindowScrolling.current &&
+        !userPaused.current &&
+        !isDragging.current
+      ) {
+        const half = el.scrollWidth / 2;
+        if (half > 0) {
+          let nextScroll = el.scrollLeft + AUTO_SCROLL_SPEED * dt;
+          if (nextScroll >= half) {
+            nextScroll -= half;
+          }
+          el.scrollLeft = nextScroll;
+        }
+      }
+
+      rafId = requestAnimationFrame(step);
+    };
+
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  // Desktop Drag Handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const el = trackRef.current;
+    if (!el) return;
+    isDragging.current = true;
+    hasMovedDuringDrag.current = false;
+    startX.current = e.pageX - el.offsetLeft;
+    scrollLeftStart.current = el.scrollLeft;
+    pauseUser();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || !trackRef.current) return;
+    const el = trackRef.current;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startX.current) * 1.25;
+    if (Math.abs(walk) > 4) {
+      hasMovedDuringDrag.current = true;
+    }
+    el.scrollLeft = scrollLeftStart.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    if (isDragging.current) {
+      isDragging.current = false;
+      resumeUserSoon();
+    }
+  };
+
+  const handleCardClick = (index: number) => {
+    if (!hasMovedDuringDrag.current) {
+      setOpenIndex(index);
+    }
+  };
 
   useEffect(() => {
     if (openIndex === null) return;
@@ -84,19 +213,36 @@ export function FabricReels() {
   }, [openIndex]);
 
   return (
-    <section className="border-border border-y py-14 md:py-20 overflow-hidden">
+    <section ref={containerRef} className="border-border border-y py-14 md:py-20 overflow-hidden">
       <Reveal className="mx-auto max-w-7xl px-5 text-center md:px-10">
         <p className="label-caps text-primary">From Our Reels</p>
         <h2 className="display-lg mt-4">Fabric in motion</h2>
       </Reveal>
 
-      {/* Smooth GPU Accelerated Continuous Infinite Marquee Reel Track */}
-      <div className="mt-10 overflow-hidden w-full" aria-label="Fabric reels">
-        <div className="animate-marquee-scroll flex gap-4 px-2">
-          {[...videos, ...videos].map((src, i) => (
-            <AutoplayCard key={i} src={src} onOpen={() => setOpenIndex(i % videos.length)} />
-          ))}
-        </div>
+      {/* Touch-Swipable & Mouse-Draggable Video Track */}
+      <div
+        ref={trackRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUpOrLeave}
+        onMouseLeave={handleMouseUpOrLeave}
+        onTouchStart={pauseUser}
+        onTouchEnd={resumeUserSoon}
+        onWheel={() => {
+          pauseUser();
+          resumeUserSoon();
+        }}
+        className="mt-10 flex gap-4 overflow-x-auto px-5 pb-3 md:px-10 select-none cursor-grab active:cursor-grabbing transform-gpu [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:bg-amber-500/30 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-950"
+        style={{ scrollbarWidth: "none", touchAction: "pan-x", overscrollBehaviorX: "contain" }}
+        aria-label="Fabric reels"
+      >
+        {[0, 1].map((pass) => (
+          <div key={pass} className="flex shrink-0 gap-4" aria-hidden={pass === 1}>
+            {videos.map((src, i) => (
+              <AutoplayCard key={`${pass}-${i}`} src={src} onOpen={() => handleCardClick(i)} />
+            ))}
+          </div>
+        ))}
       </div>
 
       {/* Full Screen Video Modal */}
