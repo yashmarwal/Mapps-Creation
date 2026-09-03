@@ -25,6 +25,7 @@ import { TopMarquee, useMarqueeSettings } from "@/components/site/TopMarquee";
 import { PromoPopup } from "@/components/site/PromoPopup";
 import { QuoteDrawer } from "@/components/site/QuoteDrawer";
 import { DownloadCatalogModal } from "@/components/site/DownloadCatalogModal";
+import { SearchModal } from "@/components/site/SearchModal";
 import { QuoteBasketProvider } from "@/hooks/useQuoteBasket";
 import { EASE_UI } from "@/components/site/motion";
 import { useSmoothScroll } from "@/hooks/useSmoothScroll";
@@ -139,12 +140,25 @@ function RootComponent() {
   const { settings: marquee, visible: marqueeVisible } = useMarqueeSettings();
   const [askOpen, setAskOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   useSmoothScroll();
 
   useEffect(() => {
     window.scrollTo(0, 0);
     window.__lenis?.scrollTo(0, { immediate: true });
   }, [pathname]);
+
+  // Global Ctrl+K / Cmd+K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   if (isAdmin) {
     return (
@@ -159,7 +173,11 @@ function RootComponent() {
       <QuoteBasketProvider>
         <IntroProvider>
           <TopMarquee visible={marqueeVisible} text={marquee.text} />
-          <Navigation marqueeVisible={marqueeVisible} onOpenCatalog={() => setCatalogOpen(true)} />
+          <Navigation
+            marqueeVisible={marqueeVisible}
+            onOpenCatalog={() => setCatalogOpen(true)}
+            onOpenSearch={() => setSearchOpen(true)}
+          />
           <main>
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <motion.div
@@ -183,6 +201,7 @@ function RootComponent() {
             onOpenCatalog={() => setCatalogOpen(true)}
           />
           <DownloadCatalogModal open={catalogOpen} onClose={() => setCatalogOpen(false)} />
+          <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
           <MobileActionBar onOpenAsk={() => setAskOpen(true)} />
           <CustomCursor />
         </IntroProvider>

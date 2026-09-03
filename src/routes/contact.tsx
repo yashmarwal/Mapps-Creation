@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Mail, MapPin, MessageCircle, Phone, Send } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Phone, Send, SendHorizontal } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { EASE_UI, Reveal, StampHeading } from "@/components/site/motion";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
@@ -72,14 +72,14 @@ function Contact() {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Enquire on WhatsApp"
-                className="border-border hover:border-primary/60 group flex items-center gap-4 border p-5 transition-colors"
+                className="border-border/80 hover:border-emerald-500/60 bg-card/60 rounded-xl group flex items-center gap-4 border p-5 transition-all"
               >
-                <span className="bg-[#25D366] text-white flex h-11 w-11 shrink-0 items-center justify-center rounded-lg">
-                  <WhatsAppIcon className="h-5 w-5 fill-current" />
+                <span className="bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm">
+                  <SendHorizontal className="h-5 w-5" />
                 </span>
                 <span>
                   <span className="label-caps text-muted-foreground block">Enquire Now</span>
-                  <span className="text-foreground group-hover:text-primary text-lg transition-colors">
+                  <span className="text-foreground group-hover:text-emerald-400 text-lg font-semibold transition-colors">
                     {SITE.phoneDisplay}
                   </span>
                 </span>
@@ -87,14 +87,14 @@ function Contact() {
 
               <a
                 href={`tel:${SITE.phone}`}
-                className="border-border hover:border-primary/60 group flex items-center gap-4 border p-5 transition-colors"
+                className="border-border/80 hover:border-amber-500/60 bg-card/60 rounded-xl group flex items-center gap-4 border p-5 transition-all"
               >
-                <span className="bg-primary text-primary-foreground flex h-11 w-11 shrink-0 items-center justify-center">
+                <span className="bg-amber-500/20 border border-amber-500/40 text-amber-400 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm">
                   <Phone className="h-5 w-5" />
                 </span>
                 <span>
-                  <span className="label-caps text-muted-foreground block">Call Now</span>
-                  <span className="text-foreground group-hover:text-primary text-lg transition-colors">
+                  <span className="label-caps text-muted-foreground block">Call Desk</span>
+                  <span className="text-foreground group-hover:text-amber-400 text-lg font-semibold transition-colors">
                     {SITE.phoneDisplay}
                   </span>
                 </span>
@@ -102,26 +102,26 @@ function Contact() {
 
               <a
                 href={`mailto:${SITE.email}`}
-                className="border-border hover:border-primary/60 group flex items-center gap-4 border p-5 transition-colors"
+                className="border-border/80 hover:border-sky-500/60 bg-card/60 rounded-xl group flex items-center gap-4 border p-5 transition-all"
               >
-                <span className="bg-primary text-primary-foreground flex h-11 w-11 shrink-0 items-center justify-center">
+                <span className="bg-sky-500/20 border border-sky-500/40 text-sky-400 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm">
                   <Mail className="h-5 w-5" />
                 </span>
                 <span>
                   <span className="label-caps text-muted-foreground block">Email Us</span>
-                  <span className="text-foreground group-hover:text-primary text-base sm:text-lg transition-colors">
+                  <span className="text-foreground group-hover:text-sky-400 text-base sm:text-lg font-semibold transition-colors">
                     {SITE.email}
                   </span>
                 </span>
               </a>
 
-              <div className="border-border flex items-center gap-4 border p-5">
-                <span className="bg-secondary text-secondary-foreground flex h-11 w-11 shrink-0 items-center justify-center">
+              <div className="border-border/80 bg-card/60 rounded-xl flex items-center gap-4 border p-5">
+                <span className="bg-purple-500/20 border border-purple-500/40 text-purple-400 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm">
                   <MapPin className="h-5 w-5" />
                 </span>
                 <span>
                   <span className="label-caps text-muted-foreground block">Location</span>
-                  <span className="text-foreground text-lg">{SITE.city}, India</span>
+                  <span className="text-foreground text-lg font-medium">{SITE.city}, India</span>
                 </span>
               </div>
             </div>

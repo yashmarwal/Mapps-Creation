@@ -54,11 +54,11 @@ function About() {
     <div className="pt-28 md:pt-36">
       {/* INTRO */}
       <section className="mx-auto max-w-7xl px-5 md:px-10">
-        <Reveal>
-          <p className="label-caps text-primary">About Us</p>
+        <Reveal className="gold-glow-radial">
+          <p className="editorial-tag mb-2">01 / OUR STORY</p>
           <StampHeading
             lines={["Knitting Dreams", "Into Reality"]}
-            className="display-lg mt-4 max-w-2xl"
+            className="display-lg mt-3 max-w-2xl text-gold-gradient"
           />
         </Reveal>
         <Reveal index={1}>

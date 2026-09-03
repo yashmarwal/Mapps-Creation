@@ -28,7 +28,7 @@ export function FounderSection({ className = "" }: { className?: string }) {
 
           {/* Sleek, Compact Card Container */}
           <Reveal index={1} className="mt-6 md:mt-8">
-            <div className="relative border border-[var(--gold)]/25 bg-[#0A1628]/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden">
+            <div className="relative glass-card-luxury gold-shimmer-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden">
               {/* Subtle Ambient Background Light */}
               <div className="pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-[var(--gold)]/10 blur-3xl" />
 

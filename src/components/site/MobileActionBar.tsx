@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, MessageCircle, Phone, Sparkles } from "lucide-react";
+import { ArrowRight, Phone, SendHorizontal, Sparkles } from "lucide-react";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
 
@@ -67,7 +67,7 @@ export function MobileActionBar({ onOpenAsk }: { onOpenAsk: () => void }) {
         className="btn-enquire flex-1 !min-h-[46px] !rounded-xl !text-xs shrink-0"
       >
         <span>
-          <MessageCircle className="h-4 w-4 fill-current" />
+          <SendHorizontal className="h-4 w-4" />
           Enquire Now
         </span>
       </a>

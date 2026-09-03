@@ -19,11 +19,9 @@ export type ReelSettings = { urls: string[] };
 export const REEL_DEFAULT: ReelSettings = { urls: [] };
 
 export const DEFAULT_VIDEOS = [v1, v2, v3, v4, v5, v6, v7, v8];
-const AUTO_SCROLL_SPEED = 0.04; // px per ms
-const RESUME_DELAY_MS = 2000;
 
 /** Plays video smoothly when scrolled into view without layout jittering */
-function AutoplayCard({ src, onOpen }: { src: string; onOpen: (e: React.MouseEvent) => void }) {
+function AutoplayCard({ src, onOpen }: { src: string; onOpen: () => void }) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -37,7 +35,7 @@ function AutoplayCard({ src, onOpen }: { src: string; onOpen: (e: React.MouseEve
           el.pause();
         }
       },
-      { threshold: 0.2 },
+      { threshold: 0.15 },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -74,35 +72,34 @@ export function FabricReels() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const userPaused = useRef(false);
+
+  const isInView = useRef(false);
+  const isWindowScrolling = useRef(false);
+  const isUserInteracting = useRef(false);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeftStart = useRef(0);
-  const resumeTimer = useRef<number | undefined>(undefined);
-  const isInView = useRef(false);
-  const isWindowScrolling = useRef(false);
   const hasMovedDuringDrag = useRef(false);
+  const resumeTimer = useRef<number | undefined>(undefined);
 
-  // Detect vertical page scrolling — HALT auto-scroll completely during page scroll to prevent jittering
+  // 1. Detect vertical page scrolling — HALT auto-scroll during page scroll to avoid reflow jittering
   useEffect(() => {
-    let scrollTimeout: number | undefined;
-
-    const handleWindowScroll = () => {
+    let timer: number | undefined;
+    const handleScroll = () => {
       isWindowScrolling.current = true;
-      if (scrollTimeout) window.clearTimeout(scrollTimeout);
-      scrollTimeout = window.setTimeout(() => {
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
         isWindowScrolling.current = false;
       }, 250);
     };
-
-    window.addEventListener("scroll", handleWindowScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
-      window.removeEventListener("scroll", handleWindowScroll);
-      if (scrollTimeout) window.clearTimeout(scrollTimeout);
+      window.removeEventListener("scroll", handleScroll);
+      if (timer) window.clearTimeout(timer);
     };
   }, []);
 
-  // Section Visibility IntersectionObserver
+  // 2. Detect section visibility
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -116,40 +113,42 @@ export function FabricReels() {
     return () => observer.disconnect();
   }, []);
 
-  const pauseUser = () => {
-    userPaused.current = true;
+  // 3. User interaction pause / resume timer (1.5 seconds)
+  const pauseUserInteraction = () => {
+    isUserInteracting.current = true;
     if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
   };
 
-  const resumeUserSoon = () => {
+  const resumeUserInteractionSoon = () => {
     if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
     resumeTimer.current = window.setTimeout(() => {
-      userPaused.current = false;
-    }, RESUME_DELAY_MS);
+      isUserInteracting.current = false;
+      isDragging.current = false;
+    }, 1500);
   };
 
-  // Auto-Scroll Loop — Only mutates scrollLeft when page is NOT scrolling vertically
+  // 4. Smooth Auto-Scroll Loop (Runs ONLY when section is visible, NOT vertical scrolling, NOT user touching)
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
 
     let rafId = 0;
     let lastTime = performance.now();
+    const speed = 0.04; // px/ms
 
     const step = (now: number) => {
       const dt = now - lastTime;
       lastTime = now;
 
-      // CRITICAL: Skip scrollLeft mutation if window is scrolling vertically, or user is dragging/interacting
       if (
         isInView.current &&
         !isWindowScrolling.current &&
-        !userPaused.current &&
+        !isUserInteracting.current &&
         !isDragging.current
       ) {
         const half = el.scrollWidth / 2;
         if (half > 0) {
-          let nextScroll = el.scrollLeft + AUTO_SCROLL_SPEED * dt;
+          let nextScroll = el.scrollLeft + speed * dt;
           if (nextScroll >= half) {
             nextScroll -= half;
           }
@@ -164,7 +163,7 @@ export function FabricReels() {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
-  // Desktop Drag Handlers
+  // 5. Desktop Mouse Dragging Handlers
   const handleMouseDown = (e: React.MouseEvent) => {
     const el = trackRef.current;
     if (!el) return;
@@ -172,7 +171,7 @@ export function FabricReels() {
     hasMovedDuringDrag.current = false;
     startX.current = e.pageX - el.offsetLeft;
     scrollLeftStart.current = el.scrollLeft;
-    pauseUser();
+    pauseUserInteraction();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -189,7 +188,7 @@ export function FabricReels() {
   const handleMouseUpOrLeave = () => {
     if (isDragging.current) {
       isDragging.current = false;
-      resumeUserSoon();
+      resumeUserInteractionSoon();
     }
   };
 
@@ -219,18 +218,19 @@ export function FabricReels() {
         <h2 className="display-lg mt-4">Fabric in motion</h2>
       </Reveal>
 
-      {/* Touch-Swipable & Mouse-Draggable Video Track */}
+      {/* Smooth Video Reel Track with Finger Swiping (Mobile) & Desktop Drag & Auto-Scroll Resume */}
       <div
         ref={trackRef}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
-        onTouchStart={pauseUser}
-        onTouchEnd={resumeUserSoon}
+        onTouchStart={pauseUserInteraction}
+        onTouchEnd={resumeUserInteractionSoon}
+        onTouchCancel={resumeUserInteractionSoon}
         onWheel={() => {
-          pauseUser();
-          resumeUserSoon();
+          pauseUserInteraction();
+          resumeUserInteractionSoon();
         }}
         className="mt-10 flex gap-4 overflow-x-auto px-5 pb-3 md:px-10 select-none cursor-grab active:cursor-grabbing transform-gpu [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:bg-amber-500/30 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-950"
         style={{ scrollbarWidth: "none", touchAction: "pan-x", overscrollBehaviorX: "contain" }}

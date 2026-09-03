@@ -49,17 +49,10 @@ export function SupplyTree() {
     <div className="mx-auto max-w-5xl">
       {/* Central Origin Node */}
       <div className="flex items-center justify-center gap-3">
-        <span className="relative flex h-3 w-3 shrink-0 items-center justify-center">
-          <span className="bg-primary h-3 w-3 rounded-full shadow-[0_0_12px_var(--gold)]" />
-          {!reduced && (
-            <motion.span
-              className="border-primary absolute inset-0 rounded-full border"
-              initial={{ opacity: 0.6, scale: 1 }}
-              animate={{ opacity: 0, scale: 3.2 }}
-              transition={{ duration: 2, ease: "easeOut", repeat: Infinity }}
-            />
-          )}
-        </span>
+        <div className="relative flex items-center justify-center h-5 w-5">
+          <span className="absolute h-full w-full rounded-full bg-[var(--gold)]/40 animate-ping" />
+          <span className="relative h-3 w-3 rounded-full bg-[var(--gold)] shadow-[0_0_12px_var(--gold)]" />
+        </div>
         <span className="font-display text-2xl md:text-3xl text-foreground tracking-wide">
           Surat
         </span>

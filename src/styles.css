@@ -406,7 +406,6 @@
   height: 1.25em;
   margin-right: 0.45em;
   flex-shrink: 0;
-  fill: currentColor;
 }
 
 .btn-enquire span,
@@ -420,5 +419,85 @@
   justify-content: center;
   padding: 0.65em 1.2em;
   white-space: nowrap;
+}
+
+/* ==========================================================================
+   Luxury Editorial Aesthetics (Mapps Creation Brand Polish)
+   ========================================================================== */
+
+/* Metallic Gold Gradient Heading */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #F7F3EA 0%, #E8DCC0 30%, #C9A66B 70%, #F5E6CA 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(201, 166, 107, 0.15);
+}
+
+/* Ambient Radial Gold Backlighting */
+.gold-glow-radial {
+  position: relative;
+}
+.gold-glow-radial::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(circle, rgba(201, 166, 107, 0.14) 0%, rgba(15, 32, 56, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(50px);
+}
+
+/* High-Fashion Glassmorphic Container */
+.glass-card-luxury {
+  background: rgba(15, 32, 56, 0.78);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(201, 166, 107, 0.28);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.6), 0 0 30px -10px rgba(201, 166, 107, 0.15);
+  border-radius: 1.25rem;
+}
+
+/* Editorial Tag Accent */
+.editorial-tag {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.editorial-tag::before {
+  content: "";
+  display: inline-block;
+  width: 1.25rem;
+  height: 1px;
+  background: var(--gold);
+}
+
+/* Metallic Gold Border Shimmer Sweep */
+@keyframes gold-border-sweep {
+  0% {
+    border-color: rgba(201, 166, 107, 0.25);
+    box-shadow: 0 0 15px rgba(201, 166, 107, 0.1);
+  }
+  50% {
+    border-color: rgba(232, 220, 192, 0.65);
+    box-shadow: 0 0 30px rgba(201, 166, 107, 0.35);
+  }
+  100% {
+    border-color: rgba(201, 166, 107, 0.25);
+    box-shadow: 0 0 15px rgba(201, 166, 107, 0.1);
+  }
+}
+
+.gold-shimmer-border {
+  animation: gold-border-sweep 4s ease-in-out infinite;
 }
 

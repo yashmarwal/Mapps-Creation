@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Check, Mail, MessageCircle, Plus, Send, X } from "lucide-react";
+import { Check, Mail, Plus, SendHorizontal, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { EASE_REVEAL, EASE_UI, Reveal } from "./motion";
 import type { Product } from "@/data/catalog";
@@ -144,7 +144,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                   className="btn-enquire w-full !text-[10px] !py-1.5"
                 >
                   <span>
-                    <MessageCircle className="h-3.5 w-3.5 fill-current" />
+                    <SendHorizontal className="h-3.5 w-3.5" />
                     Enquire
                   </span>
                 </a>
@@ -237,7 +237,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                 className="btn-enquire w-full !text-[11px] !min-h-[44px]"
               >
                 <span>
-                  <WhatsAppIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-current" />
+                  <SendHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   Enquire
                 </span>
               </a>
@@ -342,7 +342,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                     className="btn-enquire w-full !text-xs !min-h-[46px]"
                   >
                     <span>
-                      <WhatsAppIcon className="h-4 w-4 fill-current" />
+                      <SendHorizontal className="h-4 w-4" />
                       Enquire Now
                     </span>
                   </a>

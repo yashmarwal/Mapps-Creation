@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Check, MessageCircle, Send } from "lucide-react";
+import { ArrowRight, Check, Mail, SendHorizontal } from "lucide-react";
 import { useRef } from "react";
 
 import heroDesktopVideo from "@/assets/hero-desktop.mp4";
@@ -174,12 +174,12 @@ function Home() {
 
         <div className="relative mx-auto w-full max-w-7xl px-5 pb-20 pt-32 md:px-10 md:pb-28">
           <motion.p
-            className="label-caps text-primary"
-            initial={{ opacity: 0, y: 12 }}
-            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+            className="editorial-tag mb-3"
+            initial={{ opacity: 0, y: 10 }}
+            animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
             transition={{ duration: 0.7, ease: EASE_REVEAL, delay: base }}
           >
-            Mapps Creation · Surat, Gujarat
+            01 / SURAT TEXTILE HUB
           </motion.p>
 
           <StampHeading
@@ -187,7 +187,7 @@ function Home() {
             lines={["Knitting Dreams", "Into Reality"]}
             delay={base + 0.1}
             play={ready}
-            className="display-xl mt-5 max-w-4xl"
+            className="display-xl mt-4 max-w-4xl text-gold-gradient"
             lineClassName="text-foreground"
           />
 
@@ -215,8 +215,8 @@ function Home() {
               className="btn-enquire !min-h-[52px] !text-xs !px-7"
             >
               <span>
-                <WhatsAppIcon className="h-4 w-4 fill-current" />
-                WhatsApp Us
+                <SendHorizontal className="h-4 w-4" />
+                Quick Enquiry
               </span>
             </a>
             <Link
@@ -282,10 +282,10 @@ function Home() {
 
       {/* FEATURED CATALOGUE */}
       <section className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-32">
-        <Reveal className="flex flex-wrap items-end justify-between gap-6">
+        <Reveal className="flex flex-wrap items-end justify-between gap-6 gold-glow-radial">
           <div>
-            <p className="label-caps text-primary">Catalogue</p>
-            <h2 className="display-lg mt-4">Fabrics we move every week</h2>
+            <p className="editorial-tag">02 / CATALOGUE</p>
+            <h2 className="display-lg mt-3 text-gold-gradient">Fabrics we move every week</h2>
           </div>
           <Link
             to="/catalogue"
@@ -369,9 +369,9 @@ function Home() {
 
       {/* HOW IT WORKS */}
       <section className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-32">
-        <Reveal>
-          <p className="label-caps text-primary">How It Works</p>
-          <h2 className="display-lg mt-4">From enquiry to dispatch</h2>
+        <Reveal className="gold-glow-radial">
+          <p className="editorial-tag">03 / HOW IT WORKS</p>
+          <h2 className="display-lg mt-3 text-gold-gradient">From enquiry to dispatch</h2>
         </Reveal>
         <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step, i) => (
@@ -388,8 +388,9 @@ function Home() {
 
       {/* PAN-INDIA DISPATCH */}
       <section className="border-border border-y py-16 md:py-24">
-        <Reveal className="mx-auto max-w-7xl px-5 text-center md:px-10">
-          <p className="label-caps text-primary">Pan-India Dispatch</p>
+        <Reveal className="mx-auto max-w-7xl px-5 text-center md:px-10 gold-glow-radial">
+          <p className="editorial-tag">04 / PAN-INDIA DISPATCH</p>
+          <h2 className="display-lg mt-3 text-gold-gradient">Connected to India's Garment Hubs</h2>
           <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-sm leading-relaxed">
             Quality-checked rolls leave Surat by road every week for garment manufacturing hubs
             across the country.
@@ -449,15 +450,18 @@ function Home() {
                 className="btn-enquire !min-h-[52px] !text-xs !px-7"
               >
                 <span>
-                  <WhatsAppIcon className="h-4 w-4 fill-current" />
-                  WhatsApp Us
+                  <SendHorizontal className="h-4 w-4" />
+                  Quick Enquiry
                 </span>
               </a>
               <Link
                 to="/contact"
                 className="btn-enquire btn-enquire-navy !min-h-[52px] !text-xs !px-7"
               >
-                <span>Send an Enquiry</span>
+                <span>
+                  <Mail className="h-4 w-4" />
+                  Email Desk
+                </span>
               </Link>
             </div>
           </Reveal>

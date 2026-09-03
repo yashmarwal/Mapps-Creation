@@ -2,7 +2,7 @@
 
 import { Link, useLocation } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { Download, Menu, Phone, X } from "lucide-react";
+import { Download, Menu, Phone, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SITE } from "@/lib/seo";
 import { EASE_REVEAL } from "./motion";
@@ -18,9 +18,11 @@ const LINKS = [
 export function Navigation({
   marqueeVisible = false,
   onOpenCatalog,
+  onOpenSearch,
 }: {
   marqueeVisible?: boolean;
   onOpenCatalog?: () => void;
+  onOpenSearch?: () => void;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -98,15 +100,32 @@ export function Navigation({
               </Link>
             ))}
 
+            {onOpenSearch && (
+              <button
+                type="button"
+                onClick={onOpenSearch}
+                className="bg-slate-950/80 border border-slate-700/60 hover:border-[var(--gold)]/60 text-muted-foreground hover:text-foreground px-3.5 py-1.5 rounded-full font-medium transition-all duration-300 active:scale-95 cursor-pointer text-xs flex items-center gap-2 shadow-xs group shrink-0"
+                title="Search Fabrics (Ctrl+K)"
+              >
+                <Search className="h-3.5 w-3.5 text-[var(--gold)]" />
+                <span className="text-xs">Search...</span>
+                <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[9px] font-mono rounded bg-slate-900 border border-slate-800 text-muted-foreground/80">
+                  ⌘K
+                </kbd>
+              </button>
+            )}
+
             {onOpenCatalog && (
               <button
                 type="button"
                 onClick={onOpenCatalog}
-                className="btn-enquire btn-enquire-gold !min-h-[38px] !py-1.5 !px-4 !text-xs !rounded-full shrink-0"
+                className="bg-slate-950/80 border border-amber-500/40 text-amber-400 hover:bg-amber-500 hover:text-slate-950 px-3.5 py-1.5 rounded-full font-semibold transition-all duration-300 active:scale-95 cursor-pointer text-xs flex items-center gap-2 shadow-xs group shrink-0"
+                title="Download Official B2B Fabric Catalogue PDF"
               >
-                <span>
-                  <Download className="h-3.5 w-3.5" /> PDF Catalogue
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/20 text-amber-400 group-hover:bg-amber-400 group-hover:text-slate-950 transition-colors">
+                  <Download className="h-3 w-3" />
                 </span>
+                <span className="font-bold tracking-wide uppercase text-[11px]">PDF Catalogue</span>
               </button>
             )}
 
@@ -118,14 +137,31 @@ export function Navigation({
             </Link>
             <a
               href={`tel:${SITE.phone}`}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 label-caps flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-300 active:scale-95 cursor-pointer text-xs"
+              className="bg-slate-950/80 border border-emerald-500/40 text-slate-100 hover:border-emerald-400 hover:bg-slate-900 px-3.5 py-1.5 rounded-full font-semibold transition-all duration-300 active:scale-95 cursor-pointer text-xs flex items-center gap-2 shadow-xs group shrink-0"
+              title={`Call Sales Desk: ${SITE.phoneDisplay}`}
             >
-              <Phone className="h-3.5 w-3.5" /> Call {SITE.phoneDisplay}
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors">
+                <Phone className="h-3 w-3" />
+              </span>
+              <span className="font-mono text-[11px] font-bold tracking-tight whitespace-nowrap text-emerald-400 group-hover:text-slate-100 transition-colors">
+                {SITE.phoneDisplay}
+              </span>
             </a>
           </div>
 
-          {/* Mobile Header Call & Menu Buttons */}
+          {/* Mobile Header Search, Call & Menu Buttons */}
           <div className="flex items-center gap-2 md:hidden">
+            {onOpenSearch && (
+              <button
+                type="button"
+                onClick={onOpenSearch}
+                aria-label="Search Fabrics"
+                className="border border-slate-700/60 text-amber-400 bg-slate-950/90 backdrop-blur-md flex h-9 w-9 items-center justify-center rounded-full active:scale-95 transition-all shadow-xs cursor-pointer"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            )}
+
             {onOpenCatalog && (
               <button
                 type="button"

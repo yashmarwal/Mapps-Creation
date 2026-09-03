@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { MessageCircle, Send, X } from "lucide-react";
+import { SendHorizontal, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { whatsappLink } from "@/lib/seo";
@@ -73,7 +73,7 @@ export function ExitIntent() {
             </button>
 
             <span className="bg-[#25D366]/20 text-[#25D366] border border-[#25D366]/50 text-[10px] font-bold tracking-widest label-caps px-3.5 py-1 rounded-full uppercase inline-flex items-center gap-1.5">
-              <MessageCircle className="h-3.5 w-3.5 fill-[#25D366]" /> Instant Rate Check
+              <SendHorizontal className="h-3.5 w-3.5" /> Instant Rate Check
             </span>
 
             <h2 className="font-serif mt-4 text-2xl md:text-3xl font-bold text-foreground">
@@ -95,8 +95,8 @@ export function ExitIntent() {
               className="btn-enquire mt-7 w-full !min-h-[50px] !rounded-xl !text-sm"
             >
               <span>
-                <MessageCircle className="h-4 w-4 fill-current" />
-                WhatsApp Us Now
+                <SendHorizontal className="h-4 w-4" />
+                Quick Enquiry Now
               </span>
             </a>
           </motion.div>
