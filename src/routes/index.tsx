@@ -21,7 +21,6 @@ import { WhatsAppIcon } from "@/components/site/icons/WhatsAppIcon";
 import { useIntro } from "@/components/site/Preloader";
 import { SupplyTree } from "@/components/site/SupplyTree";
 import { FabricReels } from "@/components/site/FabricReels";
-import { FabricCraftingShowcase } from "@/components/site/FabricCraftingShowcase";
 import { useProducts } from "@/hooks/useProducts";
 import { useSiteImage } from "@/hooks/useSiteImage";
 import { SiteMedia } from "@/components/site/SiteMedia";
@@ -331,9 +330,6 @@ function Home() {
       <CtaBand variant="full" />
 
       <FabricReels />
-
-      {/* FABRIC APPLICATION & GARMENT CREATION SHOWCASE */}
-      <FabricCraftingShowcase />
 
       {/* WHY + STATS */}
       <section className="surface-ivory grain relative py-24 md:py-32">
