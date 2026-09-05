@@ -21,11 +21,13 @@ import { LogoMark } from "./LogoMark";
 import { EASE_UI } from "./motion";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
+import { ProductPreviewModal } from "./ProductPreviewModal";
 
 export function QuoteDrawer() {
   const { items, isOpen, setIsOpen, removeItem, updateQuantity, updateShade, clearBasket } =
     useQuoteBasket();
   const { status, submit } = useFormSubmit();
+  const [previewItem, setPreviewItem] = useState<QuoteItem | null>(null);
 
   const [buyerInfo, setBuyerInfo] = useState({
     company: "",
@@ -366,23 +368,28 @@ export function QuoteDrawer() {
                       className="border border-[var(--gold)]/20 bg-card/60 p-4 rounded-xl space-y-3 relative group"
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewItem(item)}
+                          aria-label={`Preview ${item.name}`}
+                          className="flex items-center gap-3 bg-transparent p-0 text-left cursor-pointer group/preview"
+                        >
                           {item.image && (
                             <img
                               src={item.image}
                               alt={item.name}
-                              className="w-12 h-12 rounded-md object-cover border border-border/50 shrink-0"
+                              className="w-12 h-12 rounded-md object-cover border border-border/50 shrink-0 transition-transform group-hover/preview:scale-105"
                             />
                           )}
                           <div>
                             <span className="text-[10px] text-primary uppercase font-mono tracking-wider">
                               {item.category}
                             </span>
-                            <h4 className="font-display text-base text-foreground mt-0.5">
+                            <h4 className="font-display text-base text-foreground mt-0.5 group-hover/preview:text-primary transition-colors">
                               {item.name}
                             </h4>
                           </div>
-                        </div>
+                        </button>
 
                         <button
                           onClick={() => removeItem(item.id)}
@@ -569,6 +576,8 @@ export function QuoteDrawer() {
       </AnimatePresence>
 
       {printDocument}
+
+      <ProductPreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />
     </>
   );
 }

@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, Download } from "lucide-react";
 import { CATEGORIES, PRODUCTS } from "@/data/catalog";
-import { ProductCard } from "@/components/site/ProductCard";
+import { ProductCard, ProductCardSkeleton } from "@/components/site/ProductCard";
+import { CtaBand } from "@/components/site/CtaBand";
 import { Reveal } from "@/components/site/motion";
 import { useProducts } from "@/hooks/useProducts";
 import { breadcrumbSchema, buildPageHead, itemListSchema } from "@/lib/seo";
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/catalogue")({
 function Catalogue() {
   const { category } = Route.useSearch();
   const navigate = useNavigate({ from: "/catalogue" });
-  const { products: allProducts } = useProducts();
+  const { products: allProducts, loading: productsLoading } = useProducts();
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const products = category ? allProducts.filter((p) => p.category === category) : allProducts;
 
@@ -129,11 +130,15 @@ function Catalogue() {
         </Reveal>
 
         <div className="mt-12 grid grid-cols-1 gap-4 pb-24 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 md:pb-32">
-          {products.map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} />
-          ))}
+          {productsLoading
+            ? Array.from({ length: 9 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            : products.map((product, i) => (
+                <ProductCard key={product.id} product={product} index={i} />
+              ))}
         </div>
       </section>
+
+      <CtaBand />
     </div>
   );
 }

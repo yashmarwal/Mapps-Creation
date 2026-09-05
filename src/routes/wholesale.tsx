@@ -14,6 +14,7 @@ import {
 import { useState, type FormEvent } from "react";
 import { EASE_REVEAL, EASE_UI, Reveal, StampHeading, WordReveal } from "@/components/site/motion";
 import { LogoMark } from "@/components/site/LogoMark";
+import { CtaBand } from "@/components/site/CtaBand";
 import { CATEGORIES } from "@/data/catalog";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
 import { breadcrumbSchema, buildPageHead, serviceSchema } from "@/lib/seo";
@@ -484,6 +485,8 @@ function Wholesale() {
           <WholesaleForm />
         </div>
       </section>
+
+      <CtaBand />
     </>
   );
 }

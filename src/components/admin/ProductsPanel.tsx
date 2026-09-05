@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Check, EyeOff, Pencil, Plus, Star, StarOff, Trash2 } from "lucide-react";
 import { CATEGORIES, PRODUCTS } from "@/data/catalog";
-import { checkUploadSize } from "@/lib/media";
+import { checkUploadSize, compressImageToTarget, IMAGE_COMPRESS_TARGET_MB } from "@/lib/media";
 import { supabase, type ProductRow } from "@/lib/supabase";
 
 const OTHER_VALUE = "__other__";
@@ -25,6 +25,7 @@ export function ProductsPanel() {
   const [isOtherCategory, setIsOtherCategory] = useState(false);
   const [editing, setEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("");
   const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -66,27 +67,42 @@ export function ProductsPanel() {
   };
 
   const handleUpload = async (file: File) => {
-    const sizeError = checkUploadSize(file);
-    if (sizeError) {
-      setError(sizeError);
-      return;
-    }
     setUploading(true);
     setError(null);
-    const path = `${Date.now()}-${file.name}`;
+    setUploadStatus(
+      file.size > IMAGE_COMPRESS_TARGET_MB * 1024 * 1024 ? "Compressing image..." : "Uploading...",
+    );
+
+    // Auto-compress large photos (phone camera shots are often 8-15MB) down
+    // to a manageable size before upload — admins shouldn't need to
+    // pre-compress product photos by hand. No-ops if already small enough.
+    const upload = await compressImageToTarget(file);
+
+    const sizeError = checkUploadSize(upload);
+    if (sizeError) {
+      setError(sizeError);
+      setUploading(false);
+      setUploadStatus("");
+      return;
+    }
+
+    setUploadStatus("Uploading...");
+    const path = `${Date.now()}-${upload.name}`;
     const { error: uploadError } = await supabase.storage
       .from("product-images")
-      .upload(path, file, {
+      .upload(path, upload, {
         upsert: true,
       });
     if (uploadError) {
       setError(uploadError.message);
       setUploading(false);
+      setUploadStatus("");
       return;
     }
     const { data } = supabase.storage.from("product-images").getPublicUrl(path);
     setForm((f) => ({ ...f, image_url: data.publicUrl }));
     setUploading(false);
+    setUploadStatus("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -383,7 +399,12 @@ export function ProductsPanel() {
               onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
               className="mt-2 block text-sm"
             />
-            {uploading && <p className="text-muted-foreground mt-1 text-xs">Uploading...</p>}
+            <p className="text-muted-foreground/70 mt-1 text-[11px]">
+              Large photos are auto-compressed to under {IMAGE_COMPRESS_TARGET_MB}MB before upload.
+            </p>
+            {uploading && (
+              <p className="text-muted-foreground mt-1 text-xs">{uploadStatus || "Uploading..."}</p>
+            )}
             {form.image_url && (
               <img src={form.image_url} alt="Preview" className="mt-3 h-24 w-24 object-cover" />
             )}

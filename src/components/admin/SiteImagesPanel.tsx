@@ -1,7 +1,7 @@
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase, type SiteImageRow } from "@/lib/supabase";
-import { checkUploadSize, isVideoUrl } from "@/lib/media";
+import { checkUploadSize, compressImageToTarget, isVideoUrl } from "@/lib/media";
 
 const SECTIONS = [
   { key: "hero-video-desktop", label: "Home — Hero Background (Desktop)" },
@@ -31,15 +31,22 @@ export function SiteImagesPanel() {
   }, []);
 
   const handleUpload = async (section: string, file: File) => {
-    const sizeError = checkUploadSize(file);
-    if (sizeError) {
-      setError(sizeError);
-      return;
-    }
     setUploading(section);
     setError(null);
-    const path = `${section}/${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("site-images").upload(path, file, {
+
+    // This slot accepts either a photo or a video — only compress photos;
+    // compressImageToTarget is a no-op for any non-image file, so a video
+    // upload passes through completely untouched.
+    const upload = await compressImageToTarget(file);
+
+    const sizeError = checkUploadSize(upload);
+    if (sizeError) {
+      setError(sizeError);
+      setUploading(null);
+      return;
+    }
+    const path = `${section}/${Date.now()}-${upload.name}`;
+    const { error: uploadError } = await supabase.storage.from("site-images").upload(path, upload, {
       upsert: true,
     });
     if (uploadError) {

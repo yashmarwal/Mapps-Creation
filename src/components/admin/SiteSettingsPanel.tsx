@@ -9,7 +9,7 @@ import {
   REEL_DEFAULT,
   type ReelSettings,
 } from "@/components/site/FabricReels";
-import { checkUploadSize } from "@/lib/media";
+import { checkUploadSize, compressImageToTarget } from "@/lib/media";
 
 async function loadSetting<T>(key: string, fallback: T): Promise<T> {
   const { data } = await supabase
@@ -64,17 +64,22 @@ export function SiteSettingsPanel() {
   };
 
   const handlePromoImage = async (file: File) => {
-    const sizeError = checkUploadSize(file);
-    if (sizeError) {
-      setPromoError(sizeError);
-      return;
-    }
     setPromoError(null);
     setUploading(true);
-    const path = `promo-${Date.now()}-${file.name}`;
+
+    // Image-only field (accept="image/*") — always safe to compress.
+    const upload = await compressImageToTarget(file);
+
+    const sizeError = checkUploadSize(upload);
+    if (sizeError) {
+      setPromoError(sizeError);
+      setUploading(false);
+      return;
+    }
+    const path = `promo-${Date.now()}-${upload.name}`;
     const { error } = await supabase.storage
       .from("site-images")
-      .upload(path, file, { upsert: true });
+      .upload(path, upload, { upsert: true });
     if (error) {
       setPromoError(error.message);
     } else {

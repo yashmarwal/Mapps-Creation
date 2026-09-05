@@ -18,7 +18,6 @@ import { IntroProvider } from "@/components/site/Preloader";
 import { WhatsAppButton } from "@/components/site/WhatsAppButton";
 import { StickyCta } from "@/components/site/StickyCta";
 import { CustomCursor } from "@/components/site/CustomCursor";
-import { ExitIntent } from "@/components/site/ExitIntent";
 import { AskUsChat } from "@/components/site/AskUsChat";
 import { MobileActionBar } from "@/components/site/MobileActionBar";
 import { TopMarquee, useMarqueeSettings } from "@/components/site/TopMarquee";
@@ -192,7 +191,6 @@ function RootComponent() {
           <Footer />
           <WhatsAppButton />
           <StickyCta />
-          <ExitIntent />
           <PromoPopup />
           <QuoteDrawer />
           <AskUsChat

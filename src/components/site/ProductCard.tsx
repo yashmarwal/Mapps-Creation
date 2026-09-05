@@ -8,6 +8,7 @@ import type { Product } from "@/data/catalog";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { useQuoteBasket } from "@/hooks/useQuoteBasket";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProductCard({ product, index }: { product: Product; index: number }) {
   const ref = useRef<HTMLElement>(null);
@@ -364,5 +365,28 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+/** Placeholder shown in place of a ProductCard while products are loading,
+ * so the grid never flashes seed/placeholder data before the real fetch resolves. */
+export function ProductCardSkeleton() {
+  return (
+    <div className="border-border/80 overflow-hidden rounded-2xl border bg-card/40">
+      <Skeleton className="aspect-[4/5] w-full rounded-none" />
+      <div className="p-3 sm:p-5">
+        <Skeleton className="h-5 w-2/3 sm:h-7" />
+        <Skeleton className="mt-2 h-3 w-1/2" />
+        <div className="hairline my-3 sm:my-4" />
+        <Skeleton className="h-4 w-1/3" />
+      </div>
+      <div className="p-3 pt-0 sm:p-5 sm:pt-0 space-y-2">
+        <Skeleton className="h-[38px] w-full rounded-md sm:h-[40px]" />
+        <div className="grid grid-cols-2 gap-2">
+          <Skeleton className="h-[44px] w-full rounded-xl" />
+          <Skeleton className="h-[44px] w-full rounded-xl" />
+        </div>
+      </div>
+    </div>
   );
 }

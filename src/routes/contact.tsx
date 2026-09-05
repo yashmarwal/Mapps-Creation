@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Mail, MapPin, MessageCircle, Phone, Send, SendHorizontal } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { EASE_UI, Reveal, StampHeading } from "@/components/site/motion";
+import { CtaBand } from "@/components/site/CtaBand";
 import { useFormSubmit } from "@/hooks/useFormSubmit";
 import { breadcrumbSchema, buildPageHead, SITE, whatsappLink } from "@/lib/seo";
 import { WhatsAppIcon } from "@/components/site/icons/WhatsAppIcon";
@@ -199,6 +200,8 @@ function Contact() {
           </Reveal>
         </div>
       </section>
+
+      <CtaBand />
     </div>
   );
 }

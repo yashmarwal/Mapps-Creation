@@ -7,6 +7,7 @@ import { SiteMedia } from "@/components/site/SiteMedia";
 import { breadcrumbSchema, buildPageHead } from "@/lib/seo";
 
 import { FounderSection } from "@/components/site/FounderSection";
+import { CtaBand } from "@/components/site/CtaBand";
 
 export const Route = createFileRoute("/about")({
   head: () =>
@@ -153,6 +154,8 @@ function About() {
           ))}
         </div>
       </section>
+
+      <CtaBand />
     </div>
   );
 }

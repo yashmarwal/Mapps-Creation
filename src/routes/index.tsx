@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Check, Mail, SendHorizontal } from "lucide-react";
+import { ArrowRight, Check, SendHorizontal } from "lucide-react";
 import { useRef } from "react";
 
 import heroDesktopVideo from "@/assets/hero-desktop.mp4";
 import heroMobileVideo from "@/assets/hero-mobile.mp4";
-import warehouse from "@/assets/warehouse.jpg";
 import { CATEGORIES } from "@/data/catalog";
-import { ProductCard } from "@/components/site/ProductCard";
+import { ProductCard, ProductCardSkeleton } from "@/components/site/ProductCard";
+import { CtaBand } from "@/components/site/CtaBand";
 import {
   CountUp,
   EASE_REVEAL,
@@ -21,6 +21,7 @@ import { WhatsAppIcon } from "@/components/site/icons/WhatsAppIcon";
 import { useIntro } from "@/components/site/Preloader";
 import { SupplyTree } from "@/components/site/SupplyTree";
 import { FabricReels } from "@/components/site/FabricReels";
+import { FabricCraftingShowcase } from "@/components/site/FabricCraftingShowcase";
 import { useProducts } from "@/hooks/useProducts";
 import { useSiteImage } from "@/hooks/useSiteImage";
 import { SiteMedia } from "@/components/site/SiteMedia";
@@ -137,7 +138,7 @@ const FAQS = [
 
 function Home() {
   const { ready, base } = useIntro();
-  const { featured } = useProducts();
+  const { featured, loading: productsLoading } = useProducts();
 
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -298,16 +299,20 @@ function Home() {
 
         {/* Mobile: 1-Column Vertical List (< 640px) */}
         <div className="mt-8 space-y-4 sm:hidden">
-          {featured.map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} />
-          ))}
+          {productsLoading
+            ? Array.from({ length: 3 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            : featured.map((product, i) => (
+                <ProductCard key={product.id} product={product} index={i} />
+              ))}
         </div>
 
         {/* Tablet / Desktop: Grid (>= 640px) */}
         <div className="mt-12 hidden gap-6 sm:grid sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((product, i) => (
-            <ProductCard key={product.id} product={product} index={i} />
-          ))}
+          {productsLoading
+            ? Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            : featured.map((product, i) => (
+                <ProductCard key={product.id} product={product} index={i} />
+              ))}
         </div>
 
         {/* Centered CTA button after 6 products */}
@@ -322,7 +327,13 @@ function Home() {
         </Reveal>
       </section>
 
+      {/* CTA BAND — right after the featured catalogue, not buried at the bottom */}
+      <CtaBand variant="full" />
+
       <FabricReels />
+
+      {/* FABRIC APPLICATION & GARMENT CREATION SHOWCASE */}
+      <FabricCraftingShowcase />
 
       {/* WHY + STATS */}
       <section className="surface-ivory grain relative py-24 md:py-32">
@@ -422,51 +433,6 @@ function Home() {
 
       {/* MEET THE FOUNDER */}
       <FounderSection />
-
-      {/* CTA BAND */}
-      <section className="relative overflow-hidden">
-        <img
-          src={warehouse}
-          alt="Fabric rolls stacked in the Mapps Creation warehouse in Surat"
-          loading="lazy"
-          width={1600}
-          height={1000}
-          className="absolute inset-0 h-full w-full object-cover opacity-30"
-        />
-        <div className="silk grain absolute inset-0 opacity-80" />
-        <div className="relative mx-auto max-w-3xl px-5 py-24 text-center md:px-10 md:py-32">
-          <Reveal>
-            <h2 className="display-lg">Tell us what you're knitting</h2>
-            <p className="text-muted-foreground mx-auto mt-5 max-w-xl text-sm leading-relaxed md:text-base">
-              Share your fabric type, GSM and quantity — we'll come back with swatches and a rate
-              the same working day.
-            </p>
-            <div className="mt-9 flex flex-wrap justify-center gap-3">
-              <a
-                href={whatsappLink("Hi Mapps Creation, please share a quotation.")}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="WhatsApp Us"
-                className="btn-enquire !min-h-[52px] !text-xs !px-7"
-              >
-                <span>
-                  <SendHorizontal className="h-4 w-4" />
-                  Quick Enquiry
-                </span>
-              </a>
-              <Link
-                to="/contact"
-                className="btn-enquire btn-enquire-navy !min-h-[52px] !text-xs !px-7"
-              >
-                <span>
-                  <Mail className="h-4 w-4" />
-                  Email Desk
-                </span>
-              </Link>
-            </div>
-          </Reveal>
-        </div>
-      </section>
 
       {/* FAQ */}
       <section className="mx-auto max-w-4xl px-5 py-24 md:px-10 md:py-32">

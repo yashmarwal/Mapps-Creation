@@ -20,9 +20,13 @@ const MAX_FEATURED = 6;
 /**
  * Active products from Supabase once an admin has added any; falls back to
  * the local seed catalogue so the site works before the project is wired up.
+ *
+ * When Supabase is configured, we start with an empty list (not the seed
+ * data) so pages never flash the wrong catalogue while the real fetch is
+ * in flight — callers should use `loading` to show a skeleton instead.
  */
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const [products, setProducts] = useState<Product[]>(supabaseConfigured ? [] : PRODUCTS);
   const [loading, setLoading] = useState(supabaseConfigured);
 
   useEffect(() => {
@@ -36,9 +40,7 @@ export function useProducts() {
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         if (cancelled) return;
-        if (data && data.length > 0) {
-          setProducts((data as ProductRow[]).map(fromRow));
-        }
+        setProducts(data && data.length > 0 ? (data as ProductRow[]).map(fromRow) : PRODUCTS);
         setLoading(false);
       });
 
