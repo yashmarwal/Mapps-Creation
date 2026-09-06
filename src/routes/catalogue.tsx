@@ -18,7 +18,7 @@ export const Route = createFileRoute("/catalogue")({
   },
   head: () =>
     buildPageHead({
-      title: "Fabric Catalogue — Lycra, Knit & Polyester Lycra | Mapps Creation",
+      title: "Fabric Catalogue | Lycra & Knit Fabrics | Mapps Creation",
       description:
         "Browse wholesale Lycra fabric, lycra knitted fabric, polyester lycra, melange, t-shirt, twill and matty fabrics available for bulk supply from Surat.",
       path: "/catalogue",
@@ -48,7 +48,7 @@ function Catalogue() {
   const categoriesInUse = [...knownInUse, ...customInUse];
 
   const setCategory = (next?: string) =>
-    navigate({ search: () => (next ? { category: next } : {}) });
+    navigate({ search: () => (next ? { category: next } : {}), replace: true });
 
   return (
     <div className="pt-28 md:pt-36">
@@ -74,7 +74,7 @@ function Catalogue() {
           </div>
           <p className="text-muted-foreground mt-5 max-w-2xl text-sm leading-relaxed md:text-base">
             Indicative rates for wholesale quantities. Shades, GSM and finishes can be matched to
-            your specification — message us for a firm quotation.
+            your specification; message us for a firm quotation.
           </p>
         </Reveal>
 

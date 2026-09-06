@@ -23,7 +23,7 @@ const GROUPS: { category: string; items: { q: string; a: string }[] }[] = [
       },
       {
         q: "Do you supply for sportswear, streetwear and knitwear alike?",
-        a: "Yes — our Lycra, knitted and polyester-lycra ranges are sourced and stocked to suit sportswear, streetwear and general knitwear production.",
+        a: "Yes, our Lycra, knitted and polyester-lycra ranges are sourced and stocked to suit sportswear, streetwear and general knitwear production.",
       },
     ],
   },
@@ -32,11 +32,11 @@ const GROUPS: { category: string; items: { q: string; a: string }[] }[] = [
     items: [
       {
         q: "What is your minimum order quantity?",
-        a: "MOQ depends on the fabric and shade — stock qualities can start from a single roll, while dyed-to-order shades typically start around 50 kg per colour. Message us with your requirement for an exact answer.",
+        a: "MOQ depends on the fabric and shade. Stock qualities can start from a single roll, while dyed-to-order shades typically start around 50 kg per colour. Message us with your requirement for an exact answer.",
       },
       {
         q: "How do I get a quotation?",
-        a: "Share the fabric type, GSM, shade and quantity over WhatsApp or the enquiry form. We match the closest quality from stock, share swatches, and confirm a rate per kg or meter — usually the same working day.",
+        a: "Share the fabric type, GSM, shade and quantity over WhatsApp or the enquiry form. We match the closest quality from stock, share swatches, and confirm a rate per kg or meter, usually the same working day.",
       },
       {
         q: "Can I mix fabrics across categories in one order?",
@@ -44,7 +44,7 @@ const GROUPS: { category: string; items: { q: string; a: string }[] }[] = [
       },
       {
         q: "Do prices change with order size?",
-        a: "Larger, bulk quantities are priced more competitively than small trial orders — share your expected volume when you enquire so we can quote accordingly.",
+        a: "Larger, bulk quantities are priced more competitively than small trial orders. Share your expected volume when you enquire so we can quote accordingly.",
       },
     ],
   },
@@ -57,7 +57,7 @@ const GROUPS: { category: string; items: { q: string; a: string }[] }[] = [
       },
       {
         q: "Do you provide a GST invoice?",
-        a: "Yes — Mapps Creation is a GST-registered proprietorship, and every order is billed with a proper GST invoice for your records.",
+        a: "Yes, Mapps Creation is a GST-registered proprietorship, and every order is billed with a proper GST invoice for your records.",
       },
     ],
   },
@@ -66,15 +66,15 @@ const GROUPS: { category: string; items: { q: string; a: string }[] }[] = [
     items: [
       {
         q: "Where do you dispatch from?",
-        a: "All orders are packed and dispatched from our Surat, Gujarat facility — India's knit and dyeing hub — which keeps lead times short for garment manufacturers anywhere in the country.",
+        a: "All orders are packed and dispatched from our Surat, Gujarat facility, India's knit and dyeing hub, which keeps lead times short for garment manufacturers anywhere in the country.",
       },
       {
         q: "Do you supply outside Gujarat?",
-        a: "Yes — we regularly supply garment manufacturers and exporters across India via road transport from Surat, including hubs like Delhi, Mumbai, Bengaluru, Tirupur and Ludhiana.",
+        a: "Yes, we regularly supply garment manufacturers and exporters across India via road transport from Surat, including hubs like Delhi, Mumbai, Bengaluru, Tirupur and Ludhiana.",
       },
       {
         q: "Who arranges transport?",
-        a: "We hand over quality-checked rolls to your preferred transporter, or arrange dispatch via a regular transport company on request — transport cost is billed at actuals unless agreed otherwise.",
+        a: "We hand over quality-checked rolls to your preferred transporter, or arrange dispatch via a regular transport company on request. Transport cost is billed at actuals unless agreed otherwise.",
       },
     ],
   },
@@ -96,11 +96,11 @@ const GROUPS: { category: string; items: { q: string; a: string }[] }[] = [
     items: [
       {
         q: "Is Mapps Creation a manufacturer or a trader?",
-        a: "We are a wholesale trader and distributor — we source, stock and dispatch fabric rather than knit or dye it ourselves. This lets us offer a wide range of qualities without the lead time of in-house manufacturing.",
+        a: "We are a wholesale trader and distributor: we source, stock and dispatch fabric rather than knit or dye it ourselves. This lets us offer a wide range of qualities without the lead time of in-house manufacturing.",
       },
       {
         q: "Do you have a minimum order for first-time buyers?",
-        a: "No separate minimum applies beyond the standard MOQ per fabric — first-time buyers are welcome to start with a trial quantity to check quality before scaling up.",
+        a: "No separate minimum applies beyond the standard MOQ per fabric. First-time buyers are welcome to start with a trial quantity to check quality before scaling up.",
       },
     ],
   },
@@ -109,9 +109,9 @@ const GROUPS: { category: string; items: { q: string; a: string }[] }[] = [
 export const Route = createFileRoute("/faq")({
   head: () =>
     buildPageHead({
-      title: "FAQ — Fabric Orders, Pricing & Dispatch | Mapps Creation",
+      title: "FAQ | Fabric Orders, Pricing & Dispatch | Mapps Creation",
       description:
-        "Answers to common questions about Mapps Creation's wholesale Lycra, knitted and polyester-lycra fabrics — MOQ, pricing, GST billing, dispatch from Surat and quality checks.",
+        "Answers to common questions about Mapps Creation Lycra, knitted and polyester-lycra fabrics: MOQ, pricing, GST billing, dispatch and quality checks.",
       path: "/faq",
       jsonLd: [
         breadcrumbSchema([

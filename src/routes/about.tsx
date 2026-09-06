@@ -12,9 +12,9 @@ import { CtaBand } from "@/components/site/CtaBand";
 export const Route = createFileRoute("/about")({
   head: () =>
     buildPageHead({
-      title: "About Mapps Creation — Fabric Wholesaler in Surat",
+      title: "About Mapps Creation | Fabric Wholesaler in Surat",
       description:
-        "Mapps Creation is a GST-registered wholesale trader and distributor of Lycra, knitted and polyester-lycra fabrics in Surat, trusted by 1000+ buyers across India, led by proprietor P Agarwal.",
+        "Mapps Creation is a GST-registered wholesale trader of Lycra, knitted and polyester-lycra fabrics in Surat, trusted by 1000+ buyers across India.",
       path: "/about",
       jsonLd: breadcrumbSchema([
         { name: "Home", path: "/" },
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/about")({
 const FACTS = [
   { label: "Clients Served", value: "1000+" },
   { label: "Structure", value: "GST-Registered Proprietorship" },
-  { label: "Proprietor / Co-Founder", value: "Pratham Aggarwal" },
+  { label: "Proprietor / Founder", value: "Pratham Aggarwal" },
   { label: "Dispatch Coverage", value: "Pan India" },
   { label: "Based in", value: "Surat, Gujarat" },
   { label: "Model", value: "Wholesale & Bulk Supply" },
@@ -36,7 +36,7 @@ const FACTS = [
 const PILLARS = [
   {
     title: "Sourced at the root",
-    body: "Surat is India's knitting and dyeing hub — being here means we buy close to the mill, not through three layers of middlemen.",
+    body: "Surat is India's knitting and dyeing hub, and being here means we buy close to the mill, not through three layers of middlemen.",
   },
   {
     title: "Checked before it ships",
@@ -44,7 +44,7 @@ const PILLARS = [
   },
   {
     title: "Sized to your order",
-    body: "Trial quantities or full production runs — we quote in kg or meter, whichever matches how your costing already works.",
+    body: "Trial quantities or full production runs: we quote in kg or meter, whichever matches how your costing already works.",
   },
 ];
 
@@ -58,14 +58,14 @@ function About() {
         <Reveal className="gold-glow-radial">
           <p className="editorial-tag mb-2">01 / OUR STORY</p>
           <StampHeading
-            lines={["Knitting Dreams", "Into Reality"]}
+            lines={["The Story Behind", "Mapps Creation"]}
             className="display-lg mt-3 max-w-2xl text-gold-gradient"
           />
         </Reveal>
         <Reveal index={1}>
           <p className="text-muted-foreground mt-6 max-w-2xl text-base leading-relaxed md:text-lg">
             Mapps Creation is a Surat-based wholesale trader and distributor of Lycra, knitted, and
-            polyester-lycra fabrics for garment manufacturing — supplying sportswear, streetwear and
+            polyester-lycra fabrics for garment manufacturing, supplying sportswear, streetwear and
             knitwear brands and exporters across India. We started in 2024 with a simple aim: give
             production teams a fabric partner who answers the phone, quotes honestly, and ships what
             was promised.

@@ -24,28 +24,16 @@ import { FabricReels } from "@/components/site/FabricReels";
 import { useProducts } from "@/hooks/useProducts";
 import { useSiteImage } from "@/hooks/useSiteImage";
 import { SiteMedia } from "@/components/site/SiteMedia";
-import {
-  breadcrumbSchema,
-  buildPageHead,
-  faqSchema,
-  organizationSchema,
-  websiteSchema,
-  whatsappLink,
-} from "@/lib/seo";
+import { breadcrumbSchema, buildPageHead, faqSchema, whatsappLink } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () =>
     buildPageHead({
-      title: "Mapps Creation — Lycra Fabric Supplier in Surat, Gujarat",
+      title: "Mapps Creation | Lycra Fabric Supplier in Surat, Gujarat",
       description:
         "Wholesale trader of Lycra, knitted and polyester-lycra fabrics for garment manufacturers and exporters across India. Sourced, tested and dispatched from Surat.",
       path: "/",
-      jsonLd: [
-        organizationSchema,
-        websiteSchema,
-        breadcrumbSchema([{ name: "Home", path: "/" }]),
-        faqSchema(FAQS),
-      ],
+      jsonLd: [breadcrumbSchema([{ name: "Home", path: "/" }]), faqSchema(FAQS)],
     }),
   component: Home,
 });
@@ -64,7 +52,7 @@ const WHY = [
   },
   {
     title: "Sold by kg or meter",
-    body: "Order in the unit your production planning actually uses — small trials to bulk programmes.",
+    body: "Order in the unit your production planning actually uses, from small trials to bulk programmes.",
   },
   {
     title: "Fast dispatch from Surat",
@@ -115,7 +103,7 @@ const DISPATCH_CITIES = [
 const FAQS = [
   {
     q: "What is your minimum order quantity?",
-    a: "MOQ depends on the fabric and shade — stock qualities can start from a single roll, while dyed-to-order shades typically start around 50 kg per colour. Message us with your requirement for an exact answer.",
+    a: "MOQ depends on the fabric and shade. Stock qualities can start from a single roll, while dyed-to-order shades typically start around 50 kg per colour. Message us with your requirement for an exact answer.",
   },
   {
     q: "Do you sell by kilogram or by meter?",
@@ -127,7 +115,7 @@ const FAQS = [
   },
   {
     q: "Do you supply outside Gujarat?",
-    a: "Yes — we regularly supply garment manufacturers and exporters across India via road transport from Surat.",
+    a: "Yes, we regularly supply garment manufacturers and exporters across India via road transport from Surat.",
   },
   {
     q: "Can you match a shade or GSM I already use?",
@@ -198,7 +186,7 @@ function Home() {
             transition={{ duration: 0.8, ease: EASE_REVEAL, delay: base + 0.45 }}
           >
             Mapps Creation supplies premium Lycra, knitted, and polyester-lycra fabrics to garment
-            manufacturers and exporters across India — sourced, tested, and delivered from Surat.
+            manufacturers and exporters across India, sourced, tested, and delivered from Surat.
           </motion.p>
 
           <motion.div
@@ -271,7 +259,7 @@ function Home() {
             <p className="label-caps text-primary">The Standard</p>
           </Reveal>
           <WordReveal
-            text="Every roll carries a standard — consistent quality, honest pricing, and fabric that performs the way your production line needs it to."
+            text="Every roll carries a standard: consistent quality, honest pricing, and fabric that performs the way your production line needs it to."
             className="font-display mt-7 block text-[clamp(1.6rem,3.6vw,2.9rem)] leading-[1.25]"
           />
           <Reveal index={2}>

@@ -4,7 +4,12 @@ import { useAdminSession } from "@/hooks/useAdminSession";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin/login")({
-  head: () => ({ meta: [{ title: "Admin Login — Mapps Creation" }] }),
+  head: () => ({
+    meta: [
+      { title: "Admin Login | Mapps Creation" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: AdminLogin,
 });
 

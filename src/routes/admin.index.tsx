@@ -8,7 +8,9 @@ import { useAdminSession } from "@/hooks/useAdminSession";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Admin — Mapps Creation" }] }),
+  head: () => ({
+    meta: [{ title: "Admin | Mapps Creation" }, { name: "robots", content: "noindex, nofollow" }],
+  }),
   component: AdminDashboard,
 });
 

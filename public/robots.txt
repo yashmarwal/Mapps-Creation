@@ -1,14 +1,74 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
 
 User-agent: Twitterbot
 Allow: /
+Disallow: /admin
 
 User-agent: facebookexternalhit
 Allow: /
+Disallow: /admin
+
+# AI Search / Answer Engines — explicitly allowed so the site is eligible to
+# appear in AI-generated answers (ChatGPT Search, Claude, Perplexity, Copilot).
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /admin
+
+User-agent: Claude-User
+Allow: /
+Disallow: /admin
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+
+User-agent: Amazonbot
+Allow: /
+Disallow: /admin
+
+# AI training crawlers — allowed by default. Blocking these costs no live
+# AI-answer visibility (that's the bots above), only future model-training
+# inclusion. Flagged for owner confirmation in the SEO audit report.
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin
+
+User-agent: CCBot
+Allow: /
+Disallow: /admin
+
+User-agent: meta-externalagent
+Allow: /
+Disallow: /admin
 
 User-agent: *
 Allow: /
+Disallow: /admin
+
+Sitemap: https://mappscreation.com/sitemap.xml
