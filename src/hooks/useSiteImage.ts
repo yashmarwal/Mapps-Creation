@@ -13,7 +13,10 @@ export function useSiteImage(section: string, fallback: string) {
   const [url, setUrl] = useState(() => cache.get(section) ?? fallback);
 
   useEffect(() => {
-    if (!supabaseConfigured) return;
+    // Already have a cached URL for this section (e.g. this component
+    // remounted after a client-side navigation) — skip the network round
+    // trip entirely instead of refetching data we already know.
+    if (!supabaseConfigured || cache.has(section)) return;
     let cancelled = false;
 
     supabase

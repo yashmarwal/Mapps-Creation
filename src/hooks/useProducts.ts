@@ -17,6 +17,44 @@ function fromRow(row: ProductRow): Product {
 
 const MAX_FEATURED = 6;
 
+// Module-level cache, shared by every `useProducts()` instance in the app.
+// Without this, every component that calls the hook (homepage, catalogue
+// page, search modal, download-catalogue modal — often 2-3 of them mounted
+// simultaneously) fired its own independent Supabase query for the exact
+// same `products` table on every page load. `hasFetched` covers both cases:
+// a legitimate "Supabase returned rows" result AND a "returned nothing, use
+// the seed catalogue" result, so once resolved, nothing refetches again for
+// the rest of the session (matches the original one-shot-per-mount fetch
+// behavior — there was never any live revalidation to begin with, just no
+// sharing across components/remounts).
+let hasFetched = false;
+let cachedProducts: Product[] | null = null; // null = resolved empty, use seed
+let inFlight: Promise<void> | null = null;
+
+function ensureProductsFetched(): Promise<void> {
+  if (hasFetched) return Promise.resolve();
+  if (inFlight) return inFlight;
+
+  // Wrapped in a real async IIFE (not a raw .then() chain) so this is a
+  // genuine native Promise — Supabase's query builder is only "thenable",
+  // it doesn't support .finally() directly.
+  inFlight = (async () => {
+    try {
+      const { data } = await supabase
+        .from("products")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      cachedProducts = data && data.length > 0 ? (data as ProductRow[]).map(fromRow) : null;
+      hasFetched = true;
+    } finally {
+      inFlight = null;
+    }
+  })();
+
+  return inFlight;
+}
+
 /**
  * Active products from Supabase once an admin has added any; falls back to
  * the local seed catalogue so the site works before the project is wired up.
@@ -26,23 +64,21 @@ const MAX_FEATURED = 6;
  * in flight — callers should use `loading` to show a skeleton instead.
  */
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>(supabaseConfigured ? [] : PRODUCTS);
-  const [loading, setLoading] = useState(supabaseConfigured);
+  const [products, setProducts] = useState<Product[]>(() => {
+    if (!supabaseConfigured) return PRODUCTS;
+    return hasFetched ? (cachedProducts ?? PRODUCTS) : [];
+  });
+  const [loading, setLoading] = useState(() => supabaseConfigured && !hasFetched);
 
   useEffect(() => {
-    if (!supabaseConfigured) return;
+    if (!supabaseConfigured || hasFetched) return;
     let cancelled = false;
 
-    supabase
-      .from("products")
-      .select("*")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (cancelled) return;
-        setProducts(data && data.length > 0 ? (data as ProductRow[]).map(fromRow) : PRODUCTS);
-        setLoading(false);
-      });
+    ensureProductsFetched().then(() => {
+      if (cancelled) return;
+      setProducts(cachedProducts ?? PRODUCTS);
+      setLoading(false);
+    });
 
     return () => {
       cancelled = true;

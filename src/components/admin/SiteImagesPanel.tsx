@@ -4,9 +4,9 @@ import { supabase, type SiteImageRow } from "@/lib/supabase";
 import { checkUploadSize, compressImageToTarget, isVideoUrl } from "@/lib/media";
 
 const SECTIONS = [
-  { key: "hero-video-desktop", label: "Home — Hero Background (Desktop)" },
-  { key: "hero-video-mobile", label: "Home — Hero Background (Mobile)" },
-  { key: "about-banner", label: "About — Banner" },
+  { key: "hero-video-desktop", label: "Home: Hero Background (Desktop)" },
+  { key: "hero-video-mobile", label: "Home: Hero Background (Mobile)" },
+  { key: "about-banner", label: "About: Banner" },
 ] as const;
 
 export function SiteImagesPanel() {
@@ -86,7 +86,7 @@ export function SiteImagesPanel() {
     <div>
       <h2 className="font-display text-2xl">Site Images</h2>
       <p className="text-muted-foreground mt-2 max-w-xl text-sm">
-        Replace key section backdrops without a redeploy — upload either a photo or a video,
+        Replace key section backdrops without a redeploy: upload either a photo or a video,
         whichever you have. Takes effect on the live site the next time a visitor loads that page.
       </p>
 

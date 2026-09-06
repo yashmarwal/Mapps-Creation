@@ -150,7 +150,7 @@ export function ProductsPanel() {
   const toggleFeatured = async (row: ProductRow) => {
     if (!row.is_featured && products.filter((p) => p.is_featured).length >= MAX_FEATURED) {
       setError(
-        `Only ${MAX_FEATURED} products can be featured on the homepage at once — unfeature one first.`,
+        `Only ${MAX_FEATURED} products can be featured on the homepage at once; unfeature one first.`,
       );
       return;
     }
@@ -202,7 +202,7 @@ export function ProductsPanel() {
       if (alreadyFeaturedElsewhere + selectedIds.size > MAX_FEATURED) {
         const room = Math.max(0, MAX_FEATURED - alreadyFeaturedElsewhere);
         setError(
-          `Only ${MAX_FEATURED} products can be featured at once — you have room for ${room} more. Unfeature some first or select fewer.`,
+          `Only ${MAX_FEATURED} products can be featured at once; you have room for ${room} more. Unfeature some first or select fewer.`,
         );
         return;
       }
@@ -289,10 +289,9 @@ export function ProductsPanel() {
       </div>
       <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
         "Load Default Catalogue" imports the built-in starter products here so you can edit or
-        delete them individually — the site shows those starter products only until real ones exist
+        delete them individually. The site shows those starter products only until real ones exist
         in this table. Mark up to {MAX_FEATURED} as "Featured" to control exactly which fabrics show
-        in the homepage row — leave none marked and the site falls back to the latest {MAX_FEATURED}
-        .
+        in the homepage row; leave none marked and the site falls back to the latest {MAX_FEATURED}.
       </p>
 
       {editing && (

@@ -14,7 +14,10 @@ export function useSiteSetting<T>(key: string, fallback: T) {
   const [loaded, setLoaded] = useState(cached !== undefined || !supabaseConfigured);
 
   useEffect(() => {
-    if (!supabaseConfigured) return;
+    // Already have a real cached value for this key (e.g. this component
+    // remounted after a client-side navigation) — skip the network round
+    // trip entirely instead of refetching data we already know.
+    if (!supabaseConfigured || cache.has(key)) return;
     let cancelled = false;
 
     supabase
