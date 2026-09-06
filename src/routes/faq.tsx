@@ -32,7 +32,7 @@ const GROUPS: { category: string; items: { q: string; a: string }[] }[] = [
     items: [
       {
         q: "What is your minimum order quantity?",
-        a: "MOQ depends on the fabric and shade. Stock qualities can start from a single roll, while dyed-to-order shades typically start around 50 kg per colour. Message us with your requirement for an exact answer.",
+        a: "MOQ depends on the fabric and shade. Stock qualities can start from a single roll, while dyed-to-order shades typically start around 300 kg per colour. Message us with your requirement for an exact answer.",
       },
       {
         q: "How do I get a quotation?",

@@ -75,7 +75,7 @@ const KNOWLEDGE_BASE: { keywords: string[]; response: string }[] = [
   {
     keywords: ["moq", "minimum", "minimum order", "how many", "small order"],
     response:
-      "MOQ depends on shade & quality. In-stock rolls start from a single roll (~25 kg), while custom dyed-to-order shades start around 50 kg per color.",
+      "MOQ depends on shade & quality. In-stock rolls start from a single roll (~25 kg), while custom dyed-to-order shades start around 300 kg per color.",
   },
   {
     keywords: ["sample", "samples", "swatch", "try before"],

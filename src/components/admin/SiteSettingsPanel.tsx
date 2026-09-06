@@ -350,7 +350,7 @@ export function SiteSettingsPanel() {
           <span className="label-caps text-muted-foreground">Knowledge Text</span>
           <textarea
             rows={12}
-            placeholder="e.g. Our MOQ for stock shades is 1 roll, and 50kg for dyed-to-order colours. We dispatch from Surat within 24-48 hours for in-stock rolls..."
+            placeholder="e.g. Our MOQ for stock shades is 1 roll, and 300kg for dyed-to-order colours. We dispatch from Surat within 24-48 hours for in-stock rolls..."
             value={aiKnowledge.text}
             onChange={(e) => {
               const value = e.target.value;

@@ -312,7 +312,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                 </p>
                 <p className="text-muted-foreground/90 mt-2 text-xs leading-relaxed">
                   MOQ depends on the fabric and shade. Stock qualities start from a single roll,
-                  dyed-to-order shades start from 50 kg per colour.
+                  dyed-to-order shades start from 300 kg per colour.
                 </p>
 
                 <button
