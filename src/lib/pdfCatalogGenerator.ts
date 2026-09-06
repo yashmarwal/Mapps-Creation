@@ -8,9 +8,27 @@ export type PdfCatalogOptions = {
   onProgress?: (progressText: string) => void;
 };
 
+// Each swatch is embedded at a fixed 12mm x 12mm print size (see ROW_HEIGHT
+// below) — there's no reason to ship it at full camera resolution. Capping
+// the longest side here and re-encoding as JPEG (not PNG) is the entire fix
+// for a 2-product catalogue coming out at 10MB: a lossless PNG at, say,
+// 3000x4000 source resolution is enormous for something printed at postage-
+// stamp size; a 360px-capped JPEG looks identical at that size and is
+// typically 50-100x smaller.
+const MAX_PDF_IMAGE_DIMENSION = 360;
+const PDF_IMAGE_QUALITY = 0.72;
+
+// A stalled image load (network hiccup, a URL that never fires load/error,
+// a slow cross-origin fetch) must never be able to hang the whole catalogue
+// generation forever — every image gets this long to resolve before it's
+// treated as "no image" and the row falls back to the placeholder box.
+const IMAGE_LOAD_TIMEOUT_MS = 8000;
+
 /**
  * Bulletproof helper to convert any image URL or imported Vite asset path
- * into a Base64 data URL string for jsPDF embedding.
+ * into a Base64 data URL string for jsPDF embedding, downscaled and
+ * re-encoded so the final PDF stays a reasonable size regardless of how
+ * large the original uploaded photo was.
  */
 async function loadImageAsBase64(src: string): Promise<string | null> {
   if (!src) return null;
@@ -24,7 +42,7 @@ async function loadImageAsBase64(src: string): Promise<string | null> {
       ? src
       : `${window.location.origin}${src.startsWith("/") ? "" : "/"}${src}`;
 
-  return new Promise((resolve) => {
+  const loadPromise = new Promise<string | null>((resolve) => {
     const img = new Image();
 
     // Only set crossOrigin for external cross-domain URLs
@@ -34,13 +52,17 @@ async function loadImageAsBase64(src: string): Promise<string | null> {
 
     img.onload = () => {
       try {
+        const naturalWidth = img.naturalWidth || img.width || 200;
+        const naturalHeight = img.naturalHeight || img.height || 200;
+        const scale = Math.min(1, MAX_PDF_IMAGE_DIMENSION / Math.max(naturalWidth, naturalHeight));
+
         const canvas = document.createElement("canvas");
-        canvas.width = img.naturalWidth || img.width || 200;
-        canvas.height = img.naturalHeight || img.height || 200;
+        canvas.width = Math.max(1, Math.round(naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(naturalHeight * scale));
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL("image/png");
+          const dataUrl = canvas.toDataURL("image/jpeg", PDF_IMAGE_QUALITY);
           resolve(dataUrl);
         } else {
           resolve(null);
@@ -57,6 +79,15 @@ async function loadImageAsBase64(src: string): Promise<string | null> {
 
     img.src = fullUrl;
   });
+
+  const timeoutPromise = new Promise<string | null>((resolve) => {
+    setTimeout(() => {
+      console.warn(`Image load timed out after ${IMAGE_LOAD_TIMEOUT_MS}ms, skipping:`, fullUrl);
+      resolve(null);
+    }, IMAGE_LOAD_TIMEOUT_MS);
+  });
+
+  return Promise.race([loadPromise, timeoutPromise]);
 }
 
 function fetchBlobFallback(fullUrl: string, resolve: (res: string | null) => void) {
@@ -203,7 +234,7 @@ export async function generateB2bPdfCatalog(options: PdfCatalogOptions = {}): Pr
     doc.setFontSize(7.5);
     doc.setTextColor(200, 210, 225);
     doc.text(
-      `Mapps Creation — Surat, India | For Order & Swatch Enquiries: WhatsApp ${SITE.phoneDisplay}`,
+      `Mapps Creation, Surat, India | For Order & Swatch Enquiries: WhatsApp ${SITE.phoneDisplay}`,
       margin,
       pageHeight - 5,
     );

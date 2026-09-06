@@ -14,7 +14,7 @@ const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
 export function checkUploadSize(file: File): string | null {
   if (file.size <= MAX_UPLOAD_BYTES) return null;
   const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
-  return `That file is ${sizeMb}MB — the limit is ${MAX_UPLOAD_MB}MB. Compress it or choose a smaller file.`;
+  return `That file is ${sizeMb}MB. The limit is ${MAX_UPLOAD_MB}MB. Compress it or choose a smaller file.`;
 }
 
 /** Target size product images are auto-compressed down to before upload. */
