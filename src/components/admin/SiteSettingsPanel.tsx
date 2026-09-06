@@ -11,6 +11,9 @@ import {
 } from "@/components/site/FabricReels";
 import { checkUploadSize, compressImageToTarget } from "@/lib/media";
 
+type AiKnowledgeSettings = { text: string };
+const AI_KNOWLEDGE_DEFAULT: AiKnowledgeSettings = { text: "" };
+
 async function loadSetting<T>(key: string, fallback: T): Promise<T> {
   const { data } = await supabase
     .from("site_settings")
@@ -30,6 +33,7 @@ export function SiteSettingsPanel() {
   const [marquee, setMarquee] = useState<MarqueeSettings>(MARQUEE_DEFAULT);
   const [promo, setPromo] = useState<PromoPopupSettings>(PROMO_DEFAULT);
   const [reels, setReels] = useState<ReelSettings>(REEL_DEFAULT);
+  const [aiKnowledge, setAiKnowledge] = useState<AiKnowledgeSettings>(AI_KNOWLEDGE_DEFAULT);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [promoError, setPromoError] = useState<string | null>(null);
@@ -42,24 +46,27 @@ export function SiteSettingsPanel() {
       loadSetting("marquee", MARQUEE_DEFAULT),
       loadSetting("promo_popup", PROMO_DEFAULT),
       loadSetting("reel_videos", REEL_DEFAULT),
-    ]).then(([m, p, r]) => {
+      loadSetting("ai_knowledge_base", AI_KNOWLEDGE_DEFAULT),
+    ]).then(([m, p, r, k]) => {
       setMarquee(m);
       setPromo(p);
       // Nothing saved yet — seed the editor with the 8 built-in clips so
       // they're visible and editable here too, not just a hidden fallback.
       setReels(r.urls.length > 0 ? r : { urls: DEFAULT_VIDEOS });
+      setAiKnowledge(k);
       setLoading(false);
     });
   }, []);
 
   const saveAll = async () => {
     setStatus("saving");
-    const [{ error: e1 }, { error: e2 }, { error: e3 }] = await Promise.all([
+    const [{ error: e1 }, { error: e2 }, { error: e3 }, { error: e4 }] = await Promise.all([
       saveSetting("marquee", marquee),
       saveSetting("promo_popup", promo),
       saveSetting("reel_videos", reels),
+      saveSetting("ai_knowledge_base", aiKnowledge),
     ]);
-    setStatus(e1 || e2 || e3 ? "error" : "saved");
+    setStatus(e1 || e2 || e3 || e4 ? "error" : "saved");
     window.setTimeout(() => setStatus("idle"), 3000);
   };
 
@@ -91,7 +98,7 @@ export function SiteSettingsPanel() {
 
   const handleReelUpload = async (file: File) => {
     if (reels.urls.length >= MAX_REEL_VIDEOS) {
-      setReelError(`Only ${MAX_REEL_VIDEOS} videos allowed — remove one first.`);
+      setReelError(`Only ${MAX_REEL_VIDEOS} videos allowed; remove one first.`);
       return;
     }
     const sizeError = checkUploadSize(file);
@@ -146,7 +153,7 @@ export function SiteSettingsPanel() {
       <div>
         <h2 className="font-display text-2xl">Top Marquee</h2>
         <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
-          A slim scrolling announcement bar above the navigation — e.g. a festive offer or delivery
+          A slim scrolling announcement bar above the navigation, e.g. a festive offer or delivery
           notice. Leave disabled to hide it.
         </p>
         <div className="mt-5 space-y-4">
@@ -164,7 +171,7 @@ export function SiteSettingsPanel() {
           <label className="block">
             <span className="label-caps text-muted-foreground">Text</span>
             <input
-              placeholder="e.g. Diwali Offer — Extra 5% off bulk orders this week"
+              placeholder="e.g. Diwali Offer: Extra 5% off bulk orders this week"
               value={marquee.text}
               onChange={(e) => {
                 const value = e.target.value;
@@ -179,7 +186,7 @@ export function SiteSettingsPanel() {
       <div className="border-border border-t pt-10">
         <h2 className="font-display text-2xl">Offers Popup</h2>
         <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
-          A one-time popup shown to visitors after they scroll 20% down any page — for seasonal
+          A one-time popup shown to visitors after they scroll 20% down any page, for seasonal
           offers or promotions. Shows once per browser session.
         </p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -263,9 +270,9 @@ export function SiteSettingsPanel() {
       <div className="border-border border-t pt-10">
         <h2 className="font-display text-2xl">Video Reels Bar</h2>
         <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
-          The horizontal scrolling video row on the homepage ("Fabric in motion") — up to{" "}
+          The horizontal scrolling video row on the homepage ("Fabric in motion"), up to{" "}
           {MAX_REEL_VIDEOS} videos. The 8 below are the current lineup, including the built-in
-          defaults — replace or remove any of them, or upload to fill an empty slot. Clearing all of
+          defaults; replace or remove any of them, or upload to fill an empty slot. Clearing all of
           them and saving reverts the site to the built-in clips.
         </p>
 
@@ -327,6 +334,34 @@ export function SiteSettingsPanel() {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="border-border border-t pt-10">
+        <h2 className="font-display text-2xl">AI Assistant Knowledge</h2>
+        <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
+          The chat widget's live answers come from whatever you write here, in plain language, no
+          fixed format needed &mdash; prices, MOQs, policies, anything a buyer might ask about. When
+          a visitor asks a question, it answers using only what's written below; anything not
+          covered here gets a "connect with our sales team" reply instead of a guess. Requires a
+          Gemini API key configured on the server &mdash; until then, the chat quietly uses its
+          built-in fallback answers instead.
+        </p>
+        <label className="mt-5 block">
+          <span className="label-caps text-muted-foreground">Knowledge Text</span>
+          <textarea
+            rows={12}
+            placeholder="e.g. Our MOQ for stock shades is 1 roll, and 50kg for dyed-to-order colours. We dispatch from Surat within 24-48 hours for in-stock rolls..."
+            value={aiKnowledge.text}
+            onChange={(e) => {
+              const value = e.target.value;
+              setAiKnowledge({ text: value });
+            }}
+            className="border-border bg-card mt-2 w-full border p-3 font-mono text-xs leading-relaxed"
+          />
+          <span className="text-muted-foreground mt-1.5 block text-[11px]">
+            {aiKnowledge.text.length.toLocaleString()} characters
+          </span>
+        </label>
       </div>
 
       <div className="flex items-center gap-4">
