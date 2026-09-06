@@ -14,7 +14,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { useQuoteBasket, type QuoteItem } from "@/hooks/useQuoteBasket";
 import { LogoMark } from "./LogoMark";
@@ -44,6 +44,16 @@ export function QuoteDrawer() {
     setMounted(true);
   }, []);
 
+  // `setIsOpen` is the real useState setter from useQuoteBasket's context
+  // (stable across renders), so this isn't currently the pushState-feedback
+  // loop bug documented in DownloadCatalogModal.tsx — but the same ref
+  // pattern is applied here too so this stays safe even if that ever
+  // changes (e.g. the context value gets rewrapped in a future edit).
+  const setIsOpenRef = useRef(setIsOpen);
+  useEffect(() => {
+    setIsOpenRef.current = setIsOpen;
+  }, [setIsOpen]);
+
   // Close drawer on mobile/browser back button instead of navigating away
   useEffect(() => {
     if (!isOpen) return;
@@ -51,7 +61,7 @@ export function QuoteDrawer() {
     window.history.pushState({ quoteDrawerOpen: true }, "");
 
     const handlePopState = () => {
-      setIsOpen(false);
+      setIsOpenRef.current(false);
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -62,7 +72,7 @@ export function QuoteDrawer() {
         window.history.back();
       }
     };
-  }, [isOpen, setIsOpen]);
+  }, [isOpen]);
 
   const targetBody = typeof document !== "undefined" ? document.body : null;
 
@@ -237,7 +247,7 @@ export function QuoteDrawer() {
     if (items.length === 0) return;
 
     const subject = encodeURIComponent(
-      `Wholesale Bulk Quote Request — ${buyerInfo.company || "Wholesale Buyer"}`,
+      `Wholesale Bulk Quote Request: ${buyerInfo.company || "Wholesale Buyer"}`,
     );
     let bodyText = `WHOLESALE BULK QUOTATION REQUEST\n`;
     bodyText += `------------------------------------\n`;
@@ -551,7 +561,7 @@ export function QuoteDrawer() {
                       </button>
 
                       <p className="text-[10px] text-muted-foreground/80 leading-relaxed text-center pt-1">
-                        WhatsApp and Email send a text summary only — neither can carry a file
+                        WhatsApp and Email send a text summary only; neither can carry a file
                         attachment automatically. Use "Print / Save as PDF" to save a copy, then
                         attach it yourself if you'd like to include one.
                       </p>
@@ -564,7 +574,7 @@ export function QuoteDrawer() {
                         className="bg-primary/10 border border-primary/30 text-foreground p-3 rounded-lg flex items-center gap-2 text-xs"
                       >
                         <CheckCircle className="h-4 w-4 text-primary shrink-0" />
-                        <span>Quote summary sent — check your email app.</span>
+                        <span>Quote summary sent. Check your email app.</span>
                       </motion.div>
                     )}
                   </form>

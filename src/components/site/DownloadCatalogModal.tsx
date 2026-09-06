@@ -2,10 +2,9 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, FileText, Loader2, Sparkles, CheckCircle2, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PRODUCTS } from "@/data/catalog";
 import { useProducts } from "@/hooks/useProducts";
-import { generateB2bPdfCatalog } from "@/lib/pdfCatalogGenerator";
 import { EASE_REVEAL, EASE_UI } from "./motion";
 
 export function DownloadCatalogModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -21,11 +20,47 @@ export function DownloadCatalogModal({ open, onClose }: { open: boolean; onClose
   // Dynamically extract all unique categories present in active products list
   const dynamicCategories = Array.from(new Set(activeProductsList.map((p) => p.category)));
 
+  // Always call the latest onClose without it being a dependency below —
+  // `onClose` is an inline arrow function from the parent, recreated every
+  // parent render. `pushState` is intercepted by the router's history
+  // listener (that's how it detects back/forward globally), which reacts
+  // by re-rendering the parent — producing a fresh `onClose` — which, if it
+  // were a dependency, would re-fire this effect, call pushState again, and
+  // loop forever (this was a real, reproduced infinite loop that froze/
+  // crashed the tab). Depending on `open` alone means this only ever runs
+  // once per actual open/close transition, however many times the parent
+  // re-renders while it's open.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  // Handle mobile/browser back button to close modal gracefully
+  useEffect(() => {
+    if (!open) return;
+
+    window.history.pushState({ downloadModalOpen: true }, "");
+
+    const handlePopState = () => {
+      onCloseRef.current();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [open]);
+
   const handleDownload = async () => {
     try {
       setIsGenerating(true);
       setIsSuccess(false);
       setProgressStatus("Initializing Catalogue...");
+
+      // Dynamic import, not a top-of-file one — jsPDF is a large library
+      // (~500KB+) that was previously baked into the main bundle every
+      // visitor downloads on every page, purely because this modal is
+      // always-mounted in __root.tsx. Loading it only when someone actually
+      // clicks Download means it ships as its own on-demand chunk instead.
+      const { generateB2bPdfCatalog } = await import("@/lib/pdfCatalogGenerator");
 
       await generateB2bPdfCatalog({
         productsList: activeProductsList,
@@ -120,7 +155,7 @@ export function DownloadCatalogModal({ open, onClose }: { open: boolean; onClose
                   className="w-full bg-slate-900 border border-border/80 text-foreground text-xs rounded-lg px-3.5 py-3 outline-none focus:border-[var(--gold)] transition-all cursor-pointer appearance-none"
                 >
                   <option value="all">
-                    📁 All Fabric Categories (Master Catalogue — {activeProductsList.length}{" "}
+                    📁 All Fabric Categories (Master Catalogue, {activeProductsList.length}{" "}
                     Products)
                   </option>
                   {dynamicCategories.map((cat) => {

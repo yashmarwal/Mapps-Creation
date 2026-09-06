@@ -1,36 +1,52 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  Bot,
+  Brain,
+  ChevronRight,
   Download,
   ExternalLink,
-  MessageCircle,
-  MessageCircleQuestion,
   Send,
   Sparkles,
+  Wand2,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { SITE, whatsappLink } from "@/lib/seo";
+import { askAiAssistant } from "@/lib/aiAssistant.server";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
-import { LogoMark } from "./LogoMark";
+import { BrandGlowOrb, type CopilotState } from "./icons/BrandGlowOrb";
+import { SiriLiquidAiCore, type AIVisualState } from "./SiriLiquidAiCore";
 import { EASE_REVEAL, EASE_UI } from "./motion";
 
-type Msg = { role: "user" | "agent"; text: string };
+type Msg = {
+  role: "user" | "agent";
+  text: string;
+  confused?: boolean;
+  timestamp?: string;
+  isStreaming?: boolean;
+  showCatalogCta?: boolean;
+};
+
+// Checked against the visitor's own question, not the answer text — an AI
+// answer can phrase "yes, here's our range" a dozen different ways without
+// ever saying the word "PDF", so relying on the reply text alone (as the
+// button below used to) meant the download button wouldn't reliably show
+// up just because someone asked for the catalogue.
+function asksForCatalogue(text: string): boolean {
+  return /\bcatalog(ue)?\b|\bpdf\b|\bbrochure\b|price\s*list|price\s*sheet|spec\s*sheet/i.test(
+    text,
+  );
+}
 
 const SUGGESTED_CHIPS = [
+  { icon: "⚡", text: "What is your MOQ & roll weight for Lycra?", label: "MOQ & Roll Specs" },
   { icon: "📄", text: "Can I download your B2B PDF Catalogue?", label: "Download PDF" },
-  { icon: "💬", text: "Can I connect directly on WhatsApp?", label: "WhatsApp Sales Desk" },
-  { icon: "📦", text: "What is your minimum order quantity (MOQ)?", label: "MOQ & Rates" },
+  { icon: "💬", text: "Connect directly with Surat Sales Desk", label: "WhatsApp Sales" },
   { icon: "🧵", text: "Can I get free fabric swatch samples?", label: "Free Swatches" },
-  { icon: "⚡", text: "How fast is delivery & dispatch?", label: "Lead Time & Dispatch" },
-  { icon: "🚚", text: "Do you supply outside Gujarat?", label: "Pan-India Shipping" },
-  { icon: "🏃", text: "Do you have sportswear & legging fabrics?", label: "Activewear & Lycra" },
-  { icon: "💳", text: "How do I pay & get GST tax invoice?", label: "Payment & Billing" },
+  { icon: "🚚", text: "Do you ship to Mumbai, Delhi, Tirupur?", label: "Pan-India Shipping" },
   { icon: "🎨", text: "Can you match custom Pantone shades?", label: "Shade Matching" },
-  { icon: "💰", text: "Are there bulk discounts for large orders?", label: "Bulk Discounts" },
 ];
 
 const KNOWLEDGE_BASE: { keywords: string[]; response: string }[] = [
@@ -49,32 +65,32 @@ const KNOWLEDGE_BASE: { keywords: string[]; response: string }[] = [
   {
     keywords: ["product", "categories", "range", "what do you sell", "fabric type", "offer"],
     response:
-      "We stock 8 premium fabric categories: Lycra Fabric, Lycra Knitted Fabric, Polyester Lycra Fabric, Melange Fabric, T-Shirt Fabric, Twill Fabric, Matty Fabric, and custom knitted blends — see our Catalogue for complete specs.",
+      "We stock 8 premium fabric categories: Lycra Fabric, Lycra Knitted Fabric, Polyester Lycra Fabric, Melange Fabric, T-Shirt Fabric, Twill Fabric, Matty Fabric, and custom knitted blends.",
   },
   {
     keywords: ["kg", "meter", "unit", "sell by"],
     response:
-      "Knitted qualities are traded by kg and woven qualities like twill and matty by meter. We quote in whichever unit suits your costing.",
+      "Knitted qualities are traded by kg and woven qualities like twill and matty by meter. We quote in whichever unit suits your garment costing.",
   },
   {
     keywords: ["moq", "minimum", "minimum order", "how many", "small order"],
     response:
-      "MOQ depends on the fabric and shade — stock qualities start from a single roll, while dyed-to-order shades typically start around 50 kg per colour.",
+      "MOQ depends on shade & quality. In-stock rolls start from a single roll (~25 kg), while custom dyed-to-order shades start around 50 kg per color.",
   },
   {
     keywords: ["sample", "samples", "swatch", "try before"],
     response:
-      "Yes — we share swatches of the closest matching quality free of charge. Outstation courier is arranged at actuals.",
+      "Yes! We share physical fabric swatches of matching qualities free of charge. Courier charges are billed at actuals.",
   },
   {
     keywords: ["price", "pricing", "cost", "rate", "quote", "quotation"],
     response:
-      "Share your fabric type, GSM, shade and required quantity — we usually reply with today's firm rate the same working day.",
+      "Share your required fabric GSM, shade, and quantity, and our Surat mill team usually replies with firm rates the same working day.",
   },
   {
     keywords: ["payment", "pay", "upi", "bank", "gst", "invoice", "bill"],
     response:
-      "We accept bank transfer (NEFT/RTGS/UPI) and bill every order with a proper GST invoice — Mapps Creation is a GST-registered business.",
+      "We accept bank transfer (NEFT/RTGS/UPI) and bill every order with a valid GST invoice; Mapps Creation is a 100% GST-registered business.",
   },
   {
     keywords: [
@@ -92,93 +108,13 @@ const KNOWLEDGE_BASE: { keywords: string[]; response: string }[] = [
       "ludhiana",
     ],
     response:
-      "All orders dispatch from our Surat facility. We regularly supply garment manufacturers across India — Delhi, Mumbai, Bengaluru, Tirupur, Ludhiana and more — via road transport.",
-  },
-  {
-    keywords: ["quality", "check", "defect", "gsm", "stretch"],
-    response:
-      "GSM, shade and stretch recovery are verified roll by roll before anything leaves our Surat facility.",
-  },
-  {
-    keywords: [
-      "about",
-      "company",
-      "gst registered",
-      "established",
-      "founded",
-      "team",
-      "who are you",
-    ],
-    response:
-      "Mapps Creation is a GST-registered wholesale trader based in Surat, Gujarat, established in 2024. We supply Lycra, knitted and polyester-lycra fabrics to garment manufacturers across India.",
-  },
-  {
-    keywords: ["contact", "phone", "whatsapp", "call", "reach", "number"],
-    response: `You can reach our sales desk directly on WhatsApp or call: ${SITE.phoneDisplay}.`,
-  },
-  {
-    keywords: ["wholesale", "register", "bulk", "partner", "buyer"],
-    response:
-      "For structured wholesale enquiries, fill out the registration form on our Wholesale page — we'll follow up with swatches and proforma pricing.",
-  },
-  {
-    keywords: ["melange", "grey melange", "charcoal"],
-    response:
-      "Our Melange Fabric range includes grey and charcoal shades in cotton-blend knits — check the Catalogue for GSM and blend ratios.",
-  },
-  {
-    keywords: ["twill", "matty", "woven"],
-    response:
-      "Twill and Matty are our woven qualities traded by meter. Twill suits bottomwear structure, while Matty is a lighter, breathable weave.",
-  },
-  {
-    keywords: ["t-shirt", "tshirt", "tee fabric"],
-    response:
-      "Our T-Shirt Fabric range includes cotton and cotton-lycra knits, bio-washed for a soft handfeel — ideal for sportswear and streetwear.",
-  },
-  {
-    keywords: ["shade match", "match shade", "colour match", "color match", "existing swatch"],
-    response:
-      "Send us your existing swatch or shade/GSM specification over WhatsApp — we'll match it as closely as the base quality allows.",
-  },
-  {
-    keywords: ["source", "sourcing", "mill", "where from", "manufacture", "manufacturer"],
-    response:
-      "We source directly from leading mills in Surat — India's knitting & dyeing hub — keeping pricing competitive.",
-  },
-  {
-    keywords: ["first time", "new buyer", "trial", "small quantity", "test order"],
-    response:
-      "First-time buyers can start with a trial roll quantity — there's no separate minimum for new buyers beyond standard MOQ.",
-  },
-  {
-    keywords: [
-      "roll length",
-      "roll size",
-      "meters per roll",
-      "kg per roll",
-      "packing",
-      "roll weight",
-    ],
-    response:
-      "Standard fabric rolls range from 20 kg to 35 kg per roll (~80 to 120 meters depending on GSM). All rolls are poly-wrapped and labeled with net weight & GSM.",
-  },
-  {
-    keywords: ["custom gsm", "width", "tubular", "open width", "dia", "diameter", "custom width"],
-    response:
-      "Stock rolls come in standard 60-72 inch tubular or open width. Custom GSM and widths can be knitted to order for bulk requirements (100+ kg).",
-  },
-  {
-    keywords: ["shrinkage", "color fastness", "bleeding", "washing", "color fade", "wash care"],
-    response:
-      "All Lycra and knitted qualities undergo pre-shrunk & heat-setting processes. We ensure commercial color fastness (3-4 grade) suitable for garment manufacturing.",
+      "All orders dispatch from our Surat warehouse. We regularly supply garment manufacturers across India via reliable road logistics.",
   },
   {
     keywords: [
       "sportswear",
       "activewear",
       "dry fit",
-      "dri fit",
       "gymwear",
       "leggings",
       "track pants",
@@ -186,128 +122,21 @@ const KNOWLEDGE_BASE: { keywords: string[]; response: string }[] = [
       "four way",
     ],
     response:
-      "We stock high-stretch Polyester Lycra, Spandex, and 4-way Lycra knits designed specifically for gymwear, leggings, track pants, and sportswear with high stretch recovery.",
+      "We stock high-stretch Polyester Lycra, Spandex, and 4-way Lycra knits engineered specifically for gymwear, leggings, and sportswear with high recovery.",
   },
   {
-    keywords: ["bulk discount", "discount", "cheaper rate", "volume discount", "large order"],
+    keywords: ["hi", "hello", "hey", "namaste", "mappsy", "ai"],
     response:
-      "Yes! Volume orders (500+ kg or multi-roll full lot orders) qualify for competitive tiered wholesale rates. Share your expected monthly volume over WhatsApp for a quote.",
-  },
-  {
-    keywords: [
-      "lead time",
-      "turnaround",
-      "dispatch time",
-      "delivery time",
-      "how long",
-      "fast delivery",
-    ],
-    response:
-      "In-stock roll qualities dispatch from our Surat warehouse within 24-48 hours. Custom dyed or mill-knitted orders take approximately 7 to 12 working days.",
-  },
-  {
-    keywords: ["gst rate", "tax", "hsn code", "gst percent", "tax rate", "5%"],
-    response:
-      "Fabrics are billed under standard textile HSN codes with a 5% GST rate as per Indian tax regulations. Official GST invoices are provided with every order.",
-  },
-  {
-    keywords: ["custom dye", "panton", "pantone", "dyed to order", "lab dip", "custom shade"],
-    response:
-      "Yes! Share your Pantone TCX shade code or send a physical swatch. We provide lab-dip approvals before commercial mill dyeing (MOQ ~50 kg per shade).",
-  },
-  {
-    keywords: ["blend", "composition", "cotton lycra blend", "spandex percentage", "cotton poly"],
-    response:
-      "Our standard blends include 95% Cotton / 5% Spandex, 88% Polyester / 12% Lycra, 100% Bio-washed Cotton, and Cotton-Poly Melange knits.",
-  },
-  {
-    keywords: ["export", "packing", "transportation charge", "freight", "bale", "bundle"],
-    response:
-      "Rolls are heavy-duty poly-wrapped and baled for safe long-distance transit. Freight charges are billed at actuals via trusted road logistics.",
-  },
-  {
-    keywords: ["faq", "more questions", "other questions"],
-    response:
-      "Check our FAQ page for complete answers on pricing, roll specs, and sample dispatch.",
-  },
-  {
-    keywords: ["hi", "hello", "hey", "namaste"],
-    response:
-      "Hello! I am your AI Fabric Assistant. Ask me about fabric GSM, wholesale pricing, MOQ, swatches, custom dyeing, or dispatch hubs.",
+      "Hello! I am MAPPSY, your Mapps Creation AI Fabric Specialist. Ask me about fabric GSM, wholesale pricing, MOQ, swatches, custom dyeing, or dispatch hubs.",
   },
 ];
 
-const FALLBACK = `Thanks for asking — for detailed custom fabric specifications, connect directly with our Surat sales team on WhatsApp / Call: ${SITE.phoneDisplay}`;
+const FALLBACK = `Thanks for asking! For custom mill lot specifications or firm pricing, connect directly with our Surat sales desk on WhatsApp / Call: ${SITE.phoneDisplay}`;
 
 function getResponse(input: string): string {
   const lower = input.toLowerCase();
   const match = KNOWLEDGE_BASE.find((entry) => entry.keywords.some((k) => lower.includes(k)));
   return match ? match.response : FALLBACK;
-}
-
-function TriggerButton({ open, onClick }: { open: boolean; onClick: () => void }) {
-  const [showIcon, setShowIcon] = useState(true);
-
-  useEffect(() => {
-    if (open) return;
-    const id = window.setInterval(() => setShowIcon((v) => !v), 2500);
-    return () => window.clearInterval(id);
-  }, [open]);
-
-  return (
-    <div className="fixed bottom-6 left-6 z-[95] hidden md:flex items-center gap-2 group">
-      <motion.button
-        onClick={onClick}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
-        animate={open ? { y: 0 } : { y: [0, -5, 0] }}
-        transition={open ? { duration: 0.2 } : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        aria-label={open ? "Close chat" : "Ask Mapps Creation AI Help"}
-        className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 relative h-14 w-14 items-center justify-center rounded-full shadow-[0_0_25px_rgba(201,166,107,0.5)] flex border border-amber-300/40 cursor-pointer overflow-hidden"
-      >
-        <span className="absolute inset-0 bg-white/20 animate-pulse" />
-        <AnimatePresence mode="wait" initial={false}>
-          {open ? (
-            <motion.span
-              key="close"
-              initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
-              animate={{ rotate: 0, opacity: 1, scale: 1 }}
-              exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.25, ease: EASE_UI }}
-            >
-              <X className="h-5 w-5 text-slate-950" />
-            </motion.span>
-          ) : showIcon ? (
-            <motion.span
-              key="icon"
-              initial={{ opacity: 0, scale: 0.6, rotate: -15 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              exit={{ opacity: 0, scale: 0.6, rotate: 15 }}
-              transition={{ duration: 0.35, ease: EASE_UI }}
-            >
-              <Sparkles className="h-6 w-6 text-slate-950" />
-            </motion.span>
-          ) : (
-            <motion.span
-              key="ask"
-              initial={{ opacity: 0, y: 8, scale: 0.7 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.7 }}
-              transition={{ duration: 0.3, ease: EASE_UI }}
-              className="text-[11px] font-bold tracking-wider uppercase text-slate-950"
-            >
-              AI Help
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </motion.button>
-      {!open && (
-        <span className="bg-[#0A1628]/95 border border-[var(--gold)]/40 text-foreground font-semibold label-caps backdrop-blur-xl px-3 py-1.5 rounded-full text-[10px] tracking-wider shadow-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
-          Ask AI Fabric Specialist
-        </span>
-      )}
-    </div>
-  );
 }
 
 export function AskUsChat({
@@ -319,110 +148,286 @@ export function AskUsChat({
   onOpenChange: (open: boolean) => void;
   onOpenCatalog?: () => void;
 }) {
+  const location = useLocation();
+  const pathname = location.pathname;
+
   const [msgs, setMsgs] = useState<Msg[]>([
     {
       role: "agent",
-      text: "Hello! I am your Mapps Creation AI Assistant. Ask me anything about fabric specifications, MOQ, sample swatches, or Pan-India delivery.",
+      text: "Hi! I'm MAPPSY, your AI fabric specialist. Ask me anything about fabric GSM, MOQ, swatches, custom dyeing, or wholesale rates.",
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [copilotState, setCopilotState] = useState<CopilotState>("idle");
+  const [aiVisualState, setAiVisualState] = useState<AIVisualState>("idle");
+  const [proactiveNudge, setProactiveNudge] = useState<string | null>(null);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Derive typing / idle state smoothly when user interacts with input
+  useEffect(() => {
+    if (
+      isTyping ||
+      aiVisualState === "sending" ||
+      aiVisualState === "thinking" ||
+      aiVisualState === "streaming" ||
+      aiVisualState === "complete"
+    ) {
+      return;
+    }
+    if (input.trim().length > 0) {
+      setAiVisualState("typing");
+    } else {
+      setAiVisualState("idle");
+    }
+  }, [input, isTyping, aiVisualState]);
+
+  // Consciousness: Page Route Context Sensing
+  const getRouteContextLabel = () => {
+    if (pathname === "/") return "Home → Fabric Overview";
+    if (pathname.startsWith("/catalogue")) return "Catalogue → 500+ Lycra Qualities";
+    if (pathname.startsWith("/wholesale")) return "Wholesale → B2B Factory Pricing";
+    if (pathname.startsWith("/about")) return "About → Surat Mill Hub";
+    if (pathname.startsWith("/contact")) return "Contact → Direct Sales Desk";
+    return "Surat Fabric Hub";
+  };
+
+  // Proactive Nudge on Scroll / Navigation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!open) {
+        if (pathname.startsWith("/catalogue")) {
+          setProactiveNudge("Looking for 4-Way Lycra or Cotton Spandex? ASK MAPPSY!");
+        } else if (pathname.startsWith("/wholesale")) {
+          setProactiveNudge("Inquire for factory direct rates on 500+ kg bulk lots!");
+        } else {
+          setProactiveNudge("ASK MAPPSY active. Click to chat!");
+        }
+      }
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [pathname, open]);
+
+  // `onOpenChange` is `setAskOpen` passed straight through from __root.tsx
+  // (a real useState setter, stable across renders), so this isn't
+  // currently the pushState-feedback-loop bug documented in
+  // DownloadCatalogModal.tsx — but the same ref pattern is applied here too
+  // so this stays safe even if that prop is ever passed differently.
+  const onOpenChangeRef = useRef(onOpenChange);
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+  }, [onOpenChange]);
+
+  // Handle mobile & browser back button to close chat modal gracefully
   useEffect(() => {
     if (!open) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onOpenChange(false);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onOpenChange]);
 
+    window.history.pushState({ chatModalOpen: true }, "");
+
+    const handlePopState = () => {
+      onOpenChangeRef.current(false);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [open]);
+
+  // Auto-scroll chat body smoothly during live text delivery
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
-  }, [msgs, isTyping]);
+  }, [msgs, isTyping, copilotState]);
+
+  // Silky smooth character-by-character streaming effect for zero jitter
+  const streamAgentMessage = (fullText: string, isConfused: boolean, showCatalogCta: boolean) => {
+    let charIdx = 0;
+    const totalChars = fullText.length;
+
+    setMsgs((m) => [
+      ...m,
+      {
+        role: "agent",
+        text: "",
+        confused: isConfused,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        isStreaming: true,
+        showCatalogCta,
+      },
+    ]);
+
+    setCopilotState("speaking");
+    setAiVisualState("streaming");
+
+    // Smooth character cadence: 2 chars every 18ms (silky smooth, no line wrap jumping)
+    const step = 2;
+    const interval = setInterval(() => {
+      charIdx = Math.min(totalChars, charIdx + step);
+      const textChunk = fullText.slice(0, charIdx);
+
+      setMsgs((m) => {
+        const updated = [...m];
+        const lastMsg = updated[updated.length - 1];
+        if (lastMsg && lastMsg.role === "agent") {
+          lastMsg.text = textChunk;
+        }
+        return updated;
+      });
+
+      if (charIdx >= totalChars) {
+        clearInterval(interval);
+        setMsgs((m) => {
+          const updated = [...m];
+          const lastMsg = updated[updated.length - 1];
+          if (lastMsg) lastMsg.isStreaming = false;
+          return updated;
+        });
+        setCopilotState(isConfused ? "confused" : "happy");
+        setAiVisualState("complete");
+        setTimeout(() => {
+          setCopilotState("idle");
+          setAiVisualState("idle");
+        }, 1500);
+        setIsTyping(false);
+      }
+    }, 18);
+  };
 
   const send = (text: string) => {
     if (!text.trim() || isTyping) return;
-    const userMsg: Msg = { role: "user", text };
+    const userMsg: Msg = {
+      role: "user",
+      text,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
     setMsgs((m) => [...m, userMsg]);
     setInput("");
     setIsTyping(true);
+    setCopilotState("thinking");
+    setAiVisualState("sending");
 
     setTimeout(() => {
-      const resp = getResponse(text);
-      setMsgs((m) => [...m, { role: "agent", text: resp }]);
-      setIsTyping(false);
-    }, 550);
+      setAiVisualState("thinking");
+    }, 350);
+
+    const wantsCatalogue = asksForCatalogue(text);
+    const minDelay = new Promise<void>((resolve) => setTimeout(resolve, 600));
+    Promise.all([askAiAssistant({ data: { message: text } }).catch(() => null), minDelay])
+      .then(([aiResp]) => {
+        const resp = aiResp ?? getResponse(text);
+        streamAgentMessage(resp, resp === FALLBACK, wantsCatalogue);
+      })
+      .catch(() => {
+        const fallbackResp = getResponse(text);
+        streamAgentMessage(fallbackResp, true, wantsCatalogue);
+      });
   };
 
   return (
     <>
-      <TriggerButton open={open} onClick={() => onOpenChange(!open)} />
+      {/* Floating Rotative Shadow AI Core Button */}
+      <div className="fixed bottom-6 left-6 z-[95] hidden md:flex items-center gap-3">
+        {/* Proactive Speech Bubble */}
+        <AnimatePresence>
+          {!open && proactiveNudge && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.9 }}
+              onClick={() => {
+                onOpenChange(true);
+                setProactiveNudge(null);
+              }}
+              className="absolute -top-12 left-0 bg-[#070D19]/95 border border-amber-500/40 text-amber-300 text-[11px] font-medium px-3.5 py-1.5 rounded-xl shadow-xl backdrop-blur-xl flex items-center gap-2 cursor-pointer hover:border-amber-400 transition-all whitespace-nowrap"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
+              <span>{proactiveNudge}</span>
+              <X
+                className="h-3 w-3 text-slate-400 hover:text-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setProactiveNudge(null);
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Circular Floating Siri Liquid Energy Core Trigger */}
+        <motion.button
+          onClick={() => {
+            onOpenChange(!open);
+            setProactiveNudge(null);
+          }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.94 }}
+          className="group relative flex h-17 w-17 items-center justify-center rounded-full cursor-pointer focus:outline-none"
+          aria-label={open ? "Close chat" : "ASK MAPPSY"}
+        >
+          <SiriLiquidAiCore state={aiVisualState} size={66} />
+
+          {/* Hover Tag */}
+          {!open && (
+            <span className="absolute left-18 bg-[#070D19]/95 border border-amber-500/40 text-slate-100 font-semibold label-caps backdrop-blur-2xl px-3 py-1.5 rounded-full text-[10px] tracking-wider shadow-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none whitespace-nowrap">
+              ASK MAPPSY
+            </span>
+          )}
+        </motion.button>
+      </div>
+
+      {/* Main Interactive Window Overlay */}
       <AnimatePresence>
         {open && (
           <motion.div
             data-lenis-prevent
-            initial={{ opacity: 0, y: 40, scale: 0.96 }}
+            initial={{ opacity: 0, y: 30, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 40, scale: 0.96 }}
-            transition={{ duration: 0.35, ease: EASE_REVEAL }}
-            className="border-[var(--gold)]/35 bg-[#0A1628]/95 backdrop-blur-2xl text-foreground safe-bottom fixed inset-x-0 bottom-0 z-[96] flex h-[82vh] flex-col border rounded-t-2xl shadow-2xl md:h-[500px] md:w-[360px] md:inset-x-auto md:bottom-24 md:left-6 md:rounded-2xl touch-pan-y overscroll-contain overflow-hidden"
-            style={{ overscrollBehavior: "contain", touchAction: "pan-y" }}
+            exit={{ opacity: 0, y: 30, scale: 0.96 }}
+            transition={{ duration: 0.28, ease: EASE_REVEAL }}
+            className="border-amber-500/20 bg-[#070D19]/98 backdrop-blur-3xl text-foreground safe-bottom fixed inset-x-0 bottom-0 z-[96] flex h-[85vh] flex-col border rounded-t-3xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] md:h-[500px] md:w-[380px] md:inset-x-auto md:bottom-24 md:left-6 md:rounded-2xl touch-pan-y overscroll-contain overflow-hidden"
           >
-            {/* Header */}
-            <div className="border-border/60 bg-slate-950/60 flex items-center justify-between gap-3 border-b p-3.5 backdrop-blur-md">
-              <div className="flex items-center gap-2.5">
-                <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400">
-                  <Bot className="h-4.5 w-4.5" />
-                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            {/* Header HUD */}
+            <div className="border-b border-slate-800/80 bg-slate-950/90 px-4 py-3 flex items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="shrink-0">
+                  <SiriLiquidAiCore state={aiVisualState} size={42} />
                 </div>
-                <div>
-                  <h3 className="font-serif text-base font-bold leading-tight text-foreground flex items-center gap-1.5">
-                    Mapps AI Assistant
-                  </h3>
-                  <p className="text-[10px] text-emerald-400 font-medium tracking-wider uppercase flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block" /> Online
-                    · Instant Answers
-                  </p>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-serif text-sm font-bold text-slate-100 tracking-wide">
+                      ASK MAPPSY
+                    </h3>
+                    <span className="px-1.5 py-0.5 text-[9px] font-semibold rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      LIVE
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-400 mt-0.5 flex items-center gap-1.5">
+                    <span className="h-1 w-1 rounded-full bg-emerald-400" />
+                    {getRouteContextLabel()}
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1">
-                <a
-                  href={whatsappLink(
-                    "Hi Mapps Creation, I'd like to talk directly with your sales team.",
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Connect with Human Sales Expert on WhatsApp"
-                  aria-label="Connect with Human Sales Expert on WhatsApp"
-                  className="bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 px-2 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase transition-all flex items-center gap-1 cursor-pointer"
-                >
-                  <WhatsAppIcon className="h-3.5 w-3.5" />
-                  <span>WhatsApp</span>
-                </a>
-                <button
-                  type="button"
-                  onClick={() => onOpenChange(false)}
-                  aria-label="Close chat"
-                  className="text-muted-foreground hover:text-foreground p-1.5 transition-colors cursor-pointer rounded-md hover:bg-card"
-                >
-                  <X className="h-4.5 w-4.5" />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-900 transition-colors cursor-pointer"
+                aria-label="Close MAPPSY"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
             </div>
 
-            {/* Chat Body */}
+            {/* Chat Body & Live Streamer */}
             <div
               ref={scrollRef}
               data-lenis-prevent
-              className="flex-1 space-y-3.5 overflow-y-auto p-4 touch-pan-y"
-              style={{ overscrollBehavior: "contain", touchAction: "pan-y" }}
+              className="flex-1 space-y-3.5 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-slate-800"
             >
               {msgs.map((m, i) => (
                 <div
@@ -430,107 +435,100 @@ export function AskUsChat({
                   className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}
                 >
                   <div
-                    className={`text-xs sm:text-sm leading-relaxed whitespace-pre-line ${
+                    className={`leading-relaxed ${
                       m.role === "agent"
-                        ? "bg-slate-900/90 border border-slate-700/60 text-slate-100 rounded-2xl rounded-tl-none p-3.5 shadow-sm max-w-[90%]"
-                        : "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-medium rounded-2xl rounded-tr-none px-4 py-2.5 shadow-md max-w-[85%]"
+                        ? "bg-slate-900/80 border border-slate-800/80 text-slate-200 rounded-2xl rounded-tl-sm p-3.5 shadow-sm max-w-[90%] text-xs sm:text-sm"
+                        : "bg-amber-500/90 text-slate-950 font-medium rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-sm max-w-[85%] text-xs sm:text-sm"
                     }`}
                   >
                     {m.role === "agent" && (
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-1">
-                        <LogoMark size={12} /> Mapps Creation
+                      <div className="flex items-center justify-between gap-2 text-[10px] font-semibold text-amber-400 tracking-wider mb-1.5 pb-1 border-b border-slate-800/60">
+                        <div className="flex items-center gap-1.5">
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                          <span>ASK MAPPSY</span>
+                        </div>
+                        {m.timestamp && (
+                          <span className="font-mono text-[9px] text-slate-500">{m.timestamp}</span>
+                        )}
                       </div>
                     )}
-                    {m.text}
 
-                    {/* Auto-detected Inline Action Links */}
-                    {m.role === "agent" &&
-                      (m.text.includes("PDF") || m.text.includes("pdf")) &&
-                      onOpenCatalog && (
-                        <div className="pt-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onOpenChange(false);
-                              onOpenCatalog();
-                            }}
-                            className="btn-enquire btn-enquire-gold !py-1 !px-2.5 !text-[10px]"
-                          >
-                            <span>
-                              <Download className="h-3 w-3" /> Download B2B PDF Catalogue
-                            </span>
-                          </button>
-                        </div>
+                    <div className="whitespace-pre-line leading-relaxed text-slate-200 font-normal">
+                      {m.text}
+                      {m.isStreaming && (
+                        <span className="inline-block w-1.5 h-3.5 bg-gradient-to-t from-amber-500 to-amber-300 ml-1 rounded-sm opacity-90 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.8)] align-middle" />
                       )}
-                    {m.role === "agent" &&
-                      m.text.includes("Catalogue") &&
-                      !m.text.includes("PDF") && (
-                        <div className="pt-2">
+                    </div>
+
+                    {/* Auto Action Buttons */}
+                    {m.role === "agent" && !m.isStreaming && (
+                      <div className="pt-2 flex flex-wrap gap-1.5">
+                        {(m.showCatalogCta || m.text.includes("PDF") || m.text.includes("pdf")) &&
+                          onOpenCatalog && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onOpenChange(false);
+                                onOpenCatalog();
+                              }}
+                              className="bg-amber-500/15 border border-amber-500/30 text-amber-300 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 hover:bg-amber-400 hover:text-slate-950 transition-all cursor-pointer"
+                            >
+                              <Download className="h-3 w-3" /> Download B2B PDF
+                            </button>
+                          )}
+                        {m.text.includes("Catalogue") && !m.text.includes("PDF") && (
                           <Link
                             to="/catalogue"
                             onClick={() => onOpenChange(false)}
-                            className="inline-flex items-center gap-1 text-[10px] font-bold label-caps text-amber-400 border border-amber-400/40 rounded px-2 py-1 hover:bg-amber-400 hover:text-slate-950 transition-all"
+                            className="bg-slate-800 border border-slate-700 text-amber-400 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 hover:border-amber-400 transition-all"
                           >
-                            View Catalogue <ExternalLink className="h-3 w-3" />
+                            Browse Catalogue <ExternalLink className="h-3 w-3" />
                           </Link>
-                        </div>
-                      )}
-                    {m.role === "agent" &&
-                      (m.text.includes("WhatsApp") || m.text.includes("reach us")) && (
-                        <div className="pt-2">
+                        )}
+                        {(m.text.includes("WhatsApp") || m.text.includes("reach us")) && (
                           <a
                             href={whatsappLink(
-                              "Hi Mapps Creation, I would like to make an enquiry.",
+                              "Hi Mapps Creation, I would like to inquire about fabric lot prices.",
                             )}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="btn-enquire !py-1 !px-2.5 !text-[10px]"
+                            className="bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 hover:bg-[#25D366] hover:text-slate-950 transition-all"
                           >
-                            <span>
-                              <WhatsAppIcon className="h-3 w-3" /> WhatsApp Sales Desk
-                            </span>
+                            <WhatsAppIcon className="h-3 w-3" /> Direct Sales Desk
                           </a>
-                        </div>
-                      )}
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
 
-              {/* Typing Indicator */}
-              {isTyping && (
-                <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-700/60 text-slate-400 rounded-2xl rounded-tl-none p-3 max-w-[120px]">
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-amber-400">
-                    Thinking
-                  </span>
-                  <span className="flex gap-1">
-                    <span
-                      className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-bounce"
-                      style={{ animationDelay: "0ms" }}
-                    />
-                    <span
-                      className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-bounce"
-                      style={{ animationDelay: "150ms" }}
-                    />
-                    <span
-                      className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-bounce"
-                      style={{ animationDelay: "300ms" }}
-                    />
-                  </span>
+              {/* Live Neural Thinking State Indicator - Pure Orb */}
+              {(isTyping ||
+                copilotState === "thinking" ||
+                aiVisualState === "thinking" ||
+                aiVisualState === "sending") && (
+                <div className="flex items-center py-1.5 px-1">
+                  <SiriLiquidAiCore
+                    state={aiVisualState === "idle" ? "thinking" : aiVisualState}
+                    size={36}
+                    className="shrink-0"
+                  />
                 </div>
               )}
 
-              {/* Suggested Quick Chips */}
+              {/* Quick Action Suggestion Chips */}
               {msgs.length <= 2 && !isTyping && (
-                <div className="space-y-2 pt-2 border-t border-border/40">
-                  <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
-                    Quick Topics
+                <div className="space-y-2.5 pt-3 border-t border-slate-800/60">
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 flex items-center gap-1.5">
+                    <Wand2 className="h-3 w-3 text-amber-400" /> Quick Questions
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-2">
                     {SUGGESTED_CHIPS.map((chip) => (
                       <button
                         key={chip.text}
                         onClick={() => send(chip.text)}
-                        className="bg-card/80 border-border/80 text-foreground hover:border-amber-400/60 hover:text-amber-400 border px-2.5 py-1.5 rounded-xl text-[11px] font-medium tracking-wide transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                        className="bg-slate-900/60 border border-slate-800 hover:border-amber-500/40 hover:bg-slate-800/80 text-slate-300 hover:text-amber-300 px-3 py-1.5 rounded-full text-xs font-medium transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
                       >
                         <span>{chip.icon}</span>
                         <span>{chip.label}</span>
@@ -541,56 +539,34 @@ export function AskUsChat({
               )}
             </div>
 
-            {/* Persistent Quick Action Footer Bar */}
-            <div className="bg-slate-950/90 border-t border-slate-800/80 px-3 py-2 flex items-center justify-between gap-2">
-              <a
-                href={whatsappLink("Hi Mapps Creation, I would like to make an enquiry.")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-enquire flex-1 !min-h-[34px] !py-1 !px-2 !text-[10px] !rounded-lg"
-              >
-                <span>
-                  <WhatsAppIcon className="h-3.5 w-3.5" /> WhatsApp Us
-                </span>
-              </a>
-              {onOpenCatalog && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onOpenChange(false);
-                    onOpenCatalog();
-                  }}
-                  className="btn-enquire btn-enquire-gold flex-1 !min-h-[34px] !py-1 !px-2 !text-[10px] !rounded-lg"
-                >
-                  <span>
-                    <Download className="h-3.5 w-3.5" /> PDF Catalogue
-                  </span>
-                </button>
-              )}
-            </div>
-
             {/* Input Form */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 send(input);
               }}
-              className="border-border/60 bg-slate-950 flex shrink-0 items-center gap-2 border-t p-3 backdrop-blur-md"
+              className="border-t border-slate-800/60 bg-slate-950/90 p-3 shrink-0"
             >
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your fabric query..."
-                className="text-foreground focus:border-amber-400 flex-1 border-b border-transparent bg-transparent px-2 py-1.5 text-xs sm:text-sm outline-none transition-colors placeholder:text-muted-foreground/70"
-              />
-              <button
-                type="submit"
-                aria-label="Send query"
-                disabled={!input.trim() || isTyping}
-                className="bg-amber-500 text-slate-950 hover:bg-amber-400 p-2 rounded-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
-              >
-                <Send className="h-4 w-4" />
-              </button>
+              <div className="relative flex items-center bg-slate-900/90 border border-slate-800 focus-within:border-amber-500/50 rounded-full px-3.5 py-1.5 transition-colors">
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onFocus={() => setCopilotState("listening")}
+                  onBlur={() => {
+                    if (!isTyping) setCopilotState("idle");
+                  }}
+                  placeholder="Ask MAPPSY: GSM, MOQ, Pantone shade..."
+                  className="text-slate-100 bg-transparent flex-1 text-xs sm:text-sm outline-none placeholder:text-slate-500 pr-2"
+                />
+                <button
+                  type="submit"
+                  aria-label="Send query to ASK MAPPSY"
+                  disabled={!input.trim() || isTyping}
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 p-2 rounded-full transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer shrink-0"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </form>
           </motion.div>
         )}

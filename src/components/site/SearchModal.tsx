@@ -81,6 +81,31 @@ export function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
     return undefined;
   }, [isOpen]);
 
+  // Always call the latest onClose without it being a dependency below — see
+  // the identical comment in DownloadCatalogModal.tsx for why an unstable
+  // inline `onClose` here + a raw pushState call is a real, reproduced
+  // infinite-loop/freeze: the router's history listener treats pushState as
+  // a navigation and re-renders the parent, producing a fresh `onClose`,
+  // which (if it were a dependency) re-fires this effect forever.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  // Handle mobile/browser back button to close search modal gracefully
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.history.pushState({ searchModalOpen: true }, "");
+
+    const handlePopState = () => {
+      onCloseRef.current();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [isOpen]);
+
   // Global Esc key listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -325,7 +350,7 @@ export function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
                       {query.trim() ? `No fabrics found for "${query.trim()}"` : "No fabrics found"}
                     </h4>
                     <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-                      It may not be listed yet — message us directly and we'll check current stock
+                      It may not be listed yet. Message us directly and we'll check current stock
                       and mill options for you.
                     </p>
                     <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-xs mx-auto">
