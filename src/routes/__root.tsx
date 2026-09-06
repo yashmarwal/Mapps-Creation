@@ -8,16 +8,16 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import appCss from "../styles.css?url";
+import { organizationSchema, websiteSchema } from "@/lib/seo";
 import { Navigation } from "@/components/site/Navigation";
 import { Footer } from "@/components/site/Footer";
 import { IntroProvider } from "@/components/site/Preloader";
 import { WhatsAppButton } from "@/components/site/WhatsAppButton";
 import { StickyCta } from "@/components/site/StickyCta";
-import { CustomCursor } from "@/components/site/CustomCursor";
 import { AskUsChat } from "@/components/site/AskUsChat";
 import { MobileActionBar } from "@/components/site/MobileActionBar";
 import { TopMarquee, useMarqueeSettings } from "@/components/site/TopMarquee";
@@ -89,7 +89,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Mapps Creation — Lycra & Knitted Fabric Supplier, Surat" },
+      { title: "Mapps Creation | Lycra & Knitted Fabric Supplier, Surat" },
       {
         name: "description",
         content:
@@ -111,12 +111,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap",
       },
     ],
+    // Organization + WebSite JSON-LD, once here at the root so it's present
+    // on every indexable page (helps AI/search engines resolve "who is behind
+    // this site" no matter which page they land on first). Individual routes
+    // only add their own page-specific schema (breadcrumb, FAQ, product list,
+    // etc.) — never re-declare Organization/WebSite, or it'll be duplicated.
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify([organizationSchema, websiteSchema]),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
+
+// Regular useEffect fires *after* the browser paints — for a scroll-position
+// reset, that means one visible frame (sometimes more) of the new page
+// rendered at the OLD scroll offset before it snaps to top, which reads as a
+// jitter/flash on every navigation. useLayoutEffect runs synchronously right
+// after the DOM updates but before paint, so the reset happens before the
+// user ever sees the wrong position. It's a no-op during SSR (React skips
+// effects there entirely), but React still warns about using it in
+// server-rendered code, hence the typeof-window guard, matching the
+// standard "useIsomorphicLayoutEffect" idiom.
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
@@ -142,9 +164,12 @@ function RootComponent() {
   const [searchOpen, setSearchOpen] = useState(false);
   useSmoothScroll();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    window.__lenis?.scrollTo(0, { immediate: true });
+  useIsomorphicLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+    if (window.__lenis) {
+      window.__lenis.scrollTo(0, { immediate: true });
+      window.__lenis.resize();
+    }
   }, [pathname]);
 
   // Global Ctrl+K / Cmd+K keyboard shortcut
@@ -201,7 +226,6 @@ function RootComponent() {
           <DownloadCatalogModal open={catalogOpen} onClose={() => setCatalogOpen(false)} />
           <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
           <MobileActionBar onOpenAsk={() => setAskOpen(true)} />
-          <CustomCursor />
         </IntroProvider>
       </QuoteBasketProvider>
     </QueryClientProvider>
