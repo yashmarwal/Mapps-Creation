@@ -65,8 +65,8 @@ const COMPARISON: [string, string, string][] = [
   ],
   [
     "Catalog range",
-    "8 fabric categories — Lycra, knitted & polyester-lycra variants under one roof",
-    "Narrow specialization — separate suppliers needed for Lycra, knits, and blends",
+    "8 fabric categories: Lycra, knitted & polyester-lycra variants under one roof",
+    "Narrow specialization, separate suppliers needed for Lycra, knits, and blends",
   ],
   [
     "Order flexibility",
@@ -85,7 +85,7 @@ const COMPARISON: [string, string, string][] = [
   ],
   [
     "Location advantage",
-    "Based in Surat — India's textile hub — for fast dispatch",
+    "Based in Surat, India's textile hub, for fast dispatch",
     "Sourced from out-of-state suppliers, longer lead times",
   ],
   [
@@ -129,7 +129,7 @@ function WholesaleForm() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     await submit({
-      subject: `Wholesale Registration — ${fields.company || "New buyer"}`,
+      subject: `Wholesale Registration: ${fields.company || "New buyer"}`,
       from_name: fields.contact,
       ...fields,
     });
@@ -214,7 +214,7 @@ function WholesaleForm() {
           className="bg-primary/10 text-foreground flex items-center gap-3 px-4 py-3 text-sm sm:col-span-2"
         >
           <CheckCircle className="text-primary h-5 w-5 shrink-0" />
-          Registration received — we'll be in touch shortly with swatches and pricing.
+          Registration received. We'll be in touch shortly with swatches and pricing.
         </motion.div>
       )}
       {status === "error" && (
@@ -224,7 +224,7 @@ function WholesaleForm() {
           className="bg-destructive/10 text-destructive flex items-center gap-3 px-4 py-3 text-sm sm:col-span-2"
         >
           <AlertCircle className="h-5 w-5 shrink-0" />
-          Submission failed — please WhatsApp or call us instead.
+          Submission failed. Please WhatsApp or call us instead.
         </motion.div>
       )}
     </form>
@@ -415,7 +415,7 @@ function Wholesale() {
             />
             <p className="text-muted-foreground mt-7 max-w-xl text-base leading-relaxed md:text-lg">
               Wholesale Lycra, knitted and polyester-lycra fabrics for garment manufacturers and
-              exporters across India — sourced, tested and dispatched from Surat.
+              exporters across India, sourced, tested and dispatched from Surat.
             </p>
 
             <div className="border-border mt-12 flex flex-wrap gap-10 border-t pt-10">
@@ -479,7 +479,7 @@ function Wholesale() {
             <h2 className="display-lg mt-4">Wholesale registration</h2>
           </Reveal>
           <WordReveal
-            text="Tell us a little about your business and what you're sourcing — we'll follow up with swatches and a quotation."
+            text="Tell us a little about your business and what you're sourcing, and we'll follow up with swatches and a quotation."
             className="text-muted-foreground mt-5 block max-w-xl text-sm leading-relaxed md:text-base"
           />
           <WholesaleForm />

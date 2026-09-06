@@ -11,7 +11,7 @@ import { WhatsAppIcon } from "@/components/site/icons/WhatsAppIcon";
 export const Route = createFileRoute("/contact")({
   head: () =>
     buildPageHead({
-      title: "Contact Mapps Creation — Fabric Enquiries, Surat",
+      title: "Contact Mapps Creation | Fabric Enquiries, Surat",
       description:
         "Get in touch with Mapps Creation for wholesale Lycra, knitted and polyester-lycra fabric enquiries. WhatsApp, call, or send your requirement below.",
       path: "/contact",
@@ -57,7 +57,7 @@ function Contact() {
           <p className="label-caps text-primary">Contact</p>
           <StampHeading lines={["Let's talk fabric"]} className="display-lg mt-4 max-w-2xl" />
           <p className="text-muted-foreground mt-6 max-w-xl text-base leading-relaxed md:text-lg">
-            Share your fabric type, GSM and quantity — we usually reply the same working day with
+            Share your fabric type, GSM and quantity, and we usually reply the same working day with
             swatches and a rate.
           </p>
         </Reveal>
@@ -187,12 +187,12 @@ function Contact() {
 
               {status === "success" && (
                 <p className="text-primary text-sm">
-                  Thank you — your enquiry has been sent. We'll be in touch shortly.
+                  Thank you. Your enquiry has been sent. We'll be in touch shortly.
                 </p>
               )}
               {status === "error" && (
                 <p className="text-destructive text-sm">
-                  Something went wrong sending that. Please WhatsApp or call us instead — we'll
+                  Something went wrong sending that. Please WhatsApp or call us instead; we'll
                   respond faster that way.
                 </p>
               )}

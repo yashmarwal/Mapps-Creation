@@ -38,24 +38,24 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
         <p>We collect information only when you choose to share it with us, through:</p>
         <ul className="mt-3 list-disc space-y-2 pl-5">
           <li>
-            <strong className="text-foreground">Contact and wholesale registration forms</strong> —
+            <strong className="text-foreground">Contact and wholesale registration forms:</strong>{" "}
             name, company name, phone number, email address, city, and the details of your fabric
             requirement.
           </li>
           <li>
-            <strong className="text-foreground">The Bulk Quote Builder</strong> — the products you
+            <strong className="text-foreground">The Bulk Quote Builder:</strong> the products you
             select, along with quantity, preferred shade, and the buyer/dispatch details you enter
             before sending a quote request. This list is stored in your browser's local storage on
-            your own device so it's there when you come back — we only receive it when you actually
+            your own device so it's there when you come back. We only receive it when you actually
             send it to us via WhatsApp or email.
           </li>
           <li>
-            <strong className="text-foreground">WhatsApp enquiries</strong> — if you message us via
-            a WhatsApp link on this site, that conversation happens on WhatsApp and is governed by
+            <strong className="text-foreground">WhatsApp enquiries:</strong> if you message us via a
+            WhatsApp link on this site, that conversation happens on WhatsApp and is governed by
             WhatsApp's own privacy policy, not this one.
           </li>
           <li>
-            <strong className="text-foreground">Admin account</strong> — a single, invite-only login
+            <strong className="text-foreground">Admin account:</strong> a single, invite-only login
             used by us to manage the website. This isn't a public account system; visitors cannot
             register.
           </li>
@@ -93,17 +93,17 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
         </p>
         <ul className="mt-3 list-disc space-y-2 pl-5">
           <li>
-            <strong className="text-foreground">Web3Forms</strong> — delivers the Contact and
+            <strong className="text-foreground">Web3Forms:</strong> delivers the Contact and
             Wholesale form submissions to our email inbox. Web3Forms processes the form content
             solely to route it to us.
           </li>
           <li>
-            <strong className="text-foreground">Supabase</strong> — hosts our product catalogue,
-            site content, and the admin login. Product and catalogue data stored here is not
-            personal information about site visitors.
+            <strong className="text-foreground">Supabase:</strong> hosts our product catalogue, site
+            content, and the admin login. Product and catalogue data stored here is not personal
+            information about site visitors.
           </li>
           <li>
-            <strong className="text-foreground">WhatsApp (Meta)</strong> — used for click-to-chat
+            <strong className="text-foreground">WhatsApp (Meta):</strong> used for click-to-chat
             enquiry links. Messages sent this way are handled by WhatsApp, not by us directly.
           </li>
         </ul>
@@ -115,7 +115,7 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
     body: (
       <p>
         This site does not use tracking or advertising cookies. It uses your browser's local storage
-        for one purpose only — remembering the products you've added to the Bulk Quote Builder so
+        for one purpose only: remembering the products you've added to the Bulk Quote Builder so
         your list persists between visits on the same device. This data stays on your device;
         clearing your browser's site data removes it.
       </p>
@@ -168,7 +168,7 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
     body: (
       <p>
         We may update this policy as the site or our practices change. The date below reflects the
-        most recent revision — check back periodically if you have concerns.
+        most recent revision; check back periodically if you have concerns.
       </p>
     ),
   },
