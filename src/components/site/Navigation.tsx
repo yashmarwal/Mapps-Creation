@@ -78,6 +78,7 @@ export function Navigation({
 
   useEffect(() => {
     setOpen(false);
+    setScrolled(window.scrollY > 40);
   }, [pathname]);
 
   useEffect(() => {

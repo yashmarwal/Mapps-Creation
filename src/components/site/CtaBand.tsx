@@ -38,7 +38,7 @@ export function CtaBand({ variant = "slim" }: { variant?: "full" | "slim" }) {
           <Reveal>
             <h2 className="display-lg">Tell us what you're knitting</h2>
             <p className="text-muted-foreground mx-auto mt-5 max-w-xl text-sm leading-relaxed md:text-base">
-              Share your fabric type, GSM and quantity — we'll come back with swatches and a rate
+              Share your fabric type, GSM and quantity, and we'll come back with swatches and a rate
               the same working day.
             </p>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
@@ -76,7 +76,7 @@ export function CtaBand({ variant = "slim" }: { variant?: "full" | "slim" }) {
         <div>
           <h3 className="font-serif text-xl md:text-2xl">Tell us what you're knitting</h3>
           <p className="text-muted-foreground mt-1.5 text-sm">
-            Share your fabric type, GSM and quantity — swatches and a rate the same working day.
+            Share your fabric type, GSM and quantity: swatches and a rate the same working day.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap justify-center gap-3">

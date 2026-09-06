@@ -88,7 +88,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
           <div className="relative w-[36%] shrink-0 h-full overflow-hidden bg-slate-900">
             <img
               src={product.image}
-              alt={`${product.name} — ${product.category} fabric from Mapps Creation, Surat`}
+              alt={`${product.name}, ${product.category} fabric from Mapps Creation, Surat`}
               loading="lazy"
               width={600}
               height={600}
@@ -179,7 +179,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
             <div className="relative aspect-[4/3] overflow-hidden">
               <img
                 src={product.image}
-                alt={`${product.name} — ${product.category} fabric from Mapps Creation, Surat`}
+                alt={`${product.name}, ${product.category} fabric from Mapps Creation, Surat`}
                 loading="lazy"
                 width={1024}
                 height={768}
@@ -290,7 +290,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
               <div className="relative aspect-[4/3] sm:aspect-auto bg-slate-950">
                 <img
                   src={product.image}
-                  alt={`${product.name} — ${product.category} fabric from Mapps Creation, Surat`}
+                  alt={`${product.name}, ${product.category} fabric from Mapps Creation, Surat`}
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -311,7 +311,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                   </span>
                 </p>
                 <p className="text-muted-foreground/90 mt-2 text-xs leading-relaxed">
-                  MOQ depends on the fabric and shade — stock qualities start from a single roll,
+                  MOQ depends on the fabric and shade. Stock qualities start from a single roll,
                   dyed-to-order shades start from 50 kg per colour.
                 </p>
 

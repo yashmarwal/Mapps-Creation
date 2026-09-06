@@ -1,9 +1,10 @@
 "use client";
 
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Phone, SendHorizontal, Sparkles } from "lucide-react";
+import { Phone, SendHorizontal } from "lucide-react";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
+import { SiriLiquidAiCore } from "./SiriLiquidAiCore";
 
 /**
  * Ultra-Luxurious Floating Mobile Contact Dock
@@ -18,11 +19,11 @@ export function MobileActionBar({ onOpenAsk }: { onOpenAsk: () => void }) {
       {/* Phone Call Pill */}
       <a
         href={`tel:${SITE.phone}`}
-        className="flex flex-col items-center justify-center min-w-[54px] py-2 px-2 rounded-xl bg-card/80 border border-border/80 text-foreground hover:border-[var(--gold)]/60 transition-all active:scale-95 cursor-pointer shrink-0"
+        className="flex flex-col items-center justify-center w-[54px] h-[50px] rounded-xl bg-card/80 border border-border/80 text-foreground hover:border-[var(--gold)]/60 transition-all active:scale-95 cursor-pointer shrink-0"
         aria-label="Call Mapps Creation"
       >
         <Phone className="h-4 w-4 text-[var(--gold)]" />
-        <span className="text-[9px] font-bold tracking-wider uppercase mt-1 text-foreground/90">
+        <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5 text-foreground/90">
           Call
         </span>
       </a>
@@ -35,25 +36,21 @@ export function MobileActionBar({ onOpenAsk }: { onOpenAsk: () => void }) {
         target="_blank"
         rel="noopener noreferrer"
         title="WhatsApp Enquiry"
-        className="flex flex-col items-center justify-center min-w-[58px] py-2 px-2 rounded-xl bg-[#25D366]/15 border border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366]/25 transition-all active:scale-95 cursor-pointer shrink-0"
+        className="flex flex-col items-center justify-center w-[54px] h-[50px] rounded-xl bg-[#25D366]/15 border border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366]/25 transition-all active:scale-95 cursor-pointer shrink-0"
         aria-label="WhatsApp Enquiry"
       >
         <WhatsAppIcon className="h-4 w-4" />
-        <span className="text-[9px] font-bold tracking-wider uppercase mt-1">WhatsApp</span>
+        <span className="text-[8px] font-bold tracking-wider uppercase mt-0.5">WhatsApp</span>
       </a>
 
-      {/* AI Help Assistant Pill */}
+      {/* Siri Liquid Energy AI Assistant Pill */}
       <button
         type="button"
         onClick={onOpenAsk}
-        className="relative flex flex-col items-center justify-center min-w-[54px] py-2 px-2 rounded-xl bg-card/80 border border-border/80 text-foreground hover:border-[var(--gold)]/60 transition-all active:scale-95 cursor-pointer shrink-0"
+        className="relative flex items-center justify-center w-[54px] h-[50px] p-1 rounded-xl bg-[#070D19]/90 border border-amber-500/35 text-foreground hover:border-amber-400 transition-all active:scale-95 cursor-pointer shrink-0 shadow-md"
         aria-label="Open AI fabric help chat"
       >
-        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-        <Sparkles className="h-4 w-4 text-amber-400" />
-        <span className="text-[9px] font-bold tracking-wider uppercase mt-1 text-foreground/90">
-          AI Help
-        </span>
+        <SiriLiquidAiCore size={42} />
       </button>
 
       {/* Primary Enquire CTA (btn-enquire) */}
@@ -64,7 +61,7 @@ export function MobileActionBar({ onOpenAsk }: { onOpenAsk: () => void }) {
         target="_blank"
         rel="noopener noreferrer"
         title="Enquire Now for Fabric Quotations"
-        className="btn-enquire flex-1 !min-h-[46px] !rounded-xl !text-xs shrink-0"
+        className="btn-enquire flex-1 !min-h-[50px] !h-[50px] !rounded-xl !text-xs shrink-0"
       >
         <span>
           <SendHorizontal className="h-4 w-4" />

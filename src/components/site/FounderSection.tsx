@@ -22,7 +22,7 @@ export function FounderSection({ className = "" }: { className?: string }) {
               </span>
             </div>
             <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-              Meet Our Co-Founder
+              Meet Our Founder
             </h2>
           </Reveal>
 
@@ -44,7 +44,7 @@ export function FounderSection({ className = "" }: { className?: string }) {
                     <div className="h-16 w-16 sm:h-20 sm:w-20 md:h-44 md:w-44 overflow-hidden rounded-2xl border border-[var(--gold)]/40 bg-slate-900 p-1 shadow-md transition-transform duration-300 group-hover:scale-105 group-hover:border-[var(--gold)]">
                       <img
                         src={founderImg}
-                        alt="Pratham Aggarwal — Co-Founder & Proprietor"
+                        alt="Pratham Aggarwal, Founder & Proprietor"
                         className="h-full w-full object-cover rounded-xl"
                       />
                     </div>
@@ -66,7 +66,7 @@ export function FounderSection({ className = "" }: { className?: string }) {
                       Pratham Aggarwal
                     </h3>
                     <p className="text-[var(--gold)] font-medium text-[11px] uppercase tracking-wider mt-0.5">
-                      Co-Founder &amp; Proprietor
+                      Founder &amp; Proprietor
                     </p>
                     <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground mt-1">
                       <MapPin className="h-3 w-3 text-emerald-400" /> Surat Textile Hub
@@ -84,7 +84,7 @@ export function FounderSection({ className = "" }: { className?: string }) {
                           Pratham Aggarwal
                         </h3>
                         <p className="text-[var(--gold)] font-bold text-xs uppercase tracking-widest mt-0.5">
-                          Co-Founder &amp; Proprietor · Mapps Creation
+                          Founder &amp; Proprietor · Mapps Creation
                         </p>
                       </div>
                       <span className="border border-[var(--gold)]/30 text-[var(--gold)] font-semibold text-[10px] tracking-wider uppercase px-3 py-1 rounded-full flex items-center gap-1">
@@ -97,7 +97,7 @@ export function FounderSection({ className = "" }: { className?: string }) {
                   <div className="relative bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 sm:p-4">
                     <Quote className="h-4 w-4 text-[var(--gold)]/40 absolute top-3 left-3 rotate-180" />
                     <p className="font-serif italic text-xs sm:text-sm md:text-base leading-relaxed text-slate-200 pl-4 sm:pl-5">
-                      &ldquo;Our commitment is simple — to provide garment manufacturers and
+                      &ldquo;Our commitment is simple: to provide garment manufacturers and
                       exporters across India with uncompromising fabric quality, precise GSM
                       specifications, and honest direct pricing straight from Surat&rsquo;s textile
                       hub.&rdquo;
@@ -167,13 +167,13 @@ export function FounderSection({ className = "" }: { className?: string }) {
             >
               <img
                 src={founderImg}
-                alt="Pratham Aggarwal — Full View"
+                alt="Pratham Aggarwal, full view"
                 className="max-h-[75vh] w-auto max-w-full rounded-2xl object-contain"
               />
               <div className="bg-slate-950/90 p-3.5 text-center">
                 <h4 className="font-serif text-lg font-bold text-foreground">Pratham Aggarwal</h4>
                 <p className="text-[var(--gold)] text-xs font-semibold uppercase tracking-wider mt-0.5">
-                  Co-Founder &amp; Proprietor · Mapps Creation, Surat
+                  Founder &amp; Proprietor · Mapps Creation, Surat
                 </p>
               </div>
             </motion.div>
