@@ -389,10 +389,10 @@ export function AskUsChat({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.96 }}
             transition={{ duration: 0.28, ease: EASE_REVEAL }}
-            className="border-amber-500/20 bg-[#070D19]/98 backdrop-blur-3xl text-foreground safe-bottom fixed inset-x-0 bottom-0 z-[96] flex h-[85vh] flex-col border rounded-t-3xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] md:h-[500px] md:w-[380px] md:inset-x-auto md:bottom-24 md:left-6 md:rounded-2xl touch-pan-y overscroll-contain overflow-hidden"
+            className="border-amber-500/20 bg-[#070D19]/98 backdrop-blur-3xl text-foreground safe-bottom fixed inset-0 z-[200] flex h-dvh w-full flex-col shadow-[0_20px_60px_rgba(0,0,0,0.85)] md:inset-auto md:z-[96] md:bottom-24 md:left-6 md:h-[500px] md:w-[380px] md:rounded-2xl md:border touch-pan-y overscroll-contain overflow-hidden"
           >
             {/* Header HUD */}
-            <div className="border-b border-slate-800/80 bg-slate-950/90 px-4 py-3 flex items-center justify-between gap-3 shrink-0">
+            <div className="border-b border-slate-800/80 bg-slate-950/90 px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] md:pt-3 flex items-center justify-between gap-3 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="shrink-0">
                   <SiriLiquidAiCore state={aiVisualState} size={42} />
