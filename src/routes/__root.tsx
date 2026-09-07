@@ -104,12 +104,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon-32.png", type: "image/png", sizes: "32x32" },
       { rel: "icon", href: "/favicon-16.png", type: "image/png", sizes: "16x16" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap",
-      },
+      // Fonts are now self-hosted (see styles.css) — no external Google
+      // Fonts request, so no preconnect/stylesheet needed here anymore.
     ],
     // Organization + WebSite JSON-LD, once here at the root so it's present
     // on every indexable page (helps AI/search engines resolve "who is behind
