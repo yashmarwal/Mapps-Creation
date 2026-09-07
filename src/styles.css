@@ -291,23 +291,27 @@
 }
 
 /* Text used to hard-clip right at the band's edges (overflow-hidden alone).
-   This fades it to transparent over the last ~8% instead, so it dissolves
-   rather than getting cut off mid-character. */
-@utility marquee-fade {
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 8%,
-    black 92%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 8%,
-    black 92%,
-    transparent 100%
-  );
+   These sit on top of the scrolling text and fade FROM the band's own solid
+   color TO transparent, so the text dissolves into the band — not the
+   earlier mistake of masking the whole band (which faded its background
+   too, letting the page behind the fixed bar show through at the edges). */
+@utility marquee-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8%;
+  min-width: 32px;
+  max-width: 90px;
+  pointer-events: none;
+  z-index: 1;
+}
+@utility marquee-edge-left {
+  left: 0;
+  background: linear-gradient(to right, var(--primary), transparent);
+}
+@utility marquee-edge-right {
+  right: 0;
+  background: linear-gradient(to left, var(--primary), transparent);
 }
 
 @keyframes attention-pulse {

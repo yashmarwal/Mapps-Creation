@@ -59,7 +59,7 @@ export function TopMarquee({ visible, text }: { visible: boolean; text: string }
   if (!visible) return null;
 
   return (
-    <div className="bg-primary text-primary-foreground marquee-fade fixed inset-x-0 top-0 z-[101] flex h-9 items-center overflow-hidden">
+    <div className="bg-primary text-primary-foreground fixed inset-x-0 top-0 z-[101] flex h-9 items-center overflow-hidden">
       <div
         ref={trackRef}
         className="marquee-track flex w-max gap-10"
@@ -75,6 +75,11 @@ export function TopMarquee({ visible, text }: { visible: boolean; text: string }
           </div>
         ))}
       </div>
+      {/* Sit on top of the track and fade from the band's own solid color to
+          transparent, so text dissolves into the band's edge instead of
+          getting hard-clipped — never touches the band's own background. */}
+      <div className="marquee-edge marquee-edge-left" aria-hidden="true" />
+      <div className="marquee-edge marquee-edge-right" aria-hidden="true" />
     </div>
   );
 }
