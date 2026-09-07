@@ -36,6 +36,14 @@ User-agent: PerplexityBot
 Allow: /
 Disallow: /admin
 
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin
+
+User-agent: DuckAssistBot
+Allow: /
+Disallow: /admin
+
 User-agent: Amazonbot
 Allow: /
 Disallow: /admin
