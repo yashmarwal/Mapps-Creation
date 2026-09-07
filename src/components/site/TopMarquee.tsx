@@ -59,7 +59,7 @@ export function TopMarquee({ visible, text }: { visible: boolean; text: string }
   if (!visible) return null;
 
   return (
-    <div className="bg-primary text-primary-foreground fixed inset-x-0 top-0 z-[101] flex h-9 items-center overflow-hidden">
+    <div className="bg-primary text-primary-foreground marquee-fade fixed inset-x-0 top-0 z-[101] flex h-9 items-center overflow-hidden">
       <div
         ref={trackRef}
         className="marquee-track flex w-max gap-10"

@@ -276,6 +276,11 @@
   animation: marquee 28s linear infinite;
 }
 
+/* Lets a visitor actually stop and read a message instead of chasing it. */
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);
@@ -283,6 +288,26 @@
   to {
     transform: translateX(-50%);
   }
+}
+
+/* Text used to hard-clip right at the band's edges (overflow-hidden alone).
+   This fades it to transparent over the last ~8% instead, so it dissolves
+   rather than getting cut off mid-character. */
+@utility marquee-fade {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  );
 }
 
 @keyframes attention-pulse {
