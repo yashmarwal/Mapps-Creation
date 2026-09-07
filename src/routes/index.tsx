@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Check, SendHorizontal } from "lucide-react";
+import { ArrowRight, Check, SendHorizontal, Sparkles } from "lucide-react";
 import { useRef } from "react";
 
 import heroDesktopVideo from "@/assets/hero-desktop.mp4";
@@ -210,9 +210,16 @@ function Home() {
             </a>
             <Link
               to="/catalogue"
-              className="border-primary/60 text-primary hover:bg-primary hover:text-primary-foreground label-caps hidden min-h-[52px] items-center gap-2 border px-7 transition-colors duration-500 sm:inline-flex"
+              className="btn-hero-catalogue group"
+              title="Explore Fabric Catalogue"
             >
-              Explore the Catalogue <ArrowRight className="h-4 w-4" />
+              <span className="btn-text-effect">
+                <span className="hero-emoji-motion" role="img" aria-label="Fabric thread">
+                  🧵
+                </span>
+                <span>Explore Catalogue</span>
+                <ArrowRight className="h-4 w-4 text-[#0b1524] transition-transform duration-300 group-hover:translate-x-1.5" />
+              </span>
             </Link>
           </motion.div>
 
