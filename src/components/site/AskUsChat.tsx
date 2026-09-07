@@ -15,6 +15,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { askAiAssistant } from "@/lib/aiAssistant.server";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useVisualViewportInsets } from "@/hooks/useVisualViewportInsets";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
 import { BrandGlowOrb, type CopilotState } from "./icons/BrandGlowOrb";
 import { SiriLiquidAiCore, type AIVisualState } from "./SiriLiquidAiCore";
@@ -165,6 +167,22 @@ export function AskUsChat({
   const [proactiveNudge, setProactiveNudge] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Mobile keyboard handling: the full-screen panel is `fixed inset-0
+  // h-dvh`, but mobile browsers disagree on what opening the keyboard does
+  // to that — some shrink the layout viewport (dvh alone would be fine),
+  // others just scroll the page underneath the fixed panel while reporting
+  // the same height, which is what made the whole panel visibly jump/shift
+  // upward instead of the keyboard simply covering the bottom of it.
+  // `visualViewport.height` is always > 0 once available (keyboard up or
+  // not) — this isn't "is the keyboard open," it's "do we have a live
+  // reading to trust instead of CSS viewport units," which is true the
+  // whole time the panel is open on mobile and keeps it in sync whether
+  // the keyboard opens, closes, or never appears at all. Desktop's floating
+  // panel never enables this — it doesn't have a keyboard to worry about.
+  const isMobile = useIsMobile();
+  const keyboardInsets = useVisualViewportInsets(open && isMobile);
+  const trackingViewport = keyboardInsets.height > 0;
 
   // Derive typing / idle state smoothly when user interacts with input
   useEffect(() => {
@@ -389,6 +407,16 @@ export function AskUsChat({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.96 }}
             transition={{ duration: 0.28, ease: EASE_REVEAL }}
+            // On mobile, pin the panel to exactly what VisualViewport
+            // reports as visible instead of trusting `h-dvh`/`inset-0`
+            // alone — see useVisualViewportInsets for why. Omitted entirely
+            // (falls through to the Tailwind classes below) on desktop, and
+            // for one tick before the effect above has a reading yet —
+            // `exactOptionalPropertyTypes` wants the prop left off, not set
+            // to `undefined`.
+            {...(trackingViewport
+              ? { style: { height: keyboardInsets.height, top: keyboardInsets.offsetTop } }
+              : {})}
             className="border-amber-500/20 bg-[#070D19]/98 backdrop-blur-3xl text-foreground safe-bottom fixed inset-0 z-[200] flex h-dvh w-full flex-col shadow-[0_20px_60px_rgba(0,0,0,0.85)] md:inset-auto md:z-[96] md:bottom-24 md:left-6 md:h-[500px] md:w-[380px] md:rounded-2xl md:border touch-pan-y overscroll-contain overflow-hidden"
           >
             {/* Header HUD */}
