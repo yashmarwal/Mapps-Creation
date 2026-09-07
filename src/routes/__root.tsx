@@ -156,7 +156,20 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // `location.pathname` flips to the target route the instant navigation
+  // *starts* — before that route's code has even finished loading. Keying
+  // the page-transition div (and the scroll reset) off that meant a route
+  // visited for the first time (its chunk not cached yet) would unmount the
+  // outgoing page immediately and render a blank Outlet until the new chunk
+  // arrived, reading as "the page refreshes, then switches." `resolvedLocation`
+  // is a separate store TanStack Router only updates once the navigation has
+  // fully resolved (code loaded, ready to render) — exactly the "safe to swap
+  // now" signal we want, so the outgoing page stays put until the new one is
+  // actually ready instead of leaving a gap. Falls back to `location` for the
+  // very first render, before any client-side nav has happened yet.
+  const pathname = useRouterState({
+    select: (s) => s.resolvedLocation?.pathname ?? s.location.pathname,
+  });
   const isAdmin = pathname.startsWith("/admin");
   const { settings: marquee, visible: marqueeVisible } = useMarqueeSettings();
   const [askOpen, setAskOpen] = useState(false);
