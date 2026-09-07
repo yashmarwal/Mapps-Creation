@@ -108,6 +108,59 @@ export function StampHeading({
   );
 }
 
+/**
+ * Line-by-line Haute Couture Blur-to-Focus reveal.
+ * Smoothly transitions from soft focus blur (12px) to crisp text without overflow clipping.
+ */
+export function BlurHeading({
+  lines,
+  lineClassNames,
+  className,
+  delay = 0,
+  as: Tag = "h1",
+  play = true,
+}: {
+  lines: string[];
+  lineClassNames?: string[];
+  className?: string;
+  delay?: number;
+  as?: "h1" | "h2" | "p";
+  play?: boolean;
+}) {
+  const reduced = useReducedMotion();
+
+  const animateTarget = play
+    ? reduced
+      ? { opacity: 1 }
+      : { opacity: 1, filter: "blur(0px)", y: 0, scale: 1 }
+    : reduced
+      ? { opacity: 0 }
+      : { opacity: 0, filter: "blur(12px)", y: 20, scale: 1.02 };
+
+  return (
+    <Tag className={className}>
+      {lines.map((line, i) => (
+        <motion.span
+          key={line}
+          className={`block ${lineClassNames?.[i] ?? ""}`}
+          initial={
+            reduced ? { opacity: 0 } : { opacity: 0, filter: "blur(12px)", y: 20, scale: 1.02 }
+          }
+          animate={animateTarget}
+          transition={{
+            duration: 1.0,
+            ease: EASE_REVEAL,
+            delay: delay + i * 0.18,
+          }}
+          style={{ willChange: "filter, transform, opacity" }}
+        >
+          {line}
+        </motion.span>
+      ))}
+    </Tag>
+  );
+}
+
 /** IntersectionObserver-gated count-up, fires once at ~40% visibility. */
 export function CountUp({
   to,

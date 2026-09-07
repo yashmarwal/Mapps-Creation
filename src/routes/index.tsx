@@ -9,6 +9,7 @@ import { CATEGORIES } from "@/data/catalog";
 import { ProductCard, ProductCardSkeleton } from "@/components/site/ProductCard";
 import { CtaBand } from "@/components/site/CtaBand";
 import {
+  BlurHeading,
   CountUp,
   EASE_REVEAL,
   MagneticButton,
@@ -170,13 +171,13 @@ function Home() {
             01 / SURAT TEXTILE HUB
           </motion.p>
 
-          <StampHeading
+          <BlurHeading
             as="h1"
             lines={["Knitting Dreams", "Into Reality"]}
+            lineClassNames={["text-foreground", "text-gold-gradient"]}
             delay={base + 0.1}
             play={ready}
-            className="display-xl mt-4 max-w-4xl text-gold-gradient"
-            lineClassName="text-foreground"
+            className="display-xl mt-4 max-w-4xl"
           />
 
           <motion.p
