@@ -71,4 +71,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://mappscreation.com/sitemap.xml
+Sitemap: https://mappscreation.in/sitemap.xml

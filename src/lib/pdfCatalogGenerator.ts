@@ -208,7 +208,7 @@ export async function generateB2bPdfCatalog(options: PdfCatalogOptions = {}): Pr
           align: "right",
         },
       );
-      doc.text(`Web: mappscreation.com | Email: ${SITE.email}`, pageWidth - margin, 23, {
+      doc.text(`Web: mappscreation.in | Email: ${SITE.email}`, pageWidth - margin, 23, {
         align: "right",
       });
     } else {

@@ -5,8 +5,8 @@ export const SITE = {
   phone: "+917046009423",
   phoneDisplay: "+91 70460 09423",
   email: "mappscreation@gmail.com",
-  url: "https://mappscreation.com",
-  ogImage: "https://mappscreation.com/og-image.png",
+  url: "https://mappscreation.in",
+  ogImage: "https://mappscreation.in/og-image.png",
 } as const;
 
 export const WHATSAPP_BASE = `https://wa.me/${SITE.phone.replace("+", "")}`;
