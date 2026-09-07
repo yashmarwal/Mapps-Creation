@@ -163,23 +163,35 @@ function WholesaleForm() {
         required
         value={fields.businessType}
         onChange={set("businessType")}
-        className="border-border bg-card text-foreground focus:border-primary min-h-[48px] border-b bg-transparent px-1 py-3 text-sm outline-none transition-colors"
+        className="border-border bg-[#0B1524] text-slate-100 focus:border-primary min-h-[48px] border-b bg-transparent px-1 py-3 text-sm outline-none transition-colors [&>option]:bg-[#0B1524] [&>option]:text-slate-100 cursor-pointer"
       >
-        <option value="">Business Type</option>
-        <option value="Garment Manufacturer">Garment Manufacturer</option>
-        <option value="Exporter">Exporter</option>
-        <option value="Trader / Distributor">Trader / Distributor</option>
-        <option value="Other">Other</option>
+        <option value="" className="bg-[#0B1524] text-slate-400">
+          Business Type
+        </option>
+        <option value="Garment Manufacturer" className="bg-[#0B1524] text-slate-100">
+          Garment Manufacturer
+        </option>
+        <option value="Exporter" className="bg-[#0B1524] text-slate-100">
+          Exporter
+        </option>
+        <option value="Trader / Distributor" className="bg-[#0B1524] text-slate-100">
+          Trader / Distributor
+        </option>
+        <option value="Other" className="bg-[#0B1524] text-slate-100">
+          Other
+        </option>
       </select>
 
       <select
         value={fields.interest}
         onChange={set("interest")}
-        className="border-border bg-card text-foreground focus:border-primary min-h-[48px] border-b bg-transparent px-1 py-3 text-sm outline-none transition-colors"
+        className="border-border bg-[#0B1524] text-slate-100 focus:border-primary min-h-[48px] border-b bg-transparent px-1 py-3 text-sm outline-none transition-colors [&>option]:bg-[#0B1524] [&>option]:text-slate-100 cursor-pointer"
       >
-        <option value="">Fabric Category of Interest</option>
+        <option value="" className="bg-[#0B1524] text-slate-400">
+          Fabric Category of Interest
+        </option>
         {CATEGORIES.map((c) => (
-          <option key={c} value={c}>
+          <option key={c} value={c} className="bg-[#0B1524] text-slate-100">
             {c}
           </option>
         ))}

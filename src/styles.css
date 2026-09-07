@@ -501,3 +501,15 @@
   animation: gold-border-sweep 4s ease-in-out infinite;
 }
 
+/* Fix Native HTML Select Options Popup Visibility (Dark Theme Dropdown) */
+select option,
+optgroup option {
+  background-color: #0b1524 !important;
+  color: #f8fafc !important;
+}
+
+select option:checked {
+  background-color: #1e293b !important;
+  color: #fbbf24 !important;
+}
+
