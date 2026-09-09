@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase, supabaseConfigured, type ProductRow } from "@/lib/supabase";
 import { PRODUCTS, type Product } from "@/data/catalog";
+import placeholderImage from "@/assets/product-image-placeholder.svg";
 
+// An admin can save a product before uploading its photo (or skip it
+// entirely). `image_url` is then `null`, and every image consumer in the
+// app (grid card, mobile card, preview modal, PDF catalogue, share links)
+// just does `<img src={product.image}>` with no fallback of its own — that
+// rendered as a broken-image icon (`src=""`) instead of anything useful.
+// Falling back here, once, means every consumer gets a real placeholder
+// automatically instead of each needing its own onError handler.
 function fromRow(row: ProductRow): Product {
   return {
     id: row.id,
@@ -10,7 +18,11 @@ function fromRow(row: ProductRow): Product {
     price: row.price,
     unit: row.unit,
     spec: row.spec,
-    image: row.image_url || "",
+    image: row.image_url || placeholderImage,
+    // Omit the key entirely rather than setting it to `undefined` —
+    // `exactOptionalPropertyTypes` treats those as different things for an
+    // optional property.
+    ...(row.image_url_2 ? { image2: row.image_url_2 } : {}),
     featured: row.is_featured,
   };
 }

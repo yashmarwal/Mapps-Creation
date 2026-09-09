@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <rect width="800" height="600" fill="#0F2038" />
+  <rect width="800" height="600" fill="url(#grad)" opacity="0.5" />
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#16274a" />
+      <stop offset="1" stop-color="#0b1730" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(400 255)" opacity="0.85">
+    <path
+      d="M-48 -34 L48 -34 L60 -18 L60 34 C60 40 55 45 48 45 L-48 45 C-55 45 -60 40 -60 34 L-60 -18 Z"
+      fill="none"
+      stroke="#C9A66B"
+      stroke-width="3"
+      stroke-linejoin="round"
+    />
+    <path d="M-60 -18 L-30 -18 L-18 -34" fill="none" stroke="#C9A66B" stroke-width="3" stroke-linejoin="round" />
+    <path d="M60 -18 L30 -18 L18 -34" fill="none" stroke="#C9A66B" stroke-width="3" stroke-linejoin="round" />
+    <circle cx="0" cy="8" r="17" fill="none" stroke="#C9A66B" stroke-width="3" />
+    <path d="M-9 15 L-1 4 L6 11 L11 3 L18 15 Z" fill="#C9A66B" />
+  </g>
+  <text
+    x="400"
+    y="330"
+    text-anchor="middle"
+    font-family="Arial, sans-serif"
+    font-size="16"
+    letter-spacing="3"
+    fill="#C9A66B"
+    opacity="0.85"
+  >
+    IMAGE COMING SOON
+  </text>
+</svg>
