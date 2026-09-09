@@ -14,7 +14,13 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
   const ref = useRef<HTMLElement>(null);
   const [sheen, setSheen] = useState({ x: 50, y: 50, active: false });
   const [preview, setPreview] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
   const { addItem, items } = useQuoteBasket();
+
+  // `product.image` always has something (falls back to a placeholder in
+  // useProducts), `image2` is admin-optional — only show a second thumbnail
+  // when it's genuinely there.
+  const galleryImages = product.image2 ? [product.image, product.image2] : [product.image];
 
   const isAdded = items.some((i) => i.id === product.id);
 
@@ -26,6 +32,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
 
   useEffect(() => {
     if (!preview) return;
+    setActiveImage(0);
     document.body.style.overflow = "hidden";
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setPreview(false);
@@ -289,10 +296,28 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
 
               <div className="relative aspect-[4/3] sm:aspect-auto bg-slate-950">
                 <img
-                  src={product.image}
+                  src={galleryImages[activeImage]}
                   alt={`${product.name}, ${product.category} fabric from Mapps Creation, Surat`}
                   className="h-full w-full object-cover"
                 />
+                {galleryImages.length > 1 && (
+                  <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
+                    {galleryImages.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={(e) => {
+                          stop(e);
+                          setActiveImage(i);
+                        }}
+                        aria-label={`Show photo ${i + 1}`}
+                        className={`h-2.5 w-2.5 rounded-full border border-white/60 transition-all cursor-pointer ${
+                          activeImage === i ? "bg-white" : "bg-white/20 hover:bg-white/50"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col justify-center p-6 md:p-8">

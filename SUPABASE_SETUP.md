@@ -19,6 +19,12 @@ alter table products add column if not exists is_featured boolean not null defau
 drop policy if exists "Admin delete site_images" on site_images;
 create policy "Admin delete site_images" on site_images
   for delete using (auth.role() = 'authenticated');
+
+-- Second product photo (admin panel now has an optional "Image 2" upload).
+-- REQUIRED before that panel change goes live — without this column,
+-- saving *any* product (new or edited) will fail with a database error,
+-- since the save payload now always includes image_url_2.
+alter table products add column if not exists image_url_2 text;
 ```
 
 ## 1. Create the project
@@ -42,6 +48,7 @@ create table products (
   unit text not null check (unit in ('kg', 'meter')),
   spec text not null,
   image_url text,
+  image_url_2 text,
   is_active boolean not null default true,
   is_featured boolean not null default false,
   created_at timestamptz not null default now()

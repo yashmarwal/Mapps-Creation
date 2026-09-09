@@ -15,6 +15,7 @@ const EMPTY_FORM = {
   unit: "kg" as "kg" | "meter",
   spec: "",
   image_url: "",
+  image_url_2: "",
   is_active: true,
 };
 
@@ -24,7 +25,7 @@ export function ProductsPanel() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [isOtherCategory, setIsOtherCategory] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<1 | 2 | null>(null);
   const [uploadStatus, setUploadStatus] = useState("");
   const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +55,7 @@ export function ProductsPanel() {
       unit: row.unit,
       spec: row.spec,
       image_url: row.image_url ?? "",
+      image_url_2: row.image_url_2 ?? "",
       is_active: row.is_active,
     });
     setIsOtherCategory(!(CATEGORIES as readonly string[]).includes(row.category));
@@ -66,8 +68,8 @@ export function ProductsPanel() {
     setEditing(false);
   };
 
-  const handleUpload = async (file: File) => {
-    setUploading(true);
+  const handleUpload = async (file: File, slot: 1 | 2) => {
+    setUploading(slot);
     setError(null);
     setUploadStatus(
       file.size > IMAGE_COMPRESS_TARGET_MB * 1024 * 1024 ? "Compressing image..." : "Uploading...",
@@ -81,7 +83,7 @@ export function ProductsPanel() {
     const sizeError = checkUploadSize(upload);
     if (sizeError) {
       setError(sizeError);
-      setUploading(false);
+      setUploading(null);
       setUploadStatus("");
       return;
     }
@@ -95,13 +97,15 @@ export function ProductsPanel() {
       });
     if (uploadError) {
       setError(uploadError.message);
-      setUploading(false);
+      setUploading(null);
       setUploadStatus("");
       return;
     }
     const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-    setForm((f) => ({ ...f, image_url: data.publicUrl }));
-    setUploading(false);
+    setForm((f) =>
+      slot === 1 ? { ...f, image_url: data.publicUrl } : { ...f, image_url_2: data.publicUrl },
+    );
+    setUploading(null);
     setUploadStatus("");
   };
 
@@ -115,6 +119,7 @@ export function ProductsPanel() {
       unit: form.unit,
       spec: form.spec,
       image_url: form.image_url || null,
+      image_url_2: form.image_url_2 || null,
       is_active: form.is_active,
     };
 
@@ -254,6 +259,7 @@ export function ProductsPanel() {
         unit: p.unit,
         spec: p.spec,
         image_url: p.image,
+        image_url_2: p.image2 || null,
         is_active: true,
       })),
     );
@@ -390,24 +396,55 @@ export function ProductsPanel() {
             />
           </label>
 
-          <label className="block">
-            <span className="label-caps text-muted-foreground">Image</span>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
-              className="mt-2 block text-sm"
-            />
-            <p className="text-muted-foreground/70 mt-1 text-[11px]">
-              Large photos are auto-compressed to under {IMAGE_COMPRESS_TARGET_MB}MB before upload.
-            </p>
-            {uploading && (
-              <p className="text-muted-foreground mt-1 text-xs">{uploadStatus || "Uploading..."}</p>
-            )}
-            {form.image_url && (
-              <img src={form.image_url} alt="Preview" className="mt-3 h-24 w-24 object-cover" />
-            )}
-          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block">
+              <span className="label-caps text-muted-foreground">Image 1 (main)</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], 1)}
+                className="mt-2 block text-sm"
+              />
+              {uploading === 1 && (
+                <p className="text-muted-foreground mt-1 text-xs">
+                  {uploadStatus || "Uploading..."}
+                </p>
+              )}
+              {form.image_url && (
+                <img src={form.image_url} alt="Preview" className="mt-3 h-24 w-24 object-cover" />
+              )}
+            </label>
+            <label className="block">
+              <span className="label-caps text-muted-foreground">Image 2 (optional)</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], 2)}
+                className="mt-2 block text-sm"
+              />
+              {uploading === 2 && (
+                <p className="text-muted-foreground mt-1 text-xs">
+                  {uploadStatus || "Uploading..."}
+                </p>
+              )}
+              {form.image_url_2 && (
+                <div className="mt-3 flex items-center gap-2">
+                  <img src={form.image_url_2} alt="Preview" className="h-24 w-24 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, image_url_2: "" }))}
+                    className="text-muted-foreground hover:text-destructive label-caps text-[11px]"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </label>
+          </div>
+          <p className="text-muted-foreground/70 -mt-2 text-[11px]">
+            Large photos are auto-compressed to under {IMAGE_COMPRESS_TARGET_MB}MB before upload.
+            Image 2 is optional — shown alongside the main photo on the product's detail view.
+          </p>
 
           <label className="flex items-center gap-2 text-sm">
             <input

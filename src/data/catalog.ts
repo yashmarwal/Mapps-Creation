@@ -26,6 +26,9 @@ export type Product = {
   unit: "kg" | "meter";
   spec: string;
   image: string;
+  // Optional second product photo — most seed/catalogue products only have
+  // one, but an admin can upload a second angle/shade from the panel.
+  image2?: string;
   featured?: boolean;
 };
 

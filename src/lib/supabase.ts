@@ -14,6 +14,9 @@ export type ProductRow = {
   unit: "kg" | "meter";
   spec: string;
   image_url: string | null;
+  // Optional second product photo — column added after the original launch,
+  // see the "Already have a project running?" section of SUPABASE_SETUP.md.
+  image_url_2: string | null;
   is_active: boolean;
   is_featured: boolean;
   created_at: string;
