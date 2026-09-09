@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Check, Mail, Plus, SendHorizontal, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Mail, Plus, SendHorizontal, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { EASE_REVEAL, EASE_UI, Reveal } from "./motion";
 import type { Product } from "@/data/catalog";
@@ -15,12 +15,22 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
   const [sheen, setSheen] = useState({ x: 50, y: 50, active: false });
   const [preview, setPreview] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [showSwipeHint, setShowSwipeHint] = useState(false);
   const { addItem, items } = useQuoteBasket();
 
   // `product.image` always has something (falls back to a placeholder in
   // useProducts), `image2` is admin-optional — only show a second thumbnail
   // when it's genuinely there.
   const galleryImages = product.image2 ? [product.image, product.image2] : [product.image];
+  const hasGallery = galleryImages.length > 1;
+  const galleryCount = galleryImages.length;
+  // Delta-based and via the functional setState form so keyboard/swipe/arrow
+  // handlers always read whatever the current image actually is — they're
+  // wired up once (in an effect that only depends on `preview`, not
+  // `activeImage`), so a version that captured `activeImage` from the
+  // outer scope would go stale after the first press/swipe.
+  const stepImage = (delta: number) =>
+    setActiveImage((prev) => (prev + delta + galleryCount) % galleryCount);
 
   const isAdded = items.some((i) => i.id === product.id);
 
@@ -34,14 +44,30 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
     if (!preview) return;
     setActiveImage(0);
     document.body.style.overflow = "hidden";
+
+    // Briefly show a "swipe for more" hint the first time this product's
+    // gallery opens with a second photo, then let it fade — teaches the
+    // gesture without nagging on every single open.
+    let hintTimer: number | undefined;
+    if (hasGallery) {
+      setShowSwipeHint(true);
+      hintTimer = window.setTimeout(() => setShowSwipeHint(false), 2600);
+    }
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setPreview(false);
+      if (e.key === "ArrowRight") stepImage(1);
+      if (e.key === "ArrowLeft") stepImage(-1);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKeyDown);
+      if (hintTimer) window.clearTimeout(hintTimer);
     };
+    // stepImage/hasGallery are stable across a given product's renders
+    // (derived from props, not state) — only `preview` should retrigger this.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preview]);
 
   const fine = () =>
@@ -294,29 +320,87 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
                 <X className="h-4 w-4" />
               </button>
 
-              <div className="relative aspect-[4/3] sm:aspect-auto bg-slate-950">
-                <img
+              <div className="relative aspect-[4/3] sm:aspect-auto bg-slate-950 overflow-hidden">
+                <motion.img
+                  key={activeImage}
                   src={galleryImages[activeImage]}
                   alt={`${product.name}, ${product.category} fabric from Mapps Creation, Surat`}
-                  className="h-full w-full object-cover"
+                  className={`h-full w-full object-cover ${hasGallery ? "cursor-grab active:cursor-grabbing" : ""}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.25, ease: EASE_UI }}
+                  drag={hasGallery ? "x" : false}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.2}
+                  onDragEnd={(_, info) => {
+                    const SWIPE_PX = 60;
+                    const SWIPE_VELOCITY = 400;
+                    if (info.offset.x < -SWIPE_PX || info.velocity.x < -SWIPE_VELOCITY) {
+                      stepImage(1);
+                    } else if (info.offset.x > SWIPE_PX || info.velocity.x > SWIPE_VELOCITY) {
+                      stepImage(-1);
+                    }
+                  }}
                 />
-                {galleryImages.length > 1 && (
-                  <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
-                    {galleryImages.map((_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={(e) => {
-                          stop(e);
-                          setActiveImage(i);
-                        }}
-                        aria-label={`Show photo ${i + 1}`}
-                        className={`h-2.5 w-2.5 rounded-full border border-white/60 transition-all cursor-pointer ${
-                          activeImage === i ? "bg-white" : "bg-white/20 hover:bg-white/50"
-                        }`}
-                      />
-                    ))}
-                  </div>
+
+                {hasGallery && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        stop(e);
+                        stepImage(-1);
+                      }}
+                      aria-label="Previous photo"
+                      className="absolute top-1/2 left-2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur transition-all hover:bg-black/60 cursor-pointer"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        stop(e);
+                        stepImage(1);
+                      }}
+                      aria-label="Next photo"
+                      className="absolute top-1/2 right-2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur transition-all hover:bg-black/60 cursor-pointer"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+
+                    <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
+                      {galleryImages.map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={(e) => {
+                            stop(e);
+                            setActiveImage(i);
+                          }}
+                          aria-label={`Show photo ${i + 1}`}
+                          className={`h-2.5 w-2.5 rounded-full border border-white/60 transition-all cursor-pointer ${
+                            activeImage === i ? "bg-white" : "bg-white/20 hover:bg-white/50"
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    <AnimatePresence>
+                      {showSwipeHint && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 8 }}
+                          transition={{ duration: 0.3, ease: EASE_UI }}
+                          className="pointer-events-none absolute top-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[10px] font-semibold tracking-wider text-white uppercase backdrop-blur"
+                        >
+                          <ChevronLeft className="h-3 w-3" />
+                          Swipe for more
+                          <ChevronRight className="h-3 w-3" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
                 )}
               </div>
 
