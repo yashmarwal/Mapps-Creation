@@ -35,7 +35,6 @@ const LINKS = [
     to: "/catalogue",
     label: "Catalogue",
     num: "02",
-    desc: "500+ Lycra & Knitted Fabrics",
     icon: Layers,
     badge: "500+ Types",
   },
@@ -337,9 +336,11 @@ export function Navigation({
                                 </span>
                               )}
                             </div>
-                            <span className="text-[11px] text-slate-400 font-sans font-normal truncate mt-0.5">
-                              {link.desc}
-                            </span>
+                            {"desc" in link && link.desc && (
+                              <span className="text-[11px] text-slate-400 font-sans font-normal truncate mt-0.5">
+                                {link.desc}
+                              </span>
+                            )}
                           </div>
                         </div>
 
