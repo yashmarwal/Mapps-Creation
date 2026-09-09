@@ -21,14 +21,27 @@ export function checkUploadSize(file: File): string | null {
 export const IMAGE_COMPRESS_TARGET_MB = 2;
 const IMAGE_COMPRESS_TARGET_BYTES = IMAGE_COMPRESS_TARGET_MB * 1024 * 1024;
 
+// Product photos are only ever displayed at modest sizes on the site (card
+// thumbnails, a preview modal maxing out around 1024px wide) — a phone
+// camera shot arrives at 3000-4000px+ on the longest side, and every one of
+// those extra pixels costs file size for zero visible benefit at display
+// size. Capping resolution *before* touching JPEG quality means the quality
+// loop below almost never has to drop quality far to hit the target, which
+// is what actually avoids visible degradation — shrinking dimensions
+// preserves a photo's *look* far better than a low JPEG quality setting on
+// an oversized image does.
+const MAX_DIMENSION_PX = 1600;
+export const PRODUCT_IMAGE_COMPRESS_TARGET_MB = 1;
+
 /**
  * Re-encodes an image client-side (canvas) so a large phone-camera photo
  * never eats into the upload size limit — admins shouldn't have to
- * pre-compress product photos by hand. Shrinks JPEG quality first, then
- * dimensions if quality alone isn't enough. Leaves the file untouched if
- * it's already under the target, isn't a raster type canvas can re-encode
- * (SVG), or if anything about the process fails — original upload path
- * still works exactly as before.
+ * pre-compress product photos by hand. Caps resolution to a sane web size
+ * first, then squeezes JPEG quality (only shrinking dimensions further if
+ * quality alone still can't reach the target — rare once already capped).
+ * Leaves the file untouched if it's already under the target, isn't a
+ * raster type canvas can re-encode (SVG), or if anything about the process
+ * fails — original upload path still works exactly as before.
  */
 export async function compressImageToTarget(
   file: File,
@@ -41,6 +54,13 @@ export async function compressImageToTarget(
     const bitmap = await createImageBitmap(file);
     let width = bitmap.width;
     let height = bitmap.height;
+
+    if (width > MAX_DIMENSION_PX || height > MAX_DIMENSION_PX) {
+      const scale = MAX_DIMENSION_PX / Math.max(width, height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+
     let quality = 0.9;
     let blob: Blob | null = null;
 

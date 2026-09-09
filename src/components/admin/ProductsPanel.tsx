@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { Check, EyeOff, Pencil, Plus, Star, StarOff, Trash2 } from "lucide-react";
 import { CATEGORIES, PRODUCTS } from "@/data/catalog";
-import { checkUploadSize, compressImageToTarget, IMAGE_COMPRESS_TARGET_MB } from "@/lib/media";
+import {
+  checkUploadSize,
+  compressImageToTarget,
+  PRODUCT_IMAGE_COMPRESS_TARGET_MB,
+} from "@/lib/media";
+
+const PRODUCT_IMAGE_COMPRESS_TARGET_BYTES = PRODUCT_IMAGE_COMPRESS_TARGET_MB * 1024 * 1024;
 import { supabase, type ProductRow } from "@/lib/supabase";
 
 const OTHER_VALUE = "__other__";
@@ -72,13 +78,13 @@ export function ProductsPanel() {
     setUploading(slot);
     setError(null);
     setUploadStatus(
-      file.size > IMAGE_COMPRESS_TARGET_MB * 1024 * 1024 ? "Compressing image..." : "Uploading...",
+      file.size > PRODUCT_IMAGE_COMPRESS_TARGET_BYTES ? "Compressing image..." : "Uploading...",
     );
 
     // Auto-compress large photos (phone camera shots are often 8-15MB) down
     // to a manageable size before upload — admins shouldn't need to
     // pre-compress product photos by hand. No-ops if already small enough.
-    const upload = await compressImageToTarget(file);
+    const upload = await compressImageToTarget(file, PRODUCT_IMAGE_COMPRESS_TARGET_BYTES);
 
     const sizeError = checkUploadSize(upload);
     if (sizeError) {
@@ -442,8 +448,9 @@ export function ProductsPanel() {
             </label>
           </div>
           <p className="text-muted-foreground/70 -mt-2 text-[11px]">
-            Large photos are auto-compressed to under {IMAGE_COMPRESS_TARGET_MB}MB before upload.
-            Image 2 is optional — shown alongside the main photo on the product's detail view.
+            Large photos are auto-compressed to under {PRODUCT_IMAGE_COMPRESS_TARGET_MB}MB before
+            upload. Image 2 is optional — shown alongside the main photo on the product's detail
+            view.
           </p>
 
           <label className="flex items-center gap-2 text-sm">
