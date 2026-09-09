@@ -201,25 +201,18 @@ function Home() {
               target="_blank"
               rel="noopener noreferrer"
               title="WhatsApp Us"
-              className="btn-enquire !min-h-[52px] !text-xs !px-7"
+              className="bg-primary text-primary-foreground label-caps inline-flex min-h-[52px] items-center gap-2.5 px-7 text-xs transition-all duration-300 hover:brightness-110 active:scale-[0.98]"
             >
-              <span>
-                <SendHorizontal className="h-4 w-4" />
-                Quick Enquiry
-              </span>
+              <SendHorizontal className="h-4 w-4" />
+              Quick Enquiry
             </a>
             <Link
               to="/catalogue"
-              className="btn-hero-catalogue group"
               title="Explore Fabric Catalogue"
+              className="border-border text-foreground group label-caps inline-flex min-h-[52px] items-center gap-2.5 border px-7 text-xs transition-all duration-300 hover:border-primary hover:text-primary active:scale-[0.98]"
             >
-              <span className="btn-text-effect">
-                <span className="hero-emoji-motion" role="img" aria-label="Fabric thread">
-                  🧵
-                </span>
-                <span>Explore Catalogue</span>
-                <ArrowRight className="h-4 w-4 text-[#0b1524] transition-transform duration-300 group-hover:translate-x-1.5" />
-              </span>
+              Explore Catalogue
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </motion.div>
 
