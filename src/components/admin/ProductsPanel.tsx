@@ -1,22 +1,36 @@
 import { useEffect, useState } from "react";
 import { Check, EyeOff, Pencil, Plus, Star, StarOff, Trash2 } from "lucide-react";
-import { CATEGORIES, PRODUCTS } from "@/data/catalog";
+import { PRODUCTS } from "@/data/catalog";
 import {
   checkUploadSize,
   compressImageToTarget,
   PRODUCT_IMAGE_COMPRESS_TARGET_MB,
 } from "@/lib/media";
+import { supabase, type ProductRow } from "@/lib/supabase";
 
 const PRODUCT_IMAGE_COMPRESS_TARGET_BYTES = PRODUCT_IMAGE_COMPRESS_TARGET_MB * 1024 * 1024;
-import { supabase, type ProductRow } from "@/lib/supabase";
 
 const OTHER_VALUE = "__other__";
 const MAX_FEATURED = 6;
 
+// Scoped to this admin form only — deliberately separate from the site-wide
+// CATEGORIES in data/catalog.ts (used by the footer's fabric links, the
+// Wholesale page's inquiry form, the homepage ticker, and search), which
+// stay exactly as they are. A product's category is just a text value on
+// its own row, independent of whatever this list currently offers — so
+// existing products keep working (and stay fully visible/filterable on the
+// catalogue page) even after this list changes.
+const ADMIN_PRODUCT_CATEGORIES = [
+  "T-Shirt Fabric",
+  "Bottom Wear Fabric",
+  "Bottomwear and T-Shirt Fabric",
+  "Cord Set and T-Shirt Fabric",
+] as const;
+
 const EMPTY_FORM = {
   id: "",
   name: "",
-  category: CATEGORIES[0] as string,
+  category: ADMIN_PRODUCT_CATEGORIES[0] as string,
   price: "",
   unit: "kg" as "kg" | "meter",
   spec: "",
@@ -64,7 +78,7 @@ export function ProductsPanel() {
       image_url_2: row.image_url_2 ?? "",
       is_active: row.is_active,
     });
-    setIsOtherCategory(!(CATEGORIES as readonly string[]).includes(row.category));
+    setIsOtherCategory(!(ADMIN_PRODUCT_CATEGORIES as readonly string[]).includes(row.category));
     setEditing(true);
   };
 
@@ -337,7 +351,7 @@ export function ProductsPanel() {
                 }}
                 className="border-border bg-card mt-2 w-full min-h-[44px] border px-3"
               >
-                {CATEGORIES.map((c) => (
+                {ADMIN_PRODUCT_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
@@ -417,7 +431,16 @@ export function ProductsPanel() {
                 </p>
               )}
               {form.image_url && (
-                <img src={form.image_url} alt="Preview" className="mt-3 h-24 w-24 object-cover" />
+                <div className="mt-3 flex items-center gap-2">
+                  <img src={form.image_url} alt="Preview" className="h-24 w-24 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, image_url: "" }))}
+                    className="text-muted-foreground hover:text-destructive label-caps text-[11px]"
+                  >
+                    Remove
+                  </button>
+                </div>
               )}
             </label>
             <label className="block">
