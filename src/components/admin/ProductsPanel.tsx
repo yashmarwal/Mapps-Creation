@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, EyeOff, Pencil, Plus, Star, StarOff, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { FABRIC_TYPE_CATEGORIES, PRODUCTS } from "@/data/catalog";
 import {
   checkUploadSize,
@@ -7,6 +8,18 @@ import {
   PRODUCT_IMAGE_COMPRESS_TARGET_MB,
 } from "@/lib/media";
 import { supabase, type ProductRow } from "@/lib/supabase";
+import { ImageDropzone } from "./ImageDropzone";
+import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import placeholderImage from "@/assets/product-image-placeholder.svg";
 
 const PRODUCT_IMAGE_COMPRESS_TARGET_BYTES = PRODUCT_IMAGE_COMPRESS_TARGET_MB * 1024 * 1024;
 
@@ -32,9 +45,7 @@ export function ProductsPanel() {
   const [isOtherCategory, setIsOtherCategory] = useState(false);
   const [editing, setEditing] = useState(false);
   const [uploading, setUploading] = useState<1 | 2 | null>(null);
-  const [uploadStatus, setUploadStatus] = useState("");
   const [seeding, setSeeding] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
 
@@ -76,8 +87,7 @@ export function ProductsPanel() {
 
   const handleUpload = async (file: File, slot: 1 | 2) => {
     setUploading(slot);
-    setError(null);
-    setUploadStatus(
+    const toastId = toast.loading(
       file.size > PRODUCT_IMAGE_COMPRESS_TARGET_BYTES ? "Compressing image..." : "Uploading...",
     );
 
@@ -88,13 +98,12 @@ export function ProductsPanel() {
 
     const sizeError = checkUploadSize(upload);
     if (sizeError) {
-      setError(sizeError);
+      toast.error(sizeError, { id: toastId });
       setUploading(null);
-      setUploadStatus("");
       return;
     }
 
-    setUploadStatus("Uploading...");
+    toast.loading("Uploading...", { id: toastId });
     const path = `${Date.now()}-${upload.name}`;
     const { error: uploadError } = await supabase.storage
       .from("product-images")
@@ -102,22 +111,20 @@ export function ProductsPanel() {
         upsert: true,
       });
     if (uploadError) {
-      setError(uploadError.message);
+      toast.error(uploadError.message, { id: toastId });
       setUploading(null);
-      setUploadStatus("");
       return;
     }
     const { data } = supabase.storage.from("product-images").getPublicUrl(path);
     setForm((f) =>
       slot === 1 ? { ...f, image_url: data.publicUrl } : { ...f, image_url_2: data.publicUrl },
     );
+    toast.success(`Image ${slot} uploaded`, { id: toastId });
     setUploading(null);
-    setUploadStatus("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     const payload = {
       name: form.name,
       category: form.category,
@@ -134,16 +141,22 @@ export function ProductsPanel() {
       : await supabase.from("products").insert(payload);
 
     if (saveError) {
-      setError(saveError.message);
+      toast.error(saveError.message);
       return;
     }
+    toast.success(form.id ? "Product updated" : "Product created");
     resetForm();
     load();
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this product?")) return;
-    await supabase.from("products").delete().eq("id", id);
+    const { error: deleteError } = await supabase.from("products").delete().eq("id", id);
+    if (deleteError) {
+      toast.error(deleteError.message);
+      return;
+    }
+    toast.success("Product deleted");
     setSelectedIds((prev) => {
       if (!prev.has(id)) return prev;
       const next = new Set(prev);
@@ -154,19 +167,32 @@ export function ProductsPanel() {
   };
 
   const toggleActive = async (row: ProductRow) => {
-    await supabase.from("products").update({ is_active: !row.is_active }).eq("id", row.id);
+    const { error } = await supabase
+      .from("products")
+      .update({ is_active: !row.is_active })
+      .eq("id", row.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     load();
   };
 
   const toggleFeatured = async (row: ProductRow) => {
     if (!row.is_featured && products.filter((p) => p.is_featured).length >= MAX_FEATURED) {
-      setError(
+      toast.error(
         `Only ${MAX_FEATURED} products can be featured on the homepage at once; unfeature one first.`,
       );
       return;
     }
-    setError(null);
-    await supabase.from("products").update({ is_featured: !row.is_featured }).eq("id", row.id);
+    const { error } = await supabase
+      .from("products")
+      .update({ is_featured: !row.is_featured })
+      .eq("id", row.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     load();
   };
 
@@ -190,16 +216,16 @@ export function ProductsPanel() {
   const bulkSetActive = async (active: boolean) => {
     if (selectedIds.size === 0) return;
     setBulkBusy(true);
-    setError(null);
     const { error: bulkError } = await supabase
       .from("products")
       .update({ is_active: active })
       .in("id", [...selectedIds]);
     setBulkBusy(false);
     if (bulkError) {
-      setError(bulkError.message);
+      toast.error(bulkError.message);
       return;
     }
+    toast.success(`${selectedIds.size} product(s) ${active ? "activated" : "deactivated"}`);
     clearSelection();
     load();
   };
@@ -212,23 +238,23 @@ export function ProductsPanel() {
       ).length;
       if (alreadyFeaturedElsewhere + selectedIds.size > MAX_FEATURED) {
         const room = Math.max(0, MAX_FEATURED - alreadyFeaturedElsewhere);
-        setError(
+        toast.error(
           `Only ${MAX_FEATURED} products can be featured at once; you have room for ${room} more. Unfeature some first or select fewer.`,
         );
         return;
       }
     }
     setBulkBusy(true);
-    setError(null);
     const { error: bulkError } = await supabase
       .from("products")
       .update({ is_featured: featured })
       .in("id", [...selectedIds]);
     setBulkBusy(false);
     if (bulkError) {
-      setError(bulkError.message);
+      toast.error(bulkError.message);
       return;
     }
+    toast.success(`${selectedIds.size} product(s) ${featured ? "featured" : "unfeatured"}`);
     clearSelection();
     load();
   };
@@ -237,16 +263,16 @@ export function ProductsPanel() {
     if (selectedIds.size === 0) return;
     if (!confirm(`Delete ${selectedIds.size} selected product(s)? This can't be undone.`)) return;
     setBulkBusy(true);
-    setError(null);
     const { error: bulkError } = await supabase
       .from("products")
       .delete()
       .in("id", [...selectedIds]);
     setBulkBusy(false);
     if (bulkError) {
-      setError(bulkError.message);
+      toast.error(bulkError.message);
       return;
     }
+    toast.success(`${selectedIds.size} product(s) deleted`);
     clearSelection();
     load();
   };
@@ -256,7 +282,6 @@ export function ProductsPanel() {
       return;
     }
     setSeeding(true);
-    setError(null);
     const { error: seedError } = await supabase.from("products").insert(
       PRODUCTS.map((p) => ({
         name: p.name,
@@ -271,9 +296,10 @@ export function ProductsPanel() {
     );
     setSeeding(false);
     if (seedError) {
-      setError(seedError.message);
+      toast.error(seedError.message);
       return;
     }
+    toast.success(`${PRODUCTS.length} products loaded`);
     load();
   };
 
@@ -307,7 +333,10 @@ export function ProductsPanel() {
       </p>
 
       {editing && (
-        <form onSubmit={handleSubmit} className="border-border mt-6 space-y-4 border p-5">
+        <form
+          onSubmit={handleSubmit}
+          className="border-border bg-card/40 mt-6 space-y-5 border p-5"
+        >
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
               <span className="label-caps text-muted-foreground">Name</span>
@@ -403,58 +432,76 @@ export function ProductsPanel() {
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
+            <div>
               <span className="label-caps text-muted-foreground">Image 1 (main)</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], 1)}
-                className="mt-2 block text-sm"
-              />
-              {uploading === 1 && (
-                <p className="text-muted-foreground mt-1 text-xs">
-                  {uploadStatus || "Uploading..."}
-                </p>
-              )}
-              {form.image_url && (
-                <div className="mt-3 flex items-center gap-2">
-                  <img src={form.image_url} alt="Preview" className="h-24 w-24 object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, image_url: "" }))}
-                    className="text-muted-foreground hover:text-destructive label-caps text-[11px]"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
-            </label>
-            <label className="block">
+              <div className="mt-2">
+                {form.image_url ? (
+                  <div className="border-border flex items-center gap-3 border p-2">
+                    <img
+                      src={form.image_url}
+                      alt="Preview"
+                      className="h-16 w-16 shrink-0 object-cover"
+                    />
+                    <div className="flex flex-col gap-1.5">
+                      <ImageDropzone
+                        label="Replace"
+                        compact
+                        disabled={uploading === 1}
+                        onFile={(file) => handleUpload(file, 1)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, image_url: "" }))}
+                        className="text-muted-foreground hover:text-destructive label-caps text-[11px]"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <ImageDropzone
+                    label="Drag a photo here, or click to browse"
+                    disabled={uploading === 1}
+                    onFile={(file) => handleUpload(file, 1)}
+                  />
+                )}
+              </div>
+            </div>
+            <div>
               <span className="label-caps text-muted-foreground">Image 2 (optional)</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], 2)}
-                className="mt-2 block text-sm"
-              />
-              {uploading === 2 && (
-                <p className="text-muted-foreground mt-1 text-xs">
-                  {uploadStatus || "Uploading..."}
-                </p>
-              )}
-              {form.image_url_2 && (
-                <div className="mt-3 flex items-center gap-2">
-                  <img src={form.image_url_2} alt="Preview" className="h-24 w-24 object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, image_url_2: "" }))}
-                    className="text-muted-foreground hover:text-destructive label-caps text-[11px]"
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
-            </label>
+              <div className="mt-2">
+                {form.image_url_2 ? (
+                  <div className="border-border flex items-center gap-3 border p-2">
+                    <img
+                      src={form.image_url_2}
+                      alt="Preview"
+                      className="h-16 w-16 shrink-0 object-cover"
+                    />
+                    <div className="flex flex-col gap-1.5">
+                      <ImageDropzone
+                        label="Replace"
+                        compact
+                        disabled={uploading === 2}
+                        onFile={(file) => handleUpload(file, 2)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, image_url_2: "" }))}
+                        className="text-muted-foreground hover:text-destructive label-caps text-[11px]"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <ImageDropzone
+                    label="Drag a photo here, or click to browse"
+                    disabled={uploading === 2}
+                    onFile={(file) => handleUpload(file, 2)}
+                  />
+                )}
+              </div>
+            </div>
           </div>
           <p className="text-muted-foreground/70 -mt-2 text-[11px]">
             Large photos are auto-compressed to under {PRODUCT_IMAGE_COMPRESS_TARGET_MB}MB before
@@ -473,8 +520,6 @@ export function ProductsPanel() {
             />
             Active (visible on site)
           </label>
-
-          {error && <p className="text-destructive text-sm">{error}</p>}
 
           <div className="flex gap-3">
             <button
@@ -546,61 +591,74 @@ export function ProductsPanel() {
 
       <div data-lenis-prevent className="mt-6 overflow-x-auto">
         {loading ? (
-          <p className="text-muted-foreground text-sm">Loading...</p>
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
+          </div>
         ) : products.length === 0 ? (
           <p className="text-muted-foreground text-sm">
             No products yet. The public site shows the seed catalogue until you add some here.
           </p>
         ) : (
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead>
-              <tr className="border-border text-muted-foreground label-caps border-b">
-                <th className="py-3 pr-2">
+          <Table className="min-w-[680px]">
+            <TableHeader>
+              <TableRow className="label-caps">
+                <TableHead className="w-8">
                   <input
                     type="checkbox"
                     aria-label="Select all products"
                     checked={selectedIds.size === products.length}
                     onChange={toggleSelectAll}
                   />
-                </th>
-                <th className="py-3">Name</th>
-                <th className="py-3">Category</th>
-                <th className="py-3">Price</th>
-                <th className="py-3">Active</th>
-                <th className="py-3">Featured</th>
-                <th className="py-3" />
-              </tr>
-            </thead>
-            <tbody>
+                </TableHead>
+                <TableHead className="w-14" />
+                <TableHead>Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Active</TableHead>
+                <TableHead>Featured</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {products.map((row) => (
-                <tr key={row.id} className="border-border border-b">
-                  <td className="py-3 pr-2">
+                <TableRow key={row.id}>
+                  <TableCell>
                     <input
                       type="checkbox"
                       aria-label={`Select ${row.name}`}
                       checked={selectedIds.has(row.id)}
                       onChange={() => toggleSelected(row.id)}
                     />
-                  </td>
-                  <td className="py-3">{row.name}</td>
-                  <td className="text-muted-foreground py-3">{row.category}</td>
-                  <td className="py-3">
+                  </TableCell>
+                  <TableCell>
+                    <img
+                      src={row.image_url || placeholderImage}
+                      alt={row.name}
+                      className="border-border h-10 w-10 border object-cover"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{row.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{row.category}</TableCell>
+                  <TableCell>
                     ₹{row.price}/{row.unit}
-                  </td>
-                  <td className="py-3">
-                    <button onClick={() => toggleActive(row)} className="label-caps text-primary">
-                      {row.is_active ? "Yes" : "No"}
-                    </button>
-                  </td>
-                  <td className="py-3">
-                    <button
-                      onClick={() => toggleFeatured(row)}
-                      className={`label-caps ${row.is_featured ? "text-primary" : "text-muted-foreground"}`}
-                    >
-                      {row.is_featured ? "Yes" : "No"}
-                    </button>
-                  </td>
-                  <td className="py-3">
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={row.is_active}
+                      onCheckedChange={() => toggleActive(row)}
+                      aria-label={`${row.is_active ? "Deactivate" : "Activate"} ${row.name}`}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={row.is_featured}
+                      onCheckedChange={() => toggleFeatured(row)}
+                      aria-label={`${row.is_featured ? "Unfeature" : "Feature"} ${row.name}`}
+                    />
+                  </TableCell>
+                  <TableCell>
                     <div className="flex justify-end gap-3">
                       <button onClick={() => startEdit(row)} aria-label="Edit">
                         <Pencil className="text-muted-foreground hover:text-primary h-4 w-4" />
@@ -609,11 +667,11 @@ export function ProductsPanel() {
                         <Trash2 className="text-muted-foreground hover:text-destructive h-4 w-4" />
                       </button>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
       </div>
     </div>

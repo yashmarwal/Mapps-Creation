@@ -1,7 +1,9 @@
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { supabase, type SiteImageRow } from "@/lib/supabase";
 import { checkUploadSize, compressImageToTarget, isVideoUrl } from "@/lib/media";
+import { ImageDropzone } from "./ImageDropzone";
 
 const SECTIONS = [
   { key: "hero-video-desktop", label: "Home: Hero Background (Desktop)" },
@@ -12,7 +14,6 @@ const SECTIONS = [
 export function SiteImagesPanel() {
   const [images, setImages] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
     const { data } = await supabase
@@ -32,7 +33,7 @@ export function SiteImagesPanel() {
 
   const handleUpload = async (section: string, file: File) => {
     setUploading(section);
-    setError(null);
+    const toastId = toast.loading("Uploading...");
 
     // This slot accepts either a photo or a video — only compress photos;
     // compressImageToTarget is a no-op for any non-image file, so a video
@@ -41,7 +42,7 @@ export function SiteImagesPanel() {
 
     const sizeError = checkUploadSize(upload);
     if (sizeError) {
-      setError(sizeError);
+      toast.error(sizeError, { id: toastId });
       setUploading(null);
       return;
     }
@@ -50,7 +51,7 @@ export function SiteImagesPanel() {
       upsert: true,
     });
     if (uploadError) {
-      setError(uploadError.message);
+      toast.error(uploadError.message, { id: toastId });
       setUploading(null);
       return;
     }
@@ -59,7 +60,9 @@ export function SiteImagesPanel() {
       .from("site_images")
       .insert({ section, url: data.publicUrl });
     if (insertError) {
-      setError(insertError.message);
+      toast.error(insertError.message, { id: toastId });
+    } else {
+      toast.success("Uploaded", { id: toastId });
     }
     setUploading(null);
     load();
@@ -69,16 +72,16 @@ export function SiteImagesPanel() {
     if (!confirm("Restore the default asset for this section? This removes your uploaded file.")) {
       return;
     }
-    setError(null);
     // Remove every row for this section so the site falls back to its bundled default.
     const { error: deleteError } = await supabase
       .from("site_images")
       .delete()
       .eq("section", section);
     if (deleteError) {
-      setError(deleteError.message);
+      toast.error(deleteError.message);
       return;
     }
+    toast.success("Restored to default");
     load();
   };
 
@@ -89,8 +92,6 @@ export function SiteImagesPanel() {
         Replace key section backdrops without a redeploy: upload either a photo or a video,
         whichever you have. Takes effect on the live site the next time a visitor loads that page.
       </p>
-
-      {error && <p className="text-destructive mt-4 text-sm">{error}</p>}
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map((section) => {
@@ -119,27 +120,23 @@ export function SiteImagesPanel() {
                   </div>
                 )}
               </div>
-              <div className="mt-3 flex items-center justify-between gap-3">
-                <label className="block">
-                  <span className="text-primary label-caps cursor-pointer text-xs">
-                    {uploading === section.key ? "Uploading..." : "Upload photo or video"}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    className="hidden"
-                    disabled={uploading === section.key}
-                    onChange={(e) =>
-                      e.target.files?.[0] && handleUpload(section.key, e.target.files[0])
-                    }
-                  />
-                </label>
+              <div className="mt-3">
+                <ImageDropzone
+                  compact
+                  accept="image/*,video/*"
+                  disabled={uploading === section.key}
+                  label={
+                    uploading === section.key
+                      ? "Uploading..."
+                      : "Drop a photo or video, or click to browse"
+                  }
+                  onFile={(file) => handleUpload(section.key, file)}
+                />
                 {current && (
                   <button
                     type="button"
                     onClick={() => handleRestoreDefault(section.key)}
-                    aria-label="Restore default"
-                    className="text-muted-foreground hover:text-destructive label-caps flex shrink-0 items-center gap-1.5 text-xs"
+                    className="text-muted-foreground hover:text-destructive label-caps mt-2 flex items-center gap-1.5 text-xs"
                   >
                     <Trash2 className="h-3.5 w-3.5" /> Restore default
                   </button>
