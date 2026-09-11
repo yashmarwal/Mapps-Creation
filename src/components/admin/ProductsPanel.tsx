@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, EyeOff, Pencil, Plus, Star, StarOff, Trash2 } from "lucide-react";
-import { PRODUCTS } from "@/data/catalog";
+import { FABRIC_TYPE_CATEGORIES, PRODUCTS } from "@/data/catalog";
 import {
   checkUploadSize,
   compressImageToTarget,
@@ -13,24 +13,10 @@ const PRODUCT_IMAGE_COMPRESS_TARGET_BYTES = PRODUCT_IMAGE_COMPRESS_TARGET_MB * 1
 const OTHER_VALUE = "__other__";
 const MAX_FEATURED = 6;
 
-// Scoped to this admin form only — deliberately separate from the site-wide
-// CATEGORIES in data/catalog.ts (used by the footer's fabric links, the
-// Wholesale page's inquiry form, the homepage ticker, and search), which
-// stay exactly as they are. A product's category is just a text value on
-// its own row, independent of whatever this list currently offers — so
-// existing products keep working (and stay fully visible/filterable on the
-// catalogue page) even after this list changes.
-const ADMIN_PRODUCT_CATEGORIES = [
-  "T-Shirt Fabric",
-  "Bottom Wear Fabric",
-  "Bottomwear and T-Shirt Fabric",
-  "Cord Set and T-Shirt Fabric",
-] as const;
-
 const EMPTY_FORM = {
   id: "",
   name: "",
-  category: ADMIN_PRODUCT_CATEGORIES[0] as string,
+  category: FABRIC_TYPE_CATEGORIES[0] as string,
   price: "",
   unit: "kg" as "kg" | "meter",
   spec: "",
@@ -78,7 +64,7 @@ export function ProductsPanel() {
       image_url_2: row.image_url_2 ?? "",
       is_active: row.is_active,
     });
-    setIsOtherCategory(!(ADMIN_PRODUCT_CATEGORIES as readonly string[]).includes(row.category));
+    setIsOtherCategory(!(FABRIC_TYPE_CATEGORIES as readonly string[]).includes(row.category));
     setEditing(true);
   };
 
@@ -351,7 +337,7 @@ export function ProductsPanel() {
                 }}
                 className="border-border bg-card mt-2 w-full min-h-[44px] border px-3"
               >
-                {ADMIN_PRODUCT_CATEGORIES.map((c) => (
+                {FABRIC_TYPE_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>

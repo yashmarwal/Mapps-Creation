@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Mail, MapPin, Phone } from "lucide-react";
-import { CATEGORIES } from "@/data/catalog";
+import { FABRIC_TYPE_CATEGORIES, OTHERS_CATEGORY } from "@/data/catalog";
 import { SITE } from "@/lib/seo";
 import { LogoMark } from "./LogoMark";
 
@@ -55,7 +55,7 @@ export function Footer() {
         <div>
           <h3 className="label-caps text-primary">Fabrics</h3>
           <ul className="mt-5 space-y-2.5 text-sm">
-            {CATEGORIES.map((category) => (
+            {FABRIC_TYPE_CATEGORIES.map((category) => (
               <li key={category}>
                 <Link
                   to="/catalogue"
@@ -66,6 +66,19 @@ export function Footer() {
                 </Link>
               </li>
             ))}
+            <li>
+              {/* Catch-all for anything added via the admin's free-text
+                  "Other (specify)" option instead of one of the categories
+                  above — the catalogue page filters this specially, see
+                  routes/catalogue.tsx. */}
+              <Link
+                to="/catalogue"
+                search={{ category: OTHERS_CATEGORY }}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Others
+              </Link>
+            </li>
           </ul>
         </div>
 

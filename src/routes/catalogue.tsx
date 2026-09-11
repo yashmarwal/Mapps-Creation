@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, Download } from "lucide-react";
-import { CATEGORIES, PRODUCTS } from "@/data/catalog";
+import { CATEGORIES, FABRIC_TYPE_CATEGORIES, OTHERS_CATEGORY, PRODUCTS } from "@/data/catalog";
 import { ProductCard, ProductCardSkeleton } from "@/components/site/ProductCard";
 import { CtaBand } from "@/components/site/CtaBand";
 import { Reveal } from "@/components/site/motion";
@@ -38,7 +38,18 @@ function Catalogue() {
   const navigate = useNavigate({ from: "/catalogue" });
   const { products: allProducts, loading: productsLoading } = useProducts();
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
-  const products = category ? allProducts.filter((p) => p.category === category) : allProducts;
+  // "Others" (from the footer's catch-all link) isn't a real stored
+  // category on any product — it means "everything not in one of the
+  // known FABRIC_TYPE_CATEGORIES", e.g. products added via the admin's
+  // free-text "Other (specify)" option.
+  const products =
+    category === OTHERS_CATEGORY
+      ? allProducts.filter(
+          (p) => !(FABRIC_TYPE_CATEGORIES as readonly string[]).includes(p.category),
+        )
+      : category
+        ? allProducts.filter((p) => p.category === category)
+        : allProducts;
 
   const present = new Set(allProducts.map((p) => p.category));
   const knownInUse = CATEGORIES.filter((c) => present.has(c));

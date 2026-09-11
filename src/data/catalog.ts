@@ -16,6 +16,24 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number];
 
+// The current real fabric-type groupings — used by the admin's "Add
+// Product" category dropdown and the footer's fabric quick-links.
+// Deliberately separate from CATEGORIES above (still used by the Wholesale
+// page's inquiry form, the homepage ticker, and search) rather than
+// replacing it everywhere at once.
+export const FABRIC_TYPE_CATEGORIES = [
+  "T-Shirt Fabric",
+  "Bottom Wear Fabric",
+  "Bottomwear and T-Shirt Fabric",
+  "Cord Set and T-Shirt Fabric",
+] as const;
+
+// Sentinel search-param value (not a real stored category on any product)
+// meaning "everything that isn't one of the FABRIC_TYPE_CATEGORIES above" —
+// the catch-all the footer's "Others" link points to, for products created
+// via the admin's free-text "Other (specify)" option.
+export const OTHERS_CATEGORY = "Others";
+
 export type Product = {
   id: string;
   name: string;
