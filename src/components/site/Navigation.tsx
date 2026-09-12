@@ -36,7 +36,6 @@ const LINKS = [
     label: "Catalogue",
     num: "02",
     icon: Layers,
-    badge: "500+ Types",
   },
   {
     to: "/wholesale",
