@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Quote, Sparkles, ShieldCheck, MapPin, Award, Maximize2, X } from "lucide-react";
 import { useState } from "react";
-import founderImg from "@/assets/founder.png";
+import founderImg from "@/assets/founder.jpg";
 import { whatsappLink } from "@/lib/seo";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
 import { EASE_UI, Reveal } from "./motion";
@@ -45,6 +45,7 @@ export function FounderSection({ className = "" }: { className?: string }) {
                       <img
                         src={founderImg}
                         alt="Pratham Aggarwal, Founder & Proprietor"
+                        loading="lazy"
                         className="h-full w-full object-cover rounded-xl"
                       />
                     </div>

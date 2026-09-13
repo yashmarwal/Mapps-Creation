@@ -1,4 +1,4 @@
-import logoBadge from "@/assets/logo-badge.png";
+import logoBadge from "@/assets/logo-badge.webp";
 
 /** Cropped gold monogram from the brand logo — for nav/footer badges. */
 export function LogoMark({ size = 36, className }: { size?: number; className?: string }) {

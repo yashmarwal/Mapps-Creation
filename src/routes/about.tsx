@@ -81,6 +81,7 @@ function About() {
             src={banner}
             alt="Mapps Creation warehouse and fabric stock in Surat"
             className="h-full w-full object-cover"
+            lazy
           />
           <div className="silk grain absolute inset-0 opacity-20" />
         </div>

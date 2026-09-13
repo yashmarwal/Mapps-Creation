@@ -10,11 +10,18 @@ export function SiteMedia({
   poster,
   alt,
   className,
+  lazy = false,
 }: {
   src: string;
   poster?: string;
   alt: string;
   className?: string;
+  /** Defer loading until near-visible — only for a usage that's genuinely
+   * below the fold. Never set this on a hero/first-viewport usage, since
+   * that's typically the page's LCP element and lazy-loading it would delay
+   * the very thing that should paint first. Video ignores this (there's no
+   * lazy-loading attribute for <video>; it already only preloads metadata). */
+  lazy?: boolean;
 }) {
   if (isVideoUrl(src)) {
     return (
@@ -34,5 +41,7 @@ export function SiteMedia({
     );
   }
 
-  return <img key={src} src={src} alt={alt} className={className} />;
+  return (
+    <img key={src} src={src} alt={alt} loading={lazy ? "lazy" : undefined} className={className} />
+  );
 }
