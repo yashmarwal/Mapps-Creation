@@ -112,7 +112,22 @@ create policy "Public read product-images" on storage.objects
 
 create policy "Public read site-images" on storage.objects
   for select using (bucket_id = 'site-images');
+
+create policy "Admin delete product-images" on storage.objects
+  for delete using (bucket_id = 'product-images' and auth.role() = 'authenticated');
+
+create policy "Admin delete site-images" on storage.objects
+  for delete using (bucket_id = 'site-images' and auth.role() = 'authenticated');
 ```
+
+### Already have a project running? Add the delete policies
+
+If your bucket policies were set up before the two `delete` ones above
+existed, the admin panel's delete/replace actions try to also remove the
+old file from storage now (so removing a product or replacing a
+photo/video doesn't leave the old file behind forever) — those calls will
+silently fail without these two policies. Run just the two `create policy
+... for delete ...` statements above in the SQL editor.
 
 ## 4. Create the admin login
 

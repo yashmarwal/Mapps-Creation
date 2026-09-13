@@ -2,7 +2,12 @@ import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase, type SiteImageRow } from "@/lib/supabase";
-import { checkUploadSize, compressImageToTarget, isVideoUrl } from "@/lib/media";
+import {
+  checkUploadSize,
+  compressImageToTarget,
+  deleteStorageFiles,
+  isVideoUrl,
+} from "@/lib/media";
 import { ImageDropzone } from "./ImageDropzone";
 
 const SECTIONS = [
@@ -56,14 +61,37 @@ export function SiteImagesPanel() {
       return;
     }
     const { data } = supabase.storage.from("site-images").getPublicUrl(path);
+
+    // Find whatever this section's previous row(s) were BEFORE inserting
+    // the new one, so they can be cleaned out (DB row + storage file) once
+    // the new one is safely saved — this section is meant to hold exactly
+    // one asset at a time, so nothing about the old row is worth keeping.
+    const { data: oldRows } = await supabase
+      .from("site_images")
+      .select("id,url")
+      .eq("section", section);
+
     const { error: insertError } = await supabase
       .from("site_images")
       .insert({ section, url: data.publicUrl });
     if (insertError) {
       toast.error(insertError.message, { id: toastId });
-    } else {
-      toast.success("Uploaded", { id: toastId });
+      setUploading(null);
+      return;
     }
+
+    if (oldRows && oldRows.length > 0) {
+      await supabase
+        .from("site_images")
+        .delete()
+        .in(
+          "id",
+          oldRows.map((r) => r.id),
+        );
+      deleteStorageFiles(oldRows.map((r) => r.url));
+    }
+
+    toast.success("Uploaded", { id: toastId });
     setUploading(null);
     load();
   };
@@ -72,6 +100,10 @@ export function SiteImagesPanel() {
     if (!confirm("Restore the default asset for this section? This removes your uploaded file.")) {
       return;
     }
+    const { data: rows } = await supabase
+      .from("site_images")
+      .select("id,url")
+      .eq("section", section);
     // Remove every row for this section so the site falls back to its bundled default.
     const { error: deleteError } = await supabase
       .from("site_images")
@@ -81,6 +113,7 @@ export function SiteImagesPanel() {
       toast.error(deleteError.message);
       return;
     }
+    if (rows && rows.length > 0) deleteStorageFiles(rows.map((r) => r.url));
     toast.success("Restored to default");
     load();
   };

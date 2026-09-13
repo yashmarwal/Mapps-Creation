@@ -1,5 +1,5 @@
 import { Trash2, Upload } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { MARQUEE_DEFAULT, type MarqueeSettings } from "@/components/site/TopMarquee";
@@ -10,7 +10,7 @@ import {
   REEL_DEFAULT,
   type ReelSettings,
 } from "@/components/site/FabricReels";
-import { checkUploadSize, compressImageToTarget } from "@/lib/media";
+import { checkUploadSize, compressImageToTarget, deleteStorageFiles } from "@/lib/media";
 import { ImageDropzone } from "./ImageDropzone";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -42,6 +42,12 @@ export function SiteSettingsPanel() {
   const [uploadingReel, setUploadingReel] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // What promo.imageUrl / reels.urls were as of the last successful save (or
+  // initial load) — diffed against the current values in saveAll() so any
+  // photo/video that got replaced or removed can have its old storage file
+  // cleaned up right after the save that drops the last reference to it.
+  const savedSnapshot = useRef({ promoImageUrl: "", reelUrls: [] as string[] });
+
   useEffect(() => {
     Promise.all([
       loadSetting("marquee", MARQUEE_DEFAULT),
@@ -53,8 +59,10 @@ export function SiteSettingsPanel() {
       setPromo(p);
       // Nothing saved yet — seed the editor with the 8 built-in clips so
       // they're visible and editable here too, not just a hidden fallback.
-      setReels(r.urls.length > 0 ? r : { urls: DEFAULT_VIDEOS });
+      const initialReels = r.urls.length > 0 ? r : { urls: DEFAULT_VIDEOS };
+      setReels(initialReels);
       setAiKnowledge(k);
+      savedSnapshot.current = { promoImageUrl: p.imageUrl, reelUrls: initialReels.urls };
       setLoading(false);
     });
   }, []);
@@ -73,6 +81,19 @@ export function SiteSettingsPanel() {
       toast.error(firstError.message);
       return;
     }
+
+    // Now that the new URLs are safely saved, clean up whatever they
+    // replaced: the previous promo image (if it changed) and any reel
+    // videos no longer in the list (removed, or swapped out via "Replace").
+    const prev = savedSnapshot.current;
+    const orphaned: string[] = [];
+    if (prev.promoImageUrl && prev.promoImageUrl !== promo.imageUrl) {
+      orphaned.push(prev.promoImageUrl);
+    }
+    orphaned.push(...prev.reelUrls.filter((url) => !reels.urls.includes(url)));
+    if (orphaned.length > 0) deleteStorageFiles(orphaned);
+    savedSnapshot.current = { promoImageUrl: promo.imageUrl, reelUrls: reels.urls };
+
     toast.success("Settings saved");
   };
 

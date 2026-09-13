@@ -5,6 +5,7 @@ import { FABRIC_TYPE_CATEGORIES, PRODUCTS } from "@/data/catalog";
 import {
   checkUploadSize,
   compressImageToTarget,
+  deleteStorageFiles,
   PRODUCT_IMAGE_COMPRESS_TARGET_MB,
 } from "@/lib/media";
 import { supabase, type ProductRow } from "@/lib/supabase";
@@ -136,6 +137,12 @@ export function ProductsPanel() {
       is_active: form.is_active,
     };
 
+    // Editing an existing row — remember what its images were before the
+    // save, so a replaced or removed photo can be cleaned out of storage
+    // once the update actually succeeds (not before — if the save fails,
+    // the old files are still in use and must stay).
+    const original = form.id ? products.find((p) => p.id === form.id) : undefined;
+
     const { error: saveError } = form.id
       ? await supabase.from("products").update(payload).eq("id", form.id)
       : await supabase.from("products").insert(payload);
@@ -144,6 +151,14 @@ export function ProductsPanel() {
       toast.error(saveError.message);
       return;
     }
+
+    if (original) {
+      const orphaned = [original.image_url, original.image_url_2].filter(
+        (url, i) => url && url !== [payload.image_url, payload.image_url_2][i],
+      );
+      if (orphaned.length > 0) deleteStorageFiles(orphaned);
+    }
+
     toast.success(form.id ? "Product updated" : "Product created");
     resetForm();
     load();
@@ -151,11 +166,13 @@ export function ProductsPanel() {
 
   const remove = async (id: string) => {
     if (!confirm("Delete this product?")) return;
+    const row = products.find((p) => p.id === id);
     const { error: deleteError } = await supabase.from("products").delete().eq("id", id);
     if (deleteError) {
       toast.error(deleteError.message);
       return;
     }
+    if (row) deleteStorageFiles([row.image_url, row.image_url_2]);
     toast.success("Product deleted");
     setSelectedIds((prev) => {
       if (!prev.has(id)) return prev;
@@ -263,6 +280,7 @@ export function ProductsPanel() {
     if (selectedIds.size === 0) return;
     if (!confirm(`Delete ${selectedIds.size} selected product(s)? This can't be undone.`)) return;
     setBulkBusy(true);
+    const rows = products.filter((p) => selectedIds.has(p.id));
     const { error: bulkError } = await supabase
       .from("products")
       .delete()
@@ -272,6 +290,7 @@ export function ProductsPanel() {
       toast.error(bulkError.message);
       return;
     }
+    deleteStorageFiles(rows.flatMap((r) => [r.image_url, r.image_url_2]));
     toast.success(`${selectedIds.size} product(s) deleted`);
     clearSelection();
     load();

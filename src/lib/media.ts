@@ -1,6 +1,66 @@
+import { supabase } from "@/lib/supabase";
+
 /** True if the URL (or bundled asset path) points at a video file, by extension. */
 export function isVideoUrl(url: string): boolean {
   return /\.(mp4|webm|mov|m4v|ogv)(\?|#|$)/i.test(url);
+}
+
+const SUPABASE_URL = import.meta.env["VITE_SUPABASE_URL"] as string | undefined;
+const STORAGE_PUBLIC_PREFIX = SUPABASE_URL ? `${SUPABASE_URL}/storage/v1/object/public/` : null;
+
+function parseStorageUrl(url: string | null | undefined): { bucket: string; path: string } | null {
+  if (!url || !STORAGE_PUBLIC_PREFIX || !url.startsWith(STORAGE_PUBLIC_PREFIX)) return null;
+  const rest = url.slice(STORAGE_PUBLIC_PREFIX.length);
+  const slashIndex = rest.indexOf("/");
+  if (slashIndex === -1) return null;
+  return {
+    bucket: rest.slice(0, slashIndex),
+    path: decodeURIComponent(rest.slice(slashIndex + 1)),
+  };
+}
+
+/**
+ * Deletes previously-uploaded files from Supabase Storage, given their
+ * public URLs — call this whenever an admin action removes or replaces
+ * something, so a deleted product/image/video doesn't leave its file
+ * behind, silently taking up storage quota forever.
+ *
+ * Silently skips (and never throws for) anything that isn't one of our own
+ * storage URLs — the bundled default product photos and reel videos are
+ * plain build-time asset paths, not Supabase URLs, and aren't ours to
+ * delete. A real deletion failure is logged to the console rather than
+ * thrown, since it shouldn't block whatever admin action triggered the
+ * cleanup — the DB change this runs alongside already succeeded.
+ */
+export async function deleteStorageFiles(urls: Array<string | null | undefined>): Promise<void> {
+  const byBucket = new Map<string, string[]>();
+  for (const url of urls) {
+    const parsed = parseStorageUrl(url);
+    if (!parsed) continue;
+    const list = byBucket.get(parsed.bucket) ?? [];
+    list.push(parsed.path);
+    byBucket.set(parsed.bucket, list);
+  }
+  if (byBucket.size === 0) return;
+
+  // Callers intentionally fire-and-forget this (an admin action's own
+  // success shouldn't wait on cleanup) — so a rejection here must never
+  // become an unhandled promise rejection; catch per-bucket and log instead.
+  await Promise.all(
+    [...byBucket.entries()].map(async ([bucket, paths]) => {
+      try {
+        const { error } = await supabase.storage.from(bucket).remove(paths);
+        if (error) {
+          console.error(
+            `Failed to delete ${paths.length} file(s) from "${bucket}":`,
+            error.message,
+          );
+        }
+      } catch (err) {
+        console.error(`Failed to delete ${paths.length} file(s) from "${bucket}":`, err);
+      }
+    }),
+  );
 }
 
 // Must match the Supabase Storage bucket's own file-size-limit setting
