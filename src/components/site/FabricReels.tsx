@@ -21,25 +21,45 @@ export const REEL_DEFAULT: ReelSettings = { urls: [] };
 export const DEFAULT_VIDEOS = [v1, v2, v3, v4, v5, v6, v7, v8];
 
 /** Plays video smoothly when scrolled into view without layout jittering */
-function AutoplayCard({ src, onOpen }: { src: string; onOpen: () => void }) {
+function AutoplayCard({
+  src,
+  onOpen,
+  scrollRoot,
+}: {
+  src: string;
+  onOpen: () => void;
+  scrollRoot: React.RefObject<HTMLDivElement | null>;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Root MUST be the horizontally-scrolling track, not the default (viewport).
+    // Without this, a card that's clipped off-screen by the track's own
+    // overflow-x is still considered "intersecting" the viewport (its
+    // bounding box overlaps the window vertically), so every reel — visible
+    // or not — starts autoplaying on load.
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
+          // Lazy-assign src on first real visibility — an unconditional
+          // src= in the JSX gets requested by the browser's HTML parser
+          // the instant the page loads, for all 16 cards at once (both
+          // marquee passes), regardless of what the observer says. Only
+          // attaching it here means the network request itself doesn't
+          // fire until a card is genuinely about to be shown.
+          if (!el.src) el.src = src;
           el.play().catch(() => {});
         } else {
           el.pause();
         }
       },
-      { threshold: 0.15 },
+      { root: scrollRoot.current, threshold: 0.15 },
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [scrollRoot, src]);
 
   return (
     <div
@@ -49,11 +69,10 @@ function AutoplayCard({ src, onOpen }: { src: string; onOpen: () => void }) {
     >
       <video
         ref={ref}
-        src={src}
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="none"
         className="h-full w-full object-cover transform-gpu will-change-transform pointer-events-none select-none"
         style={{ transform: "translateZ(0)" }}
       />
@@ -239,7 +258,12 @@ export function FabricReels() {
         {[0, 1].map((pass) => (
           <div key={pass} className="flex shrink-0 gap-4" aria-hidden={pass === 1}>
             {videos.map((src, i) => (
-              <AutoplayCard key={`${pass}-${i}`} src={src} onOpen={() => handleCardClick(i)} />
+              <AutoplayCard
+                key={`${pass}-${i}`}
+                src={src}
+                onOpen={() => handleCardClick(i)}
+                scrollRoot={trackRef}
+              />
             ))}
           </div>
         ))}
