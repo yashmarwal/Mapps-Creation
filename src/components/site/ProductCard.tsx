@@ -1,7 +1,17 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight, Mail, Plus, SendHorizontal, X } from "lucide-react";
+import {
+  Check,
+  CheckCheck,
+  ChevronLeft,
+  ChevronRight,
+  Mail,
+  Plus,
+  SendHorizontal,
+  Share2,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { EASE_REVEAL, EASE_UI, Reveal } from "./motion";
 import type { Product } from "@/data/catalog";
@@ -10,13 +20,47 @@ import { useQuoteBasket } from "@/hooks/useQuoteBasket";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function ProductCard({ product, index }: { product: Product; index: number }) {
+export function ProductCard({
+  product,
+  index,
+  forceOpen,
+  onOpenChange,
+}: {
+  product: Product;
+  index: number;
+  /** Open the preview on mount — set when this card's product id matches a
+   * shared link's `?product=` param, so opening that link shows the exact
+   * fabric that was shared, not just the generic catalogue grid. */
+  forceOpen?: boolean;
+  /** Fires whenever the preview opens or closes (click, share-link,
+   * Escape, backdrop click, the close button) so the page can keep the
+   * `?product=` URL in sync with what's actually on screen. */
+  onOpenChange?: (open: boolean) => void;
+}) {
   const ref = useRef<HTMLElement>(null);
   const [sheen, setSheen] = useState({ x: 50, y: 50, active: false });
   const [preview, setPreview] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [showSwipeHint, setShowSwipeHint] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const { addItem, items } = useQuoteBasket();
+
+  const openPreview = () => {
+    setPreview(true);
+    onOpenChange?.(true);
+  };
+  const closePreview = () => {
+    setPreview(false);
+    onOpenChange?.(false);
+  };
+
+  useEffect(() => {
+    if (forceOpen) openPreview();
+    // Only ever act on forceOpen turning on for THIS card — openPreview
+    // itself is recreated every render (closes over onOpenChange) and must
+    // not retrigger this.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forceOpen]);
 
   // `product.image` always has something (falls back to a placeholder in
   // useProducts), `image2` is admin-optional — only show a second thumbnail
@@ -55,7 +99,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
     }
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPreview(false);
+      if (e.key === "Escape") closePreview();
       if (e.key === "ArrowRight") stepImage(1);
       if (e.key === "ArrowLeft") stepImage(-1);
     };
@@ -90,7 +134,11 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
     setSheen((s) => ({ ...s, active: false }));
   };
 
-  const productUrl = `${SITE.url}/catalogue?category=${encodeURIComponent(product.category)}`;
+  // A real, working deep link — opening this takes you straight to this
+  // exact product's preview on the site (see the `product` search param +
+  // `forceOpen` wiring in catalogue.tsx), not just the generic catalogue
+  // grid filtered to its category.
+  const productUrl = `${SITE.url}/catalogue?product=${product.id}`;
   const imageLine = product.image.startsWith("http") ? `\nImage: ${product.image}` : "";
 
   const wa = whatsappLink(
@@ -109,12 +157,45 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
     addItem(product);
   };
 
+  const shareData = {
+    title: `${product.name} | Mapps Creation`,
+    text: `${product.name} — ${product.spec} — ₹${product.price}/${product.unit} — Mapps Creation, Surat`,
+    url: productUrl,
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // navigator.share opens the device's real native share sheet (WhatsApp,
+    // etc.) with the actual product link — the whole point being that
+    // whoever receives it lands on this exact fabric, not the catalogue
+    // homepage. Falls back to copy-to-clipboard on desktop browsers that
+    // don't support it.
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch {
+        // User cancelled the share sheet, or the OS rejected it — either
+        // way there's nothing useful to show; just leave it be.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(productUrl);
+      setLinkCopied(true);
+      window.setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Clipboard API can be blocked (insecure context, permissions) —
+      // fall back to a prompt so the link is still obtainable either way.
+      window.prompt("Copy this link to share:", productUrl);
+    }
+  };
+
   return (
     <>
       <Reveal index={index}>
         {/* MOBILE HORIZONTAL SPLIT CARD (< 640px) — 1 COLUMN FULL WIDTH */}
         <div
-          onClick={() => setPreview(true)}
+          onClick={() => openPreview()}
           className="sm:hidden border-border/80 bg-card overflow-hidden border rounded-xl flex flex-row h-[175px] w-full relative cursor-pointer group shadow-sm transition-all duration-300 active:scale-[0.99]"
         >
           {/* Left Thumbnail (36% width) */}
@@ -204,7 +285,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
           ref={ref}
           onMouseMove={onMove}
           onMouseLeave={onLeave}
-          onClick={() => setPreview(true)}
+          onClick={() => openPreview()}
           style={{ rotateX, rotateY, transformPerspective: 900 }}
           className="hidden sm:flex border-border bg-card group h-full cursor-pointer overflow-hidden border transition-shadow duration-500 hover:shadow-elevate flex-col justify-between"
         >
@@ -301,7 +382,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: EASE_UI }}
-            onClick={() => setPreview(false)}
+            onClick={() => closePreview()}
           >
             <motion.div
               data-lenis-prevent
@@ -313,7 +394,20 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
               onClick={stop}
             >
               <button
-                onClick={() => setPreview(false)}
+                onClick={handleShare}
+                aria-label={linkCopied ? "Link copied" : "Share this fabric"}
+                title={linkCopied ? "Link copied!" : "Share this fabric"}
+                className={`absolute top-3 right-14 z-10 flex h-9 w-9 items-center justify-center border rounded-full backdrop-blur transition-all active:scale-95 cursor-pointer ${
+                  linkCopied
+                    ? "border-[#25D366]/60 bg-[#25D366]/20 text-[#25D366]"
+                    : "border-border/60 bg-background/80 text-foreground hover:bg-primary hover:text-primary-foreground"
+                }`}
+              >
+                {linkCopied ? <CheckCheck className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+              </button>
+
+              <button
+                onClick={() => closePreview()}
                 aria-label="Close"
                 className="border-border/60 bg-background/80 text-foreground hover:bg-primary hover:text-primary-foreground absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center border rounded-full backdrop-blur transition-all active:scale-95 cursor-pointer"
               >

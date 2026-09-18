@@ -9,12 +9,16 @@ import { useProducts } from "@/hooks/useProducts";
 import { breadcrumbSchema, buildPageHead, itemListSchema } from "@/lib/seo";
 import { DownloadCatalogModal } from "@/components/site/DownloadCatalogModal";
 
-type Search = { category?: string };
+type Search = { category?: string; product?: string };
 
 export const Route = createFileRoute("/catalogue")({
   validateSearch: (search: Record<string, unknown>): Search => {
     const category = search["category"];
-    return typeof category === "string" && category.trim() ? { category } : {};
+    const product = search["product"];
+    return {
+      ...(typeof category === "string" && category.trim() ? { category } : {}),
+      ...(typeof product === "string" && product.trim() ? { product } : {}),
+    };
   },
   head: () =>
     buildPageHead({
@@ -34,7 +38,7 @@ export const Route = createFileRoute("/catalogue")({
 });
 
 function Catalogue() {
-  const { category } = Route.useSearch();
+  const { category, product: sharedProductId } = Route.useSearch();
   const navigate = useNavigate({ from: "/catalogue" });
   const { products: allProducts, loading: productsLoading } = useProducts();
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
@@ -60,6 +64,19 @@ function Catalogue() {
 
   const setCategory = (next?: string) =>
     navigate({ search: () => (next ? { category: next } : {}), replace: true });
+
+  // Keeps the `?product=` URL in sync with whichever card's preview is
+  // actually open — set when a shared link opens one on load, cleared when
+  // it's closed, without disturbing the category filter either way.
+  const handleProductOpenChange = (id: string, open: boolean) =>
+    navigate({
+      search: (prev: Search) => {
+        if (open) return { ...prev, product: id };
+        const { product: _dropped, ...rest } = prev;
+        return rest;
+      },
+      replace: true,
+    });
 
   return (
     <div className="pt-28 md:pt-36">
@@ -144,7 +161,13 @@ function Catalogue() {
           {productsLoading
             ? Array.from({ length: 9 }).map((_, i) => <ProductCardSkeleton key={i} />)
             : products.map((product, i) => (
-                <ProductCard key={product.id} product={product} index={i} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={i}
+                  forceOpen={product.id === sharedProductId}
+                  onOpenChange={(open) => handleProductOpenChange(product.id, open)}
+                />
               ))}
         </div>
       </section>
