@@ -56,6 +56,17 @@ export function ProductPreviewModal({
     return () => window.removeEventListener("popstate", handlePopState);
   }, [item]);
 
+  // Close on Escape, matching every other overlay in this codebase
+  // (SearchModal, Navigation drawer, PromoPopup, DownloadCatalogModal).
+  useEffect(() => {
+    if (!item) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCloseRef.current();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [item]);
+
   return (
     <AnimatePresence>
       {item && (

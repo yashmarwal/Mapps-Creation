@@ -174,6 +174,22 @@ function Contact() {
                 />
               </label>
 
+              <label className="text-muted-foreground flex items-start gap-2.5 text-xs leading-relaxed">
+                <input
+                  type="checkbox"
+                  required
+                  className="border-border accent-primary mt-0.5 h-4 w-4 shrink-0"
+                />
+                <span>
+                  I agree to the{" "}
+                  <a href="/privacy" className="text-primary underline underline-offset-2">
+                    Privacy Policy
+                  </a>{" "}
+                  and consent to Mapps Creation using the information above to respond to this
+                  enquiry.
+                </span>
+              </label>
+
               <button
                 type="submit"
                 disabled={status === "submitting"}

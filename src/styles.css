@@ -105,7 +105,11 @@
   --muted-foreground: oklch(0.75 0.02 90);
   --accent: var(--gold-bright);
   --accent-foreground: var(--navy-deep);
-  --destructive: oklch(0.577 0.245 27.325);
+  /* L raised from 0.577: the original was 3.65:1 against this dark theme's
+     navy background for error text (routes/contact.tsx, admin.login.tsx),
+     under the WCAG AA 4.5:1 minimum for normal text. 0.64 clears it
+     (~4.7:1) while staying a clearly "error" red. */
+  --destructive: oklch(0.64 0.19 27.325);
   --destructive-foreground: var(--ivory);
   --border: oklch(0.729 0.073 79.6 / 22%);
   --input: oklch(0.729 0.073 79.6 / 28%);

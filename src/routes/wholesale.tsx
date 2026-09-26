@@ -205,6 +205,22 @@ function WholesaleForm() {
         className="border-border bg-card text-foreground focus:border-primary resize-none border-b bg-transparent px-1 py-3 text-sm outline-none transition-colors placeholder:text-muted-foreground sm:col-span-2"
       />
 
+      <label className="text-muted-foreground flex items-start gap-2.5 text-xs leading-relaxed sm:col-span-2">
+        <input
+          type="checkbox"
+          required
+          className="border-border accent-primary mt-0.5 h-4 w-4 shrink-0"
+        />
+        <span>
+          I agree to the{" "}
+          <a href="/privacy" className="text-primary underline underline-offset-2">
+            Privacy Policy
+          </a>{" "}
+          and consent to Mapps Creation using the information above to process this wholesale
+          registration.
+        </span>
+      </label>
+
       <button
         type="submit"
         disabled={status === "submitting"}

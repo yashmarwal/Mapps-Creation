@@ -14,8 +14,11 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CatalogueRouteImport } from './routes/catalogue'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WholesaleRouteImport } from './routes/wholesale'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -45,6 +48,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
@@ -53,6 +61,16 @@ const FaqRoute = FaqRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WholesaleRoute = WholesaleRouteImport.update({
@@ -77,8 +95,11 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/catalogue': typeof CatalogueRoute
   '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
+  '/terms': typeof TermsRoute
   '/wholesale': typeof WholesaleRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
@@ -88,8 +109,11 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/catalogue': typeof CatalogueRoute
   '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
+  '/terms': typeof TermsRoute
   '/wholesale': typeof WholesaleRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin': typeof AdminIndexRoute
@@ -101,8 +125,11 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/catalogue': typeof CatalogueRoute
   '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
   '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
+  '/terms': typeof TermsRoute
   '/wholesale': typeof WholesaleRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/': typeof AdminIndexRoute
@@ -115,8 +142,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/catalogue'
     | '/contact'
+    | '/cookies'
     | '/faq'
     | '/privacy'
+    | '/refund-policy'
+    | '/terms'
     | '/wholesale'
     | '/admin/login'
     | '/admin/'
@@ -126,8 +156,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/catalogue'
     | '/contact'
+    | '/cookies'
     | '/faq'
     | '/privacy'
+    | '/refund-policy'
+    | '/terms'
     | '/wholesale'
     | '/admin/login'
     | '/admin'
@@ -138,8 +171,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/catalogue'
     | '/contact'
+    | '/cookies'
     | '/faq'
     | '/privacy'
+    | '/refund-policy'
+    | '/terms'
     | '/wholesale'
     | '/admin/login'
     | '/admin/'
@@ -151,8 +187,11 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   CatalogueRoute: typeof CatalogueRoute
   ContactRoute: typeof ContactRoute
+  CookiesRoute: typeof CookiesRoute
   FaqRoute: typeof FaqRoute
   PrivacyRoute: typeof PrivacyRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
+  TermsRoute: typeof TermsRoute
   WholesaleRoute: typeof WholesaleRoute
 }
 
@@ -193,6 +232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/faq': {
       id: '/faq'
       path: '/faq'
@@ -205,6 +251,20 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/wholesale': {
@@ -249,8 +309,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   CatalogueRoute: CatalogueRoute,
   ContactRoute: ContactRoute,
+  CookiesRoute: CookiesRoute,
   FaqRoute: FaqRoute,
   PrivacyRoute: PrivacyRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
+  TermsRoute: TermsRoute,
   WholesaleRoute: WholesaleRoute,
 }
 export const routeTree = rootRouteImport
