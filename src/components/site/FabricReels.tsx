@@ -11,6 +11,8 @@ import v5 from "@/assets/videos/shop-look-5.mp4";
 import v6 from "@/assets/videos/shop-look-6.mp4";
 import v7 from "@/assets/videos/shop-look-7.mp4";
 import v8 from "@/assets/videos/shop-look-8.mp4";
+import { useBackToClose } from "@/hooks/useBackToClose";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { EASE_REVEAL, EASE_UI, Reveal } from "./motion";
 
@@ -217,17 +219,19 @@ export function FabricReels() {
     }
   };
 
+  useScrollLock(openIndex !== null);
+
+  // Close on the mobile/browser back button instead of navigating the page
+  // away, matching every other overlay in this codebase.
+  useBackToClose(openIndex !== null, () => setOpenIndex(null));
+
   useEffect(() => {
     if (openIndex === null) return;
-    document.body.style.overflow = "hidden";
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpenIndex(null);
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [openIndex]);
 
   return (

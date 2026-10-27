@@ -2,9 +2,11 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, FileText, Loader2, Sparkles, CheckCircle2, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { PRODUCTS } from "@/data/catalog";
+import { useBackToClose } from "@/hooks/useBackToClose";
 import { useProducts } from "@/hooks/useProducts";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { EASE_REVEAL, EASE_UI } from "./motion";
 
 export function DownloadCatalogModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -20,34 +22,24 @@ export function DownloadCatalogModal({ open, onClose }: { open: boolean; onClose
   // Dynamically extract all unique categories present in active products list
   const dynamicCategories = Array.from(new Set(activeProductsList.map((p) => p.category)));
 
-  // Always call the latest onClose without it being a dependency below —
-  // `onClose` is an inline arrow function from the parent, recreated every
-  // parent render. `pushState` is intercepted by the router's history
-  // listener (that's how it detects back/forward globally), which reacts
-  // by re-rendering the parent — producing a fresh `onClose` — which, if it
-  // were a dependency, would re-fire this effect, call pushState again, and
-  // loop forever (this was a real, reproduced infinite loop that froze/
-  // crashed the tab). Depending on `open` alone means this only ever runs
-  // once per actual open/close transition, however many times the parent
-  // re-renders while it's open.
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
   // Handle mobile/browser back button to close modal gracefully
+  useBackToClose(open, onClose);
+
+  // Close on Escape, matching every other overlay in this codebase
+  // (SearchModal, Navigation drawer, PromoPopup, QuoteDrawer) — this one
+  // was missing it entirely.
   useEffect(() => {
     if (!open) return;
-
-    window.history.pushState({ downloadModalOpen: true }, "");
-
-    const handlePopState = () => {
-      onCloseRef.current();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
     };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
 
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [open]);
+  // Lock page scroll while the modal is open — another overlay that was
+  // missing this, so the page behind it kept scrolling.
+  useScrollLock(open);
 
   const handleDownload = async () => {
     try {
@@ -152,22 +144,33 @@ export function DownloadCatalogModal({ open, onClose }: { open: boolean; onClose
                   value={selectedCat}
                   onChange={(e) => setSelectedCat(e.target.value)}
                   disabled={isGenerating}
-                  className="w-full bg-slate-900 border border-border/80 text-foreground text-xs rounded-lg px-3.5 py-3 outline-none focus:border-[var(--gold)] transition-all cursor-pointer appearance-none"
+                  // pr-9 (not the symmetric px-3.5 this had before) reserves
+                  // real room for the ▼ indicator at right-3.5 below — the
+                  // old symmetric padding let a long option's text run
+                  // straight under the arrow instead of stopping short of
+                  // it. `truncate` is the backstop for names too long even
+                  // for that gap.
+                  className="w-full truncate bg-slate-900 border border-border/80 text-foreground text-xs rounded-lg py-3 pl-3.5 pr-10 outline-none focus:border-[var(--gold)] transition-all cursor-pointer appearance-none"
                 >
-                  <option value="all">
-                    📁 All Fabric Categories (Master Catalogue, {activeProductsList.length}{" "}
-                    Products)
-                  </option>
+                  {/* Short on purpose: a <select>'s closed-state text is
+                      rendered by the OS's native form control on mobile,
+                      which can hard-clip instead of honoring CSS
+                      text-overflow/truncate — more padding and `truncate`
+                      alone don't reliably fix it on a narrow phone screen.
+                      Less text is the fix that works everywhere. The count
+                      is redundant with "N Products Included" shown right
+                      above the select, so this drops nothing a buyer needs. */}
+                  <option value="all">📁 All Categories ({activeProductsList.length})</option>
                   {dynamicCategories.map((cat) => {
                     const count = activeProductsList.filter((p) => p.category === cat).length;
                     return (
                       <option key={cat} value={cat}>
-                        🧵 {cat} ({count} {count === 1 ? "Quality" : "Qualities"})
+                        🧵 {cat} ({count})
                       </option>
                     );
                   })}
                 </select>
-                <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">
+                <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">
                   ▼
                 </div>
               </div>

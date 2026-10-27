@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useBackToClose } from "@/hooks/useBackToClose";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { useSiteSetting } from "@/hooks/useSiteSetting";
 import { EASE_REVEAL, EASE_UI } from "./motion";
 
@@ -48,17 +50,19 @@ export function PromoPopup() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [loaded, settings.enabled, settings.title]);
 
+  useScrollLock(show);
+
+  // Close on the mobile/browser back button instead of navigating the page
+  // away, matching every other overlay in this codebase.
+  useBackToClose(show, () => setShow(false));
+
   useEffect(() => {
     if (!show) return;
-    document.body.style.overflow = "hidden";
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setShow(false);
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [show]);
 
   return (

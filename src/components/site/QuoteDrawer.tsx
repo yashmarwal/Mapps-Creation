@@ -16,7 +16,9 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
+import { useBackToClose } from "@/hooks/useBackToClose";
 import { useQuoteBasket, type QuoteItem } from "@/hooks/useQuoteBasket";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { LogoMark } from "./LogoMark";
 import { EASE_UI } from "./motion";
 import { SITE, whatsappLink } from "@/lib/seo";
@@ -44,35 +46,24 @@ export function QuoteDrawer() {
     setMounted(true);
   }, []);
 
-  // `setIsOpen` is the real useState setter from useQuoteBasket's context
-  // (stable across renders), so this isn't currently the pushState-feedback
-  // loop bug documented in DownloadCatalogModal.tsx — but the same ref
-  // pattern is applied here too so this stays safe even if that ever
-  // changes (e.g. the context value gets rewrapped in a future edit).
-  const setIsOpenRef = useRef(setIsOpen);
-  useEffect(() => {
-    setIsOpenRef.current = setIsOpen;
-  }, [setIsOpen]);
-
   // Close drawer on mobile/browser back button instead of navigating away
+  useBackToClose(isOpen, () => setIsOpen(false));
+
+  // Close on Escape, matching every other overlay in this codebase
+  // (SearchModal, Navigation drawer, PromoPopup, DownloadCatalogModal).
   useEffect(() => {
     if (!isOpen) return;
-
-    window.history.pushState({ quoteDrawerOpen: true }, "");
-
-    const handlePopState = () => {
-      setIsOpenRef.current(false);
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
     };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, setIsOpen]);
 
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-      if (typeof window !== "undefined" && window.history.state?.quoteDrawerOpen) {
-        window.history.back();
-      }
-    };
-  }, [isOpen]);
+  // Lock page scroll while the drawer is open — reference-counted because
+  // the product-preview lightbox can open on top of this drawer while it's
+  // still open; see useScrollLock's own comment for why that matters.
+  useScrollLock(isOpen);
 
   const targetBody = typeof document !== "undefined" ? document.body : null;
 
@@ -231,8 +222,19 @@ export function QuoteDrawer() {
     return msg;
   };
 
+  // Only the "Send via Email" button is type="submit", so it's the only one
+  // the checkbox's native `required` blocks automatically. WhatsApp send
+  // shares the same personal-data payload (company/phone/email/city) but is
+  // a plain button — gate it manually against the same checkbox instead of
+  // duplicating the consent copy into a second, separately-required control.
+  const consentRef = useRef<HTMLInputElement>(null);
+
   const handleWhatsAppSend = () => {
     if (items.length === 0) return;
+    if (!consentRef.current?.checked) {
+      consentRef.current?.reportValidity();
+      return;
+    }
     const message = generateWhatsAppMessage();
     window.open(whatsappLink(message), "_blank", "noopener,noreferrer");
   };
@@ -346,6 +348,7 @@ export function QuoteDrawer() {
                     <button
                       onClick={clearBasket}
                       title="Clear Quote List"
+                      aria-label="Clear all items from the quote list"
                       className="text-muted-foreground hover:text-destructive p-2 transition-colors cursor-pointer"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -353,6 +356,7 @@ export function QuoteDrawer() {
                   )}
                   <button
                     onClick={() => setIsOpen(false)}
+                    aria-label="Close quote drawer"
                     className="text-muted-foreground hover:text-foreground p-2 transition-colors cursor-pointer"
                   >
                     <X className="h-5 w-5" />
@@ -403,6 +407,7 @@ export function QuoteDrawer() {
 
                         <button
                           onClick={() => removeItem(item.id)}
+                          aria-label={`Remove ${item.name} from the quote list`}
                           className="text-muted-foreground hover:text-destructive p-1 transition-colors cursor-pointer shrink-0"
                         >
                           <X className="h-4 w-4" />
@@ -412,7 +417,10 @@ export function QuoteDrawer() {
                       <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border/40">
                         {/* Quantity Stepper */}
                         <div>
-                          <label className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-1">
+                          <label
+                            htmlFor={`quantity-${item.id}`}
+                            className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-1"
+                          >
                             Quantity ({item.unit})
                           </label>
                           <div className="flex items-center border border-border rounded-lg bg-background/50 overflow-hidden">
@@ -424,11 +432,13 @@ export function QuoteDrawer() {
                                   item.quantity - (item.unit === "kg" ? 10 : 25),
                                 )
                               }
+                              aria-label={`Decrease quantity for ${item.name}`}
                               className="p-1.5 hover:bg-muted text-muted-foreground transition-colors cursor-pointer"
                             >
                               <Minus className="h-3.5 w-3.5" />
                             </button>
                             <input
+                              id={`quantity-${item.id}`}
                               type="number"
                               value={item.quantity || 50}
                               onChange={(e) =>
@@ -444,6 +454,7 @@ export function QuoteDrawer() {
                                   (item.quantity || 50) + (item.unit === "kg" ? 10 : 25),
                                 )
                               }
+                              aria-label={`Increase quantity for ${item.name}`}
                               className="p-1.5 hover:bg-muted text-muted-foreground transition-colors cursor-pointer"
                             >
                               <Plus className="h-3.5 w-3.5" />
@@ -453,10 +464,14 @@ export function QuoteDrawer() {
 
                         {/* Shade Input */}
                         <div>
-                          <label className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-1">
+                          <label
+                            htmlFor={`shade-${item.id}`}
+                            className="text-[10px] text-muted-foreground uppercase tracking-wider block mb-1"
+                          >
                             Preferred Shade
                           </label>
                           <input
+                            id={`shade-${item.id}`}
                             type="text"
                             placeholder="e.g. Navy, Black"
                             value={item.shade || ""}
@@ -513,6 +528,22 @@ export function QuoteDrawer() {
                         className="w-full border-b border-border bg-transparent text-xs py-2 px-1 text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
                       />
                     </div>
+
+                    <label className="text-muted-foreground flex items-start gap-2 text-[11px] leading-relaxed pt-1">
+                      <input
+                        ref={consentRef}
+                        type="checkbox"
+                        required
+                        className="border-border accent-primary mt-0.5 h-3.5 w-3.5 shrink-0"
+                      />
+                      <span>
+                        I agree to the{" "}
+                        <a href="/privacy" className="text-primary underline underline-offset-2">
+                          Privacy Policy
+                        </a>{" "}
+                        and consent to this information being used to send my quote.
+                      </span>
+                    </label>
 
                     {/* Action Buttons */}
                     <div className="pt-3 flex flex-col gap-2">

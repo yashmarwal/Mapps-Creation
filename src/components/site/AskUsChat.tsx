@@ -15,6 +15,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { askAiAssistant } from "@/lib/aiAssistant.server";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useVisualViewportInsets } from "@/hooks/useVisualViewportInsets";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
@@ -228,29 +229,15 @@ export function AskUsChat({
     return () => clearTimeout(timer);
   }, [pathname, open]);
 
-  // `onOpenChange` is `setAskOpen` passed straight through from __root.tsx
-  // (a real useState setter, stable across renders), so this isn't
-  // currently the pushState-feedback-loop bug documented in
-  // DownloadCatalogModal.tsx — but the same ref pattern is applied here too
-  // so this stays safe even if that prop is ever passed differently.
-  const onOpenChangeRef = useRef(onOpenChange);
-  useEffect(() => {
-    onOpenChangeRef.current = onOpenChange;
-  }, [onOpenChange]);
+  // NOT using useBackToClose here: the "Browse Catalogue" link MAPPSY can
+  // show in a reply closes the chat AND navigates to a real page in the
+  // same click, which races useBackToClose's history.back() correction and
+  // can cancel the navigation — see Navigation.tsx for the full story.
 
-  // Handle mobile & browser back button to close chat modal gracefully
-  useEffect(() => {
-    if (!open) return;
-
-    window.history.pushState({ chatModalOpen: true }, "");
-
-    const handlePopState = () => {
-      onOpenChangeRef.current(false);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [open]);
+  // Lock page scroll while the chat is open — every other overlay in this
+  // codebase does this; this one didn't, so the page behind it kept
+  // scrolling.
+  useScrollLock(open);
 
   // Auto-scroll chat body smoothly during live text delivery
   useEffect(() => {

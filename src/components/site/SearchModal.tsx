@@ -16,6 +16,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { CATEGORIES, type Product } from "@/data/catalog";
 import { useProducts } from "@/hooks/useProducts";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { useQuoteBasket } from "@/hooks/useQuoteBasket";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { EASE_REVEAL, EASE_UI } from "./motion";
@@ -67,44 +68,25 @@ export function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
     return picks;
   }, [allProducts]);
 
+  useScrollLock(isOpen);
+
   // Focus input automatically on open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
       const timer = setTimeout(() => inputRef.current?.focus(), 80);
       return () => clearTimeout(timer);
     }
-    document.body.style.overflow = "";
     setQuery("");
     setSelectedCategory("All");
     setPreviewProduct(null);
     return undefined;
   }, [isOpen]);
 
-  // Always call the latest onClose without it being a dependency below — see
-  // the identical comment in DownloadCatalogModal.tsx for why an unstable
-  // inline `onClose` here + a raw pushState call is a real, reproduced
-  // infinite-loop/freeze: the router's history listener treats pushState as
-  // a navigation and re-renders the parent, producing a fresh `onClose`,
-  // which (if it were a dependency) re-fires this effect forever.
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
-  // Handle mobile/browser back button to close search modal gracefully
-  useEffect(() => {
-    if (!isOpen) return;
-
-    window.history.pushState({ searchModalOpen: true }, "");
-
-    const handlePopState = () => {
-      onCloseRef.current();
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [isOpen]);
+  // NOT using useBackToClose here: the "View Full Catalogue" link inside
+  // this modal closes it AND navigates to a real page in the same click.
+  // That races useBackToClose's own history.back() correction and can
+  // cancel the navigation — see the longer comment on this in
+  // Navigation.tsx, which hit the same thing.
 
   // Global Esc key listener
   useEffect(() => {

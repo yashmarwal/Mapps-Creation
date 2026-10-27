@@ -106,6 +106,55 @@ function About() {
         </div>
       </section>
 
+      {/* BUSINESS & LEGAL DETAILS — DPDP/consumer-transparency requirement:
+          legal name, structure, proprietor, and contact must be findable
+          somewhere on the site. GSTIN and a full registered postal address
+          are NOT in any existing copy or data source in this codebase —
+          left as explicit "needs input" rows rather than invented. */}
+      <section className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-32">
+        <Reveal>
+          <p className="label-caps text-primary">Business & Legal Details</p>
+          <h2 className="display-lg mt-4 max-w-xl">Who you're dealing with</h2>
+        </Reveal>
+        <Reveal index={1}>
+          <dl className="border-border mt-10 grid grid-cols-1 gap-x-8 gap-y-6 border-t pt-8 sm:grid-cols-2">
+            <div>
+              <dt className="label-caps text-muted-foreground">Legal / Trading Name</dt>
+              <dd className="mt-1 text-base">Mapps Creation</dd>
+            </div>
+            <div>
+              <dt className="label-caps text-muted-foreground">Business Structure</dt>
+              <dd className="mt-1 text-base">GST-registered proprietorship</dd>
+            </div>
+            <div>
+              <dt className="label-caps text-muted-foreground">Proprietor</dt>
+              <dd className="mt-1 text-base">Pratham Aggarwal</dd>
+            </div>
+            <div>
+              <dt className="label-caps text-muted-foreground">GSTIN</dt>
+              <dd className="text-muted-foreground mt-1 text-sm italic">
+                Not yet published on the site — add once confirmed by the business.
+              </dd>
+            </div>
+            <div>
+              <dt className="label-caps text-muted-foreground">Registered Address</dt>
+              <dd className="text-muted-foreground mt-1 text-sm italic">
+                Only the city (Surat, Gujarat) is published today — a full registered postal address
+                is needed from the business before this can be completed.
+              </dd>
+            </div>
+            <div>
+              <dt className="label-caps text-muted-foreground">Support Contact</dt>
+              <dd className="mt-1 text-base">
+                <a href="/contact" className="hover:text-primary underline underline-offset-2">
+                  {"phone & email on our Contact page"}
+                </a>
+              </dd>
+            </div>
+          </dl>
+        </Reveal>
+      </section>
+
       {/* FOUNDER SECTION */}
       <FounderSection />
 

@@ -16,7 +16,9 @@ import { useEffect, useRef, useState } from "react";
 import { EASE_REVEAL, EASE_UI, Reveal } from "./motion";
 import type { Product } from "@/data/catalog";
 import { SITE, whatsappLink } from "@/lib/seo";
+import { useBackToClose } from "@/hooks/useBackToClose";
 import { useQuoteBasket } from "@/hooks/useQuoteBasket";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -40,7 +42,10 @@ export function ProductCard({
   const ref = useRef<HTMLElement>(null);
   const [sheen, setSheen] = useState({ x: 50, y: 50, active: false });
   const [preview, setPreview] = useState(false);
-  const [activeImage, setActiveImage] = useState(0);
+  // Index + direction together, so the gallery always knows which way to
+  // slide (right-to-left for "next", left-to-right for "previous") whether
+  // the change came from a drag, the chevrons, a dot, or the arrow keys.
+  const [[activeImage, direction], setImageState] = useState<[number, number]>([0, 0]);
   const [showSwipeHint, setShowSwipeHint] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const { addItem, items } = useQuoteBasket();
@@ -74,7 +79,9 @@ export function ProductCard({
   // `activeImage`), so a version that captured `activeImage` from the
   // outer scope would go stale after the first press/swipe.
   const stepImage = (delta: number) =>
-    setActiveImage((prev) => (prev + delta + galleryCount) % galleryCount);
+    setImageState(([prev]) => [(prev + delta + galleryCount) % galleryCount, delta]);
+  const goToImage = (i: number) =>
+    setImageState(([prev]) => [i, i === prev ? 0 : i > prev ? 1 : -1]);
 
   const isAdded = items.some((i) => i.id === product.id);
 
@@ -84,10 +91,20 @@ export function ProductCard({
   const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [7, -7]), spring);
   const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-7, 7]), spring);
 
+  // Lock page scroll while the preview is open. Reference-counted: a
+  // shared product link can open this preview directly on a fresh page
+  // load, but it can also, via the same mechanism, be opened while another
+  // overlay already holds the lock — counting avoids one closing early and
+  // un-locking scroll out from under the other.
+  useScrollLock(preview);
+
+  // Handle mobile/browser back button to close the preview gracefully,
+  // matching every other overlay in this codebase.
+  useBackToClose(preview, closePreview);
+
   useEffect(() => {
     if (!preview) return;
-    setActiveImage(0);
-    document.body.style.overflow = "hidden";
+    setImageState([0, 0]);
 
     // Briefly show a "swipe for more" hint the first time this product's
     // gallery opens with a second photo, then let it fade — teaches the
@@ -105,7 +122,6 @@ export function ProductCard({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = "";
       window.removeEventListener("keydown", onKeyDown);
       if (hintTimer) window.clearTimeout(hintTimer);
     };
@@ -415,27 +431,48 @@ export function ProductCard({
               </button>
 
               <div className="relative aspect-[4/3] sm:aspect-auto bg-slate-950 overflow-hidden">
-                <motion.img
-                  key={activeImage}
-                  src={galleryImages[activeImage]}
-                  alt={`${product.name}, ${product.category} fabric from Mapps Creation, Surat`}
-                  className={`h-full w-full object-cover ${hasGallery ? "cursor-grab active:cursor-grabbing" : ""}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.25, ease: EASE_UI }}
-                  drag={hasGallery ? "x" : false}
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.2}
-                  onDragEnd={(_, info) => {
-                    const SWIPE_PX = 60;
-                    const SWIPE_VELOCITY = 400;
-                    if (info.offset.x < -SWIPE_PX || info.velocity.x < -SWIPE_VELOCITY) {
-                      stepImage(1);
-                    } else if (info.offset.x > SWIPE_PX || info.velocity.x > SWIPE_VELOCITY) {
-                      stepImage(-1);
-                    }
-                  }}
-                />
+                {/* Directional slide + crossfade instead of a hard cut: the
+                    outgoing photo and the incoming one are both mounted for
+                    the duration of the transition (default AnimatePresence
+                    mode, not popLayout — both are absolutely positioned so
+                    they're meant to overlap) and slide past each other the
+                    way the drag itself suggested. Without `custom`, the
+                    exit variant has no way to know which direction the
+                    gallery is moving and the old photo would always exit
+                    the same way regardless of swipe direction. */}
+                <AnimatePresence custom={direction} initial={false}>
+                  <motion.img
+                    key={activeImage}
+                    src={galleryImages[activeImage]}
+                    alt={`${product.name}, ${product.category} fabric from Mapps Creation, Surat`}
+                    className={`absolute inset-0 h-full w-full object-cover ${hasGallery ? "cursor-grab active:cursor-grabbing" : ""}`}
+                    custom={direction}
+                    variants={{
+                      enter: (dir: number) => ({ x: dir >= 0 ? "100%" : "-100%", opacity: 0 }),
+                      center: { x: "0%", opacity: 1 },
+                      exit: (dir: number) => ({ x: dir >= 0 ? "-100%" : "100%", opacity: 0 }),
+                    }}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 320, damping: 32 },
+                      opacity: { duration: 0.2 },
+                    }}
+                    drag={hasGallery ? "x" : false}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.2}
+                    onDragEnd={(_, info) => {
+                      const SWIPE_PX = 60;
+                      const SWIPE_VELOCITY = 400;
+                      if (info.offset.x < -SWIPE_PX || info.velocity.x < -SWIPE_VELOCITY) {
+                        stepImage(1);
+                      } else if (info.offset.x > SWIPE_PX || info.velocity.x > SWIPE_VELOCITY) {
+                        stepImage(-1);
+                      }
+                    }}
+                  />
+                </AnimatePresence>
 
                 {hasGallery && (
                   <>
@@ -469,7 +506,7 @@ export function ProductCard({
                           type="button"
                           onClick={(e) => {
                             stop(e);
-                            setActiveImage(i);
+                            goToImage(i);
                           }}
                           aria-label={`Show photo ${i + 1}`}
                           className={`h-2.5 w-2.5 rounded-full border border-white/60 transition-all cursor-pointer ${

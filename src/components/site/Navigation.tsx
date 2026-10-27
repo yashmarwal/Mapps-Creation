@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SITE, whatsappLink } from "@/lib/seo";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { EASE_REVEAL } from "./motion";
 import { LogoMark } from "./LogoMark";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
@@ -95,22 +96,23 @@ export function Navigation({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useScrollLock(open);
+
+  // NOT using useBackToClose here: every item in this drawer is a <Link>
+  // that closes the drawer AND navigates to a real page in the same click.
+  // Pushing a history entry on open and popping it in the close effect's
+  // cleanup races the real navigation's own pushState — in practice it won
+  // the race and silently cancelled the navigation, so clicking a menu
+  // item closed the drawer but never changed the page. Overlays that only
+  // ever close via a button (not an internal page Link) don't have this
+  // conflict; this one does, so it stays on Escape + scroll-lock only.
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
-    if (open) {
-      window.addEventListener("keydown", onKeyDown);
-    }
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
   return (

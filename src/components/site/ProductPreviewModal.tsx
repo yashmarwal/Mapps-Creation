@@ -2,7 +2,9 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { ImageOff, X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { useBackToClose } from "@/hooks/useBackToClose";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { EASE_REVEAL, EASE_UI } from "./motion";
 
 /** Minimal shape both a full catalogue Product and a QuoteItem satisfy —
@@ -29,32 +31,25 @@ export function ProductPreviewModal({
   item: PreviewItem | null;
   onClose: () => void;
 }) {
-  // Always call the latest onClose without it being a dependency below — see
-  // the identical comment in DownloadCatalogModal.tsx: both call sites here
-  // (SearchModal, QuoteDrawer) pass an inline arrow function, recreated every
-  // render of the parent. Combined with `onClose` in this effect's deps and
-  // a raw pushState call, that's a real, reproduced infinite-loop/freeze —
-  // the router's history listener treats pushState as a navigation and
-  // re-renders the parent, producing a fresh `onClose`, which re-fires this
-  // effect, forever.
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
   // Handle mobile/browser back button to close lightbox preview gracefully
+  useBackToClose(Boolean(item), onClose);
+
+  // Lock page scroll while open. Reference-counted on purpose: this modal
+  // can be opened from inside an already-open Quote drawer or Search modal
+  // (both of which also hold this lock) — a plain set/clear here would
+  // un-lock scroll out from under the parent the moment this one closes.
+  useScrollLock(Boolean(item));
+
+  // Close on Escape, matching every other overlay in this codebase
+  // (SearchModal, Navigation drawer, PromoPopup, DownloadCatalogModal).
   useEffect(() => {
     if (!item) return;
-
-    window.history.pushState({ previewOpen: true }, "");
-
-    const handlePopState = () => {
-      onCloseRef.current();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
     };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [item]);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [item, onClose]);
 
   return (
     <AnimatePresence>

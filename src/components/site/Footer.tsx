@@ -113,17 +113,26 @@ export function Footer() {
       </div>
 
       <div className="hairline" />
-      <div className="text-muted-foreground mx-auto flex max-w-7xl flex-col gap-2 px-5 py-6 text-xs md:flex-row md:items-center md:justify-between md:px-10">
+      <div className="text-muted-foreground mx-auto flex max-w-7xl flex-col gap-3 px-5 py-6 text-xs md:flex-row md:items-center md:justify-between md:px-10">
         <p>© {new Date().getFullYear()} Mapps Creation. All rights reserved.</p>
-        <p className="flex flex-wrap items-center gap-x-2">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
           <span>Inquiry-only B2B · Wholesale &amp; bulk supply from Surat</span>
-          <span aria-hidden="true">·</span>
-          <Link
-            to="/privacy"
-            className="hover:text-foreground underline underline-offset-2 transition-colors"
-          >
-            Privacy Policy
-          </Link>
+          {[
+            { to: "/privacy", label: "Privacy Policy" },
+            { to: "/terms", label: "Terms & Conditions" },
+            { to: "/cookies", label: "Cookies Policy" },
+            { to: "/refund-policy", label: "Refund & Cancellation" },
+          ].map((link) => (
+            <span key={link.to} className="flex items-center gap-x-2">
+              <span aria-hidden="true">·</span>
+              <Link
+                to={link.to}
+                className="hover:text-foreground underline underline-offset-2 transition-colors"
+              >
+                {link.label}
+              </Link>
+            </span>
+          ))}
         </p>
       </div>
 
