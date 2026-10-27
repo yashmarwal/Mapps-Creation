@@ -15,7 +15,6 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { CATEGORIES, type Product } from "@/data/catalog";
-import { useBackToClose } from "@/hooks/useBackToClose";
 import { useProducts } from "@/hooks/useProducts";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { useQuoteBasket } from "@/hooks/useQuoteBasket";
@@ -83,8 +82,11 @@ export function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
     return undefined;
   }, [isOpen]);
 
-  // Handle mobile/browser back button to close search modal gracefully
-  useBackToClose(isOpen, onClose);
+  // NOT using useBackToClose here: the "View Full Catalogue" link inside
+  // this modal closes it AND navigates to a real page in the same click.
+  // That races useBackToClose's own history.back() correction and can
+  // cancel the navigation — see the longer comment on this in
+  // Navigation.tsx, which hit the same thing.
 
   // Global Esc key listener
   useEffect(() => {

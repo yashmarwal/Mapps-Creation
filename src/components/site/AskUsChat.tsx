@@ -15,7 +15,6 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { askAiAssistant } from "@/lib/aiAssistant.server";
-import { useBackToClose } from "@/hooks/useBackToClose";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useVisualViewportInsets } from "@/hooks/useVisualViewportInsets";
@@ -230,8 +229,10 @@ export function AskUsChat({
     return () => clearTimeout(timer);
   }, [pathname, open]);
 
-  // Handle mobile & browser back button to close chat modal gracefully
-  useBackToClose(open, () => onOpenChange(false));
+  // NOT using useBackToClose here: the "Browse Catalogue" link MAPPSY can
+  // show in a reply closes the chat AND navigates to a real page in the
+  // same click, which races useBackToClose's history.back() correction and
+  // can cancel the navigation — see Navigation.tsx for the full story.
 
   // Lock page scroll while the chat is open — every other overlay in this
   // codebase does this; this one didn't, so the page behind it kept
