@@ -18,6 +18,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { useBackToClose } from "@/hooks/useBackToClose";
 import { useQuoteBasket, type QuoteItem } from "@/hooks/useQuoteBasket";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { LogoMark } from "./LogoMark";
 import { EASE_UI } from "./motion";
 import { SITE, whatsappLink } from "@/lib/seo";
@@ -58,6 +59,11 @@ export function QuoteDrawer() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, setIsOpen]);
+
+  // Lock page scroll while the drawer is open — reference-counted because
+  // the product-preview lightbox can open on top of this drawer while it's
+  // still open; see useScrollLock's own comment for why that matters.
+  useScrollLock(isOpen);
 
   const targetBody = typeof document !== "undefined" ? document.body : null;
 

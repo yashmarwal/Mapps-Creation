@@ -2,14 +2,30 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Quote, Sparkles, ShieldCheck, MapPin, Award, Maximize2, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import founderImg from "@/assets/founder.jpg";
 import { whatsappLink } from "@/lib/seo";
+import { useBackToClose } from "@/hooks/useBackToClose";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
 import { EASE_UI, Reveal } from "./motion";
 
 export function FounderSection({ className = "" }: { className?: string }) {
   const [imageOpen, setImageOpen] = useState(false);
+
+  // This lightbox had none of the overlay hygiene every other one in the
+  // codebase has: pressing back closed the whole page instead of just the
+  // image, the page scrolled behind it, and Escape did nothing.
+  useBackToClose(imageOpen, () => setImageOpen(false));
+  useScrollLock(imageOpen);
+  useEffect(() => {
+    if (!imageOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setImageOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [imageOpen]);
 
   return (
     <>

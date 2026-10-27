@@ -17,6 +17,7 @@ import { Link } from "@tanstack/react-router";
 import { CATEGORIES, type Product } from "@/data/catalog";
 import { useBackToClose } from "@/hooks/useBackToClose";
 import { useProducts } from "@/hooks/useProducts";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { useQuoteBasket } from "@/hooks/useQuoteBasket";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { EASE_REVEAL, EASE_UI } from "./motion";
@@ -68,14 +69,14 @@ export function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
     return picks;
   }, [allProducts]);
 
+  useScrollLock(isOpen);
+
   // Focus input automatically on open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
       const timer = setTimeout(() => inputRef.current?.focus(), 80);
       return () => clearTimeout(timer);
     }
-    document.body.style.overflow = "";
     setQuery("");
     setSelectedCategory("All");
     setPreviewProduct(null);

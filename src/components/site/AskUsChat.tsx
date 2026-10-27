@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { askAiAssistant } from "@/lib/aiAssistant.server";
 import { useBackToClose } from "@/hooks/useBackToClose";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useVisualViewportInsets } from "@/hooks/useVisualViewportInsets";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
@@ -233,19 +234,9 @@ export function AskUsChat({
   useBackToClose(open, () => onOpenChange(false));
 
   // Lock page scroll while the chat is open — every other overlay in this
-  // codebase does this (ProductCard preview, PromoPopup, Navigation drawer,
-  // DownloadCatalogModal); this one didn't, so the page behind it kept
-  // scrolling. useSmoothScroll's MutationObserver watches document.body's
-  // style attribute and pauses Lenis (our inertia-scroll lib) whenever it
-  // sees overflow:hidden, so this one line handles both native and Lenis
-  // scroll.
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+  // codebase does this; this one didn't, so the page behind it kept
+  // scrolling.
+  useScrollLock(open);
 
   // Auto-scroll chat body smoothly during live text delivery
   useEffect(() => {

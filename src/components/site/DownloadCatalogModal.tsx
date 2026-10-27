@@ -2,10 +2,11 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Download, FileText, Loader2, Sparkles, CheckCircle2, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PRODUCTS } from "@/data/catalog";
 import { useBackToClose } from "@/hooks/useBackToClose";
 import { useProducts } from "@/hooks/useProducts";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { EASE_REVEAL, EASE_UI } from "./motion";
 
 export function DownloadCatalogModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -23,6 +24,22 @@ export function DownloadCatalogModal({ open, onClose }: { open: boolean; onClose
 
   // Handle mobile/browser back button to close modal gracefully
   useBackToClose(open, onClose);
+
+  // Close on Escape, matching every other overlay in this codebase
+  // (SearchModal, Navigation drawer, PromoPopup, QuoteDrawer) — this one
+  // was missing it entirely.
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
+  // Lock page scroll while the modal is open — another overlay that was
+  // missing this, so the page behind it kept scrolling.
+  useScrollLock(open);
 
   const handleDownload = async () => {
     try {
@@ -133,17 +150,22 @@ export function DownloadCatalogModal({ open, onClose }: { open: boolean; onClose
                   // straight under the arrow instead of stopping short of
                   // it. `truncate` is the backstop for names too long even
                   // for that gap.
-                  className="w-full truncate bg-slate-900 border border-border/80 text-foreground text-xs rounded-lg py-3 pl-3.5 pr-9 outline-none focus:border-[var(--gold)] transition-all cursor-pointer appearance-none"
+                  className="w-full truncate bg-slate-900 border border-border/80 text-foreground text-xs rounded-lg py-3 pl-3.5 pr-10 outline-none focus:border-[var(--gold)] transition-all cursor-pointer appearance-none"
                 >
-                  <option value="all">
-                    📁 All Fabric Categories (Master Catalogue, {activeProductsList.length}{" "}
-                    Products)
-                  </option>
+                  {/* Short on purpose: a <select>'s closed-state text is
+                      rendered by the OS's native form control on mobile,
+                      which can hard-clip instead of honoring CSS
+                      text-overflow/truncate — more padding and `truncate`
+                      alone don't reliably fix it on a narrow phone screen.
+                      Less text is the fix that works everywhere. The count
+                      is redundant with "N Products Included" shown right
+                      above the select, so this drops nothing a buyer needs. */}
+                  <option value="all">📁 All Categories ({activeProductsList.length})</option>
                   {dynamicCategories.map((cat) => {
                     const count = activeProductsList.filter((p) => p.category === cat).length;
                     return (
                       <option key={cat} value={cat}>
-                        🧵 {cat} ({count} {count === 1 ? "Quality" : "Qualities"})
+                        🧵 {cat} ({count})
                       </option>
                     );
                   })}

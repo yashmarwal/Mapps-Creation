@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SITE, whatsappLink } from "@/lib/seo";
+import { useBackToClose } from "@/hooks/useBackToClose";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { EASE_REVEAL } from "./motion";
 import { LogoMark } from "./LogoMark";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
@@ -95,22 +97,19 @@ export function Navigation({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useScrollLock(open);
+
+  // Close on the mobile/browser back button instead of navigating the page
+  // away — opening the drawer shouldn't cost the visitor a real back-press.
+  useBackToClose(open, () => setOpen(false));
+
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
-    if (open) {
-      window.addEventListener("keydown", onKeyDown);
-    }
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
   return (

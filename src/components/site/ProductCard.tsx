@@ -16,7 +16,9 @@ import { useEffect, useRef, useState } from "react";
 import { EASE_REVEAL, EASE_UI, Reveal } from "./motion";
 import type { Product } from "@/data/catalog";
 import { SITE, whatsappLink } from "@/lib/seo";
+import { useBackToClose } from "@/hooks/useBackToClose";
 import { useQuoteBasket } from "@/hooks/useQuoteBasket";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -89,10 +91,20 @@ export function ProductCard({
   const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [7, -7]), spring);
   const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-7, 7]), spring);
 
+  // Lock page scroll while the preview is open. Reference-counted: a
+  // shared product link can open this preview directly on a fresh page
+  // load, but it can also, via the same mechanism, be opened while another
+  // overlay already holds the lock — counting avoids one closing early and
+  // un-locking scroll out from under the other.
+  useScrollLock(preview);
+
+  // Handle mobile/browser back button to close the preview gracefully,
+  // matching every other overlay in this codebase.
+  useBackToClose(preview, closePreview);
+
   useEffect(() => {
     if (!preview) return;
     setImageState([0, 0]);
-    document.body.style.overflow = "hidden";
 
     // Briefly show a "swipe for more" hint the first time this product's
     // gallery opens with a second photo, then let it fade — teaches the
@@ -110,7 +122,6 @@ export function ProductCard({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = "";
       window.removeEventListener("keydown", onKeyDown);
       if (hintTimer) window.clearTimeout(hintTimer);
     };

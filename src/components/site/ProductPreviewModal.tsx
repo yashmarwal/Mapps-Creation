@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ImageOff, X } from "lucide-react";
 import { useEffect } from "react";
 import { useBackToClose } from "@/hooks/useBackToClose";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { EASE_REVEAL, EASE_UI } from "./motion";
 
 /** Minimal shape both a full catalogue Product and a QuoteItem satisfy —
@@ -32,6 +33,12 @@ export function ProductPreviewModal({
 }) {
   // Handle mobile/browser back button to close lightbox preview gracefully
   useBackToClose(Boolean(item), onClose);
+
+  // Lock page scroll while open. Reference-counted on purpose: this modal
+  // can be opened from inside an already-open Quote drawer or Search modal
+  // (both of which also hold this lock) — a plain set/clear here would
+  // un-lock scroll out from under the parent the moment this one closes.
+  useScrollLock(Boolean(item));
 
   // Close on Escape, matching every other overlay in this codebase
   // (SearchModal, Navigation drawer, PromoPopup, DownloadCatalogModal).
