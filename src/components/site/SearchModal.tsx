@@ -15,6 +15,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { CATEGORIES, type Product } from "@/data/catalog";
+import { useBackToClose } from "@/hooks/useBackToClose";
 import { useProducts } from "@/hooks/useProducts";
 import { useQuoteBasket } from "@/hooks/useQuoteBasket";
 import { SITE, whatsappLink } from "@/lib/seo";
@@ -81,30 +82,8 @@ export function SearchModal({ isOpen, onClose }: { isOpen: boolean; onClose: () 
     return undefined;
   }, [isOpen]);
 
-  // Always call the latest onClose without it being a dependency below — see
-  // the identical comment in DownloadCatalogModal.tsx for why an unstable
-  // inline `onClose` here + a raw pushState call is a real, reproduced
-  // infinite-loop/freeze: the router's history listener treats pushState as
-  // a navigation and re-renders the parent, producing a fresh `onClose`,
-  // which (if it were a dependency) re-fires this effect forever.
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
   // Handle mobile/browser back button to close search modal gracefully
-  useEffect(() => {
-    if (!isOpen) return;
-
-    window.history.pushState({ searchModalOpen: true }, "");
-
-    const handlePopState = () => {
-      onCloseRef.current();
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [isOpen]);
+  useBackToClose(isOpen, onClose);
 
   // Global Esc key listener
   useEffect(() => {

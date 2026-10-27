@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
+import { useBackToClose } from "@/hooks/useBackToClose";
 import { useQuoteBasket, type QuoteItem } from "@/hooks/useQuoteBasket";
 import { LogoMark } from "./LogoMark";
 import { EASE_UI } from "./motion";
@@ -44,46 +45,19 @@ export function QuoteDrawer() {
     setMounted(true);
   }, []);
 
-  // `setIsOpen` is the real useState setter from useQuoteBasket's context
-  // (stable across renders), so this isn't currently the pushState-feedback
-  // loop bug documented in DownloadCatalogModal.tsx — but the same ref
-  // pattern is applied here too so this stays safe even if that ever
-  // changes (e.g. the context value gets rewrapped in a future edit).
-  const setIsOpenRef = useRef(setIsOpen);
-  useEffect(() => {
-    setIsOpenRef.current = setIsOpen;
-  }, [setIsOpen]);
-
   // Close drawer on mobile/browser back button instead of navigating away
-  useEffect(() => {
-    if (!isOpen) return;
-
-    window.history.pushState({ quoteDrawerOpen: true }, "");
-
-    const handlePopState = () => {
-      setIsOpenRef.current(false);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-      if (typeof window !== "undefined" && window.history.state?.quoteDrawerOpen) {
-        window.history.back();
-      }
-    };
-  }, [isOpen]);
+  useBackToClose(isOpen, () => setIsOpen(false));
 
   // Close on Escape, matching every other overlay in this codebase
   // (SearchModal, Navigation drawer, PromoPopup, DownloadCatalogModal).
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpenRef.current(false);
+      if (e.key === "Escape") setIsOpen(false);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   const targetBody = typeof document !== "undefined" ? document.body : null;
 

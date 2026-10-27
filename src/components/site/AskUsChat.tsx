@@ -15,6 +15,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { SITE, whatsappLink } from "@/lib/seo";
 import { askAiAssistant } from "@/lib/aiAssistant.server";
+import { useBackToClose } from "@/hooks/useBackToClose";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useVisualViewportInsets } from "@/hooks/useVisualViewportInsets";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
@@ -228,28 +229,22 @@ export function AskUsChat({
     return () => clearTimeout(timer);
   }, [pathname, open]);
 
-  // `onOpenChange` is `setAskOpen` passed straight through from __root.tsx
-  // (a real useState setter, stable across renders), so this isn't
-  // currently the pushState-feedback-loop bug documented in
-  // DownloadCatalogModal.tsx — but the same ref pattern is applied here too
-  // so this stays safe even if that prop is ever passed differently.
-  const onOpenChangeRef = useRef(onOpenChange);
-  useEffect(() => {
-    onOpenChangeRef.current = onOpenChange;
-  }, [onOpenChange]);
-
   // Handle mobile & browser back button to close chat modal gracefully
+  useBackToClose(open, () => onOpenChange(false));
+
+  // Lock page scroll while the chat is open — every other overlay in this
+  // codebase does this (ProductCard preview, PromoPopup, Navigation drawer,
+  // DownloadCatalogModal); this one didn't, so the page behind it kept
+  // scrolling. useSmoothScroll's MutationObserver watches document.body's
+  // style attribute and pauses Lenis (our inertia-scroll lib) whenever it
+  // sees overflow:hidden, so this one line handles both native and Lenis
+  // scroll.
   useEffect(() => {
     if (!open) return;
-
-    window.history.pushState({ chatModalOpen: true }, "");
-
-    const handlePopState = () => {
-      onOpenChangeRef.current(false);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
     };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
   }, [open]);
 
   // Auto-scroll chat body smoothly during live text delivery

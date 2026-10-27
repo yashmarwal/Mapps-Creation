@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import appCss from "../styles.css?url";
 import { organizationSchema, websiteSchema } from "@/lib/seo";
 import { Navigation } from "@/components/site/Navigation";
+import { RouteLoadingBar } from "@/components/site/RouteLoadingBar";
 import { Footer } from "@/components/site/Footer";
 import { IntroProvider } from "@/components/site/Preloader";
 import { WhatsAppButton } from "@/components/site/WhatsAppButton";
@@ -173,12 +174,23 @@ function RootComponent() {
   const [searchOpen, setSearchOpen] = useState(false);
   useSmoothScroll();
 
+  // The router itself now owns *where* to scroll on navigation (restore the
+  // previous offset on back/forward, top on a fresh Link click — see
+  // `scrollRestoration: true` in router.tsx). Forcing scrollTo(0,0) here
+  // unconditionally, as this used to, overrode that and made "back" always
+  // land at the top of the previous page instead of where the user left
+  // off. All that's left for us to do is keep Lenis (our smooth-scroll lib)
+  // honest: it tracks scroll position independently of the native value, so
+  // after the router moves `window.scrollY`, resync Lenis to match rather
+  // than fighting it with a native-only scrollTo. Deferred one frame so the
+  // router's own scrollTo (which runs off its own post-render subscription)
+  // has already applied by the time we read `window.scrollY`.
   useIsomorphicLayoutEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-    if (window.__lenis) {
-      window.__lenis.scrollTo(0, { immediate: true });
-      window.__lenis.resize();
-    }
+    const raf = requestAnimationFrame(() => {
+      window.__lenis?.resize();
+      window.__lenis?.scrollTo(window.scrollY, { immediate: true });
+    });
+    return () => cancelAnimationFrame(raf);
   }, [pathname]);
 
   // Global Ctrl+K / Cmd+K keyboard shortcut
@@ -196,6 +208,7 @@ function RootComponent() {
   if (isAdmin) {
     return (
       <QueryClientProvider client={queryClient}>
+        <RouteLoadingBar />
         <Outlet />
       </QueryClientProvider>
     );
@@ -205,6 +218,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <QuoteBasketProvider>
         <IntroProvider>
+          <RouteLoadingBar />
           <TopMarquee visible={marqueeVisible} text={marquee.text} />
           <Navigation
             marqueeVisible={marqueeVisible}
