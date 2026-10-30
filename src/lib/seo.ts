@@ -22,6 +22,8 @@ type HeadInput = {
   image?: string;
   type?: "website" | "article";
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** Keep the page out of search results (e.g. a fabric page with too few products). */
+  noindex?: boolean;
 };
 
 /** One-call head builder: title, description, canonical, OG, Twitter, JSON-LD. */
@@ -32,8 +34,12 @@ export function buildPageHead({
   image = SITE.ogImage,
   type = "website",
   jsonLd,
+  noindex = false,
 }: HeadInput) {
   const canonical = `${SITE.url}${path}`;
+  if (import.meta.env.DEV && (title.length > 60 || description.length > 155)) {
+    console.warn(`[seo] ${path}: title ${title.length}/60, description ${description.length}/155`);
+  }
   const meta = [
     { title },
     { name: "description", content: description },
@@ -47,6 +53,8 @@ export function buildPageHead({
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
   ];
+
+  if (noindex) meta.push({ name: "robots", content: "noindex, follow" });
 
   if (image) {
     meta.push(
