@@ -13,6 +13,8 @@ import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import appCss from "../styles.css?url";
+import { indexablePages } from "@/data/fabricPages";
+import { fetchActiveProducts } from "@/hooks/useProducts";
 import { organizationSchema, websiteSchema } from "@/lib/seo";
 import { Navigation } from "@/components/site/Navigation";
 import { RouteLoadingBar } from "@/components/site/RouteLoadingBar";
@@ -87,6 +89,15 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Footer links to fabric pages that actually have products; cached so it
+  // isn't refetched on every navigation.
+  loader: async () => ({
+    fabricLinks: indexablePages(await fetchActiveProducts()).map(({ slug, label }) => ({
+      slug,
+      label,
+    })),
+  }),
+  staleTime: 5 * 60_000,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -154,6 +165,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { fabricLinks } = Route.useLoaderData();
   // `location.pathname` flips to the target route the instant navigation
   // *starts* — before that route's code has even finished loading. Keying
   // the page-transition div (and the scroll reset) off that meant a route
@@ -237,7 +249,7 @@ function RootComponent() {
               <Outlet />
             </motion.div>
           </main>
-          <Footer />
+          <Footer fabricLinks={fabricLinks} />
           <WhatsAppButton />
           <StickyCta />
           <PromoPopup />
