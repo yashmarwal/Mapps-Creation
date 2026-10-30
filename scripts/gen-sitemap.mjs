@@ -34,7 +34,9 @@ const res = await fetch(
 );
 if (!res.ok)
   throw new Error(`Could not read live products (HTTP ${res.status}); sitemap not written`);
-const livePages = indexablePages(await res.json());
+const rows = await res.json();
+if (rows.length === 0) throw new Error("No live products returned; sitemap not written");
+const livePages = indexablePages(rows);
 
 const PAGES = [
   { path: "/", files: ["src/routes/index.tsx"] },

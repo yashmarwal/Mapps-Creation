@@ -34,18 +34,26 @@ const MAX_FEATURED = 6;
  * in the server-rendered HTML (the hook below only fills in after hydration,
  * which crawlers that don't run JS never see). Same fallback rules as the hook.
  */
-export async function fetchActiveProducts(): Promise<Product[]> {
-  if (!supabaseConfigured) return PRODUCTS;
+export async function fetchLiveProducts(): Promise<Product[] | null> {
+  if (!supabaseConfigured) return null;
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("products")
       .select("*")
       .eq("is_active", true)
       .order("created_at", { ascending: false });
-    return data && data.length > 0 ? (data as ProductRow[]).map(fromRow) : PRODUCTS;
+    // An error or an empty result is "unknown", not "zero products": it can be
+    // an outage or a permissions problem, so nothing may be decided from it.
+    if (error || !data || data.length === 0) return null;
+    return (data as ProductRow[]).map(fromRow);
   } catch {
-    return PRODUCTS;
+    return null;
   }
+}
+
+/** For display: live products, or the sample catalogue when the live read gave nothing. */
+export async function fetchActiveProducts(): Promise<Product[]> {
+  return (await fetchLiveProducts()) ?? PRODUCTS;
 }
 
 // Module-level cache, shared by every `useProducts()` instance in the app.

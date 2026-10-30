@@ -4,13 +4,8 @@ import { ArrowRight, SendHorizontal } from "lucide-react";
 import { ProductCard } from "@/components/site/ProductCard";
 import { CtaBand } from "@/components/site/CtaBand";
 import { Reveal, StampHeading } from "@/components/site/motion";
-import {
-  findFabricPage,
-  gsmRange,
-  indexablePages,
-  MIN_PRODUCTS_TO_INDEX,
-} from "@/data/fabricPages";
-import { fetchActiveProducts } from "@/hooks/useProducts";
+import { findFabricPage, gsmRange, indexablePages, fabricPageState } from "@/data/fabricPages";
+import { fetchLiveProducts } from "@/hooks/useProducts";
 import { breadcrumbSchema, buildPageHead, itemListSchema, whatsappLink } from "@/lib/seo";
 
 export const Route = createFileRoute("/fabrics/$slug")({
@@ -19,12 +14,12 @@ export const Route = createFileRoute("/fabrics/$slug")({
   loader: async ({ params }) => {
     const page = findFabricPage(params.slug);
     if (!page) throw notFound();
-    const all = await fetchActiveProducts();
+    const live = await fetchLiveProducts();
     return {
       slug: page.slug,
-      products: all.filter(page.matches),
-      // Other pages that have products, for the "Other fabric types" links.
-      liveSlugs: indexablePages(all).map((p) => p.slug),
+      ...fabricPageState(page, live),
+      // Other pages that have enough products, for the "Other fabric types" links.
+      liveSlugs: live ? indexablePages(live).map((p) => p.slug) : [],
     };
   },
   head: ({ loaderData }) => {
@@ -35,7 +30,7 @@ export const Route = createFileRoute("/fabrics/$slug")({
       title: page.title,
       description: page.description,
       path,
-      noindex: loaderData.products.length < MIN_PRODUCTS_TO_INDEX,
+      noindex: loaderData.noindex,
       jsonLd: [
         breadcrumbSchema([
           { name: "Home", path: "/" },

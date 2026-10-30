@@ -134,6 +134,18 @@ export function findFabricPage(slug: string) {
 /** A fabric page with fewer live products than this is thin: noindex, unlisted and unlinked. */
 export const MIN_PRODUCTS_TO_INDEX = 3;
 
+/**
+ * What a fabric page may show and claim, given the live product read. `live` is
+ * null when the read failed or returned nothing, so we cannot tell how many
+ * products there are: show none (never the sample catalogue) and never
+ * noindex. Only a successful read with too few matches makes a page noindex.
+ */
+export function fabricPageState<T extends Matchable>(page: FabricPage, live: T[] | null) {
+  if (!live) return { products: [] as T[], noindex: false };
+  const products = live.filter(page.matches);
+  return { products, noindex: products.length < MIN_PRODUCTS_TO_INDEX };
+}
+
 /** Pages with enough live products: the only ones that are linked, listed and indexable. */
 export function indexablePages(products: Matchable[]) {
   return FABRIC_PAGES.filter(

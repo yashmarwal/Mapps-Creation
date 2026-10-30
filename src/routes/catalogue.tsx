@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, Download } from "lucide-react";
-import { ADMIN_CATEGORIES, CATEGORIES, OTHERS_CATEGORY } from "@/data/catalog";
+import { ADMIN_CATEGORIES, CATEGORIES, OTHERS_CATEGORY, PRODUCTS } from "@/data/catalog";
 import { indexablePages } from "@/data/fabricPages";
 import { ProductCard } from "@/components/site/ProductCard";
 import { CtaBand } from "@/components/site/CtaBand";
 import { Reveal } from "@/components/site/motion";
-import { fetchActiveProducts } from "@/hooks/useProducts";
+import { fetchLiveProducts } from "@/hooks/useProducts";
 import { breadcrumbSchema, buildPageHead, itemListSchema } from "@/lib/seo";
 import { DownloadCatalogModal } from "@/components/site/DownloadCatalogModal";
 
@@ -23,7 +23,12 @@ export const Route = createFileRoute("/catalogue")({
   },
   // Loaded on the server so the product list is in the HTML crawlers read,
   // not just filled in after hydration.
-  loader: () => fetchActiveProducts(),
+  loader: async () => {
+    const live = await fetchLiveProducts();
+    // Sample products are shown if the live read gives nothing, but never
+    // published as structured data or used to pick fabric-page links.
+    return { products: live ?? PRODUCTS, isLive: live !== null };
+  },
   head: ({ loaderData }) =>
     buildPageHead({
       title: "Fabric Catalogue | Lycra & Knit Fabrics | Mapps Creation",
@@ -35,7 +40,7 @@ export const Route = createFileRoute("/catalogue")({
           { name: "Home", path: "/" },
           { name: "Catalogue", path: "/catalogue" },
         ]),
-        ...(loaderData?.length ? [itemListSchema(loaderData)] : []),
+        ...(loaderData?.isLive ? [itemListSchema(loaderData.products)] : []),
       ],
     }),
   component: Catalogue,
@@ -44,7 +49,7 @@ export const Route = createFileRoute("/catalogue")({
 function Catalogue() {
   const { category, product: sharedProductId } = Route.useSearch();
   const navigate = useNavigate({ from: "/catalogue" });
-  const allProducts = Route.useLoaderData();
+  const { products: allProducts, isLive } = Route.useLoaderData();
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   // "Others" (from the footer's catch-all link) isn't a real stored
   // category on any product — it means "everything not in one of the
@@ -111,7 +116,7 @@ function Catalogue() {
         <Reveal className="mt-10">
           <h2 className="label-caps text-primary">Browse by fabric type</h2>
           <ul className="mt-4 mb-8 flex flex-wrap gap-3">
-            {indexablePages(allProducts).map((page) => (
+            {(isLive ? indexablePages(allProducts) : []).map((page) => (
               <li key={page.slug}>
                 <Link
                   to="/fabrics/$slug"

@@ -14,7 +14,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import appCss from "../styles.css?url";
 import { indexablePages } from "@/data/fabricPages";
-import { fetchActiveProducts } from "@/hooks/useProducts";
+import { fetchLiveProducts } from "@/hooks/useProducts";
 import { organizationSchema, websiteSchema } from "@/lib/seo";
 import { Navigation } from "@/components/site/Navigation";
 import { RouteLoadingBar } from "@/components/site/RouteLoadingBar";
@@ -92,7 +92,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   // Footer links to fabric pages that actually have products; cached so it
   // isn't refetched on every navigation.
   loader: async () => ({
-    fabricLinks: indexablePages(await fetchActiveProducts()).map(({ slug, label }) => ({
+    fabricLinks: indexablePages((await fetchLiveProducts()) ?? []).map(({ slug, label }) => ({
       slug,
       label,
     })),
