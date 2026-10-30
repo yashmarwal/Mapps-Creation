@@ -42,7 +42,7 @@ const LINKS = [
     to: "/wholesale",
     label: "Wholesale",
     num: "03",
-    desc: "B2B Bulk Factory Pricing",
+    desc: "B2B Bulk Pricing",
     icon: Building2,
     badge: "B2B Bulk",
   },

@@ -22,6 +22,8 @@ type HeadInput = {
   image?: string;
   type?: "website" | "article";
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** Keep the page out of search results (e.g. a fabric page with no products yet). */
+  noindex?: boolean;
 };
 
 /** One-call head builder: title, description, canonical, OG, Twitter, JSON-LD. */
@@ -32,8 +34,12 @@ export function buildPageHead({
   image = SITE.ogImage,
   type = "website",
   jsonLd,
+  noindex = false,
 }: HeadInput) {
   const canonical = `${SITE.url}${path}`;
+  if (import.meta.env.DEV && (title.length > 60 || description.length > 155)) {
+    console.warn(`[seo] ${path}: title ${title.length}/60, description ${description.length}/155`);
+  }
   const meta = [
     { title },
     { name: "description", content: description },
@@ -47,6 +53,8 @@ export function buildPageHead({
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
   ];
+
+  if (noindex) meta.push({ name: "robots", content: "noindex, follow" });
 
   if (image) {
     meta.push(
@@ -79,7 +87,15 @@ export const organizationSchema = {
   logo: `${SITE.url}/apple-touch-icon.png`,
   image: SITE.ogImage,
   telephone: SITE.phoneDisplay,
+  email: SITE.email,
   foundingDate: "2024",
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "sales",
+    telephone: SITE.phoneDisplay,
+    email: SITE.email,
+    areaServed: "IN",
+  },
   address: {
     "@type": "PostalAddress",
     addressLocality: "Surat",
@@ -156,9 +172,21 @@ export function serviceSchema({
   };
 }
 
-export function itemListSchema(
-  products: { name: string; category: string; price: number; unit: "kg" | "meter" }[],
-) {
+type SchemaProduct = {
+  name: string;
+  category: string;
+  price: number;
+  unit: "kg" | "meter";
+  spec?: string;
+  image?: string;
+};
+
+/** Relative asset paths (bundled images) must be absolute in structured data. */
+function absoluteUrl(url: string) {
+  return url.startsWith("http") ? url : `${SITE.url}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
+export function itemListSchema(products: SchemaProduct[]) {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -169,6 +197,9 @@ export function itemListSchema(
         "@type": "Product",
         name: product.name,
         category: product.category,
+        ...(product.spec ? { description: product.spec } : {}),
+        ...(product.image ? { image: absoluteUrl(product.image) } : {}),
+        brand: { "@type": "Brand", name: SITE.name },
         offers: {
           "@type": "Offer",
           price: product.price,

@@ -1,11 +1,12 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, Download } from "lucide-react";
-import { CATEGORIES, FABRIC_TYPE_CATEGORIES, OTHERS_CATEGORY, PRODUCTS } from "@/data/catalog";
-import { ProductCard, ProductCardSkeleton } from "@/components/site/ProductCard";
+import { ADMIN_CATEGORIES, CATEGORIES, OTHERS_CATEGORY, PRODUCTS } from "@/data/catalog";
+import { indexablePages } from "@/data/fabricPages";
+import { ProductCard } from "@/components/site/ProductCard";
 import { CtaBand } from "@/components/site/CtaBand";
 import { Reveal } from "@/components/site/motion";
-import { useProducts } from "@/hooks/useProducts";
+import { fetchLiveProducts } from "@/hooks/useProducts";
 import { breadcrumbSchema, buildPageHead, itemListSchema } from "@/lib/seo";
 import { DownloadCatalogModal } from "@/components/site/DownloadCatalogModal";
 
@@ -20,7 +21,15 @@ export const Route = createFileRoute("/catalogue")({
       ...(typeof product === "string" && product.trim() ? { product } : {}),
     };
   },
-  head: () =>
+  // Loaded on the server so the product list is in the HTML crawlers read,
+  // not just filled in after hydration.
+  loader: async () => {
+    const live = await fetchLiveProducts();
+    // Sample products are shown if the live read gives nothing, but never
+    // published as structured data or used to pick fabric-page links.
+    return { products: live ?? PRODUCTS, isLive: live !== null };
+  },
+  head: ({ loaderData }) =>
     buildPageHead({
       title: "Fabric Catalogue | Lycra & Knit Fabrics | Mapps Creation",
       description:
@@ -31,7 +40,7 @@ export const Route = createFileRoute("/catalogue")({
           { name: "Home", path: "/" },
           { name: "Catalogue", path: "/catalogue" },
         ]),
-        itemListSchema(PRODUCTS),
+        ...(loaderData?.isLive ? [itemListSchema(loaderData.products)] : []),
       ],
     }),
   component: Catalogue,
@@ -40,17 +49,15 @@ export const Route = createFileRoute("/catalogue")({
 function Catalogue() {
   const { category, product: sharedProductId } = Route.useSearch();
   const navigate = useNavigate({ from: "/catalogue" });
-  const { products: allProducts, loading: productsLoading } = useProducts();
+  const { products: allProducts, isLive } = Route.useLoaderData();
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   // "Others" (from the footer's catch-all link) isn't a real stored
   // category on any product — it means "everything not in one of the
-  // known FABRIC_TYPE_CATEGORIES", e.g. products added via the admin's
+  // known ADMIN_CATEGORIES", e.g. products added via the admin's
   // free-text "Other (specify)" option.
   const products =
     category === OTHERS_CATEGORY
-      ? allProducts.filter(
-          (p) => !(FABRIC_TYPE_CATEGORIES as readonly string[]).includes(p.category),
-        )
+      ? allProducts.filter((p) => !ADMIN_CATEGORIES.includes(p.category))
       : category
         ? allProducts.filter((p) => p.category === category)
         : allProducts;
@@ -107,6 +114,21 @@ function Catalogue() {
         </Reveal>
 
         <Reveal className="mt-10">
+          <h2 className="label-caps text-primary">Browse by fabric type</h2>
+          <ul className="mt-4 mb-8 flex flex-wrap gap-3">
+            {(isLive ? indexablePages(allProducts) : []).map((page) => (
+              <li key={page.slug}>
+                <Link
+                  to="/fabrics/$slug"
+                  params={{ slug: page.slug }}
+                  className="label-caps border-border hover:border-primary hover:text-primary inline-flex min-h-[44px] items-center rounded-full border px-5 text-xs transition-colors"
+                >
+                  {page.label} wholesale
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <h2 className="label-caps text-primary mb-4">All fabric qualities</h2>
           {/* Mobile: a single dropdown — too many long category names to
               show as pills without wrapping into a cluttered grid. */}
           <div className="relative md:hidden">
@@ -158,17 +180,15 @@ function Catalogue() {
         </Reveal>
 
         <div className="mt-12 grid grid-cols-1 gap-4 pb-24 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 md:pb-32">
-          {productsLoading
-            ? Array.from({ length: 9 }).map((_, i) => <ProductCardSkeleton key={i} />)
-            : products.map((product, i) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={i}
-                  forceOpen={product.id === sharedProductId}
-                  onOpenChange={(open) => handleProductOpenChange(product.id, open)}
-                />
-              ))}
+          {products.map((product, i) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              index={i}
+              forceOpen={product.id === sharedProductId}
+              onOpenChange={(open) => handleProductOpenChange(product.id, open)}
+            />
+          ))}
         </div>
       </section>
 

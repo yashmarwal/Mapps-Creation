@@ -73,7 +73,7 @@ const KNOWLEDGE_BASE: { keywords: string[]; response: string }[] = [
   {
     keywords: ["kg", "meter", "unit", "sell by"],
     response:
-      "Knitted qualities are traded by kg and woven qualities like twill and matty by meter. We quote in whichever unit suits your garment costing.",
+      "Our qualities, including twill and matty, are traded by kg. We quote in whichever unit suits your garment costing.",
   },
   {
     keywords: ["moq", "minimum", "minimum order", "how many", "small order"],
@@ -93,7 +93,7 @@ const KNOWLEDGE_BASE: { keywords: string[]; response: string }[] = [
   {
     keywords: ["payment", "pay", "upi", "bank", "gst", "invoice", "bill"],
     response:
-      "We accept bank transfer (NEFT/RTGS/UPI) and bill every order with a valid GST invoice; Mapps Creation is a 100% GST-registered business.",
+      "We accept bank transfer (NEFT/RTGS/UPI) and bill every order with a valid GST invoice; Mapps Creation is a GST-registered business.",
   },
   {
     keywords: [
@@ -207,7 +207,7 @@ export function AskUsChat({
   const getRouteContextLabel = () => {
     if (pathname === "/") return "Home → Fabric Overview";
     if (pathname.startsWith("/catalogue")) return "Catalogue → 500+ Lycra Qualities";
-    if (pathname.startsWith("/wholesale")) return "Wholesale → B2B Factory Pricing";
+    if (pathname.startsWith("/wholesale")) return "Wholesale → B2B Bulk Pricing";
     if (pathname.startsWith("/about")) return "About → Surat Mill Hub";
     if (pathname.startsWith("/contact")) return "Contact → Direct Sales Desk";
     return "Surat Fabric Hub";
@@ -220,7 +220,7 @@ export function AskUsChat({
         if (pathname.startsWith("/catalogue")) {
           setProactiveNudge("Looking for 4-Way Lycra or Cotton Spandex? ASK MAPPSY!");
         } else if (pathname.startsWith("/wholesale")) {
-          setProactiveNudge("Inquire for factory direct rates on 500+ kg bulk lots!");
+          setProactiveNudge("Inquire for bulk rates on 500+ kg lots!");
         } else {
           setProactiveNudge("ASK MAPPSY active. Click to chat!");
         }

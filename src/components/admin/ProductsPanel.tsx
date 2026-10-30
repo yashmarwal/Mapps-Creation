@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Check, EyeOff, Pencil, Plus, Star, StarOff, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { FABRIC_TYPE_CATEGORIES, PRODUCTS } from "@/data/catalog";
+import { ADMIN_CATEGORIES, PRODUCTS } from "@/data/catalog";
 import {
   checkUploadSize,
   compressImageToTarget,
@@ -30,7 +30,7 @@ const MAX_FEATURED = 6;
 const EMPTY_FORM = {
   id: "",
   name: "",
-  category: FABRIC_TYPE_CATEGORIES[0] as string,
+  category: ADMIN_CATEGORIES[0] as string,
   price: "",
   unit: "kg" as "kg" | "meter",
   spec: "",
@@ -76,7 +76,7 @@ export function ProductsPanel() {
       image_url_2: row.image_url_2 ?? "",
       is_active: row.is_active,
     });
-    setIsOtherCategory(!(FABRIC_TYPE_CATEGORIES as readonly string[]).includes(row.category));
+    setIsOtherCategory(!ADMIN_CATEGORIES.includes(row.category));
     setEditing(true);
   };
 
@@ -385,7 +385,7 @@ export function ProductsPanel() {
                 }}
                 className="border-border bg-card mt-2 w-full min-h-[44px] border px-3"
               >
-                {FABRIC_TYPE_CATEGORIES.map((c) => (
+                {ADMIN_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>

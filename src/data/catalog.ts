@@ -34,6 +34,16 @@ export const FABRIC_TYPE_CATEGORIES = [
 // via the admin's free-text "Other (specify)" option.
 export const OTHERS_CATEGORY = "Others";
 
+// Everything the admin's category dropdown offers: the current groupings plus
+// the fabric-type categories (minus the "Other Products" catch-all and the
+// duplicate "T-Shirt Fabric"), so products can be tagged for the fabric pages.
+export const ADMIN_CATEGORIES: readonly string[] = [
+  ...FABRIC_TYPE_CATEGORIES,
+  ...CATEGORIES.filter(
+    (c) => c !== "Other Products" && !(FABRIC_TYPE_CATEGORIES as readonly string[]).includes(c),
+  ),
+];
+
 export type Product = {
   id: string;
   name: string;

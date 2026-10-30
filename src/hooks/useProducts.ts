@@ -29,6 +29,33 @@ function fromRow(row: ProductRow): Product {
 
 const MAX_FEATURED = 6;
 
+/**
+ * One-shot fetch for route loaders, so product names, specs and prices are
+ * in the server-rendered HTML (the hook below only fills in after hydration,
+ * which crawlers that don't run JS never see). Same fallback rules as the hook.
+ */
+export async function fetchLiveProducts(): Promise<Product[] | null> {
+  if (!supabaseConfigured) return null;
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+    // An error or an empty result is "unknown", not "zero products": it can be
+    // an outage or a permissions problem, so nothing may be decided from it.
+    if (error || !data || data.length === 0) return null;
+    return (data as ProductRow[]).map(fromRow);
+  } catch {
+    return null;
+  }
+}
+
+/** For display: live products, or the sample catalogue when the live read gave nothing. */
+export async function fetchActiveProducts(): Promise<Product[]> {
+  return (await fetchLiveProducts()) ?? PRODUCTS;
+}
+
 // Module-level cache, shared by every `useProducts()` instance in the app.
 // Without this, every component that calls the hook (homepage, catalogue
 // page, search modal, download-catalogue modal — often 2-3 of them mounted

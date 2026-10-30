@@ -5,7 +5,10 @@
 ## Pages
 - [Home](https://www.mappscreation.in/): Overview of Mapps Creation's fabric supply, sourcing model and how to order.
 - [About](https://www.mappscreation.in/about): Company background, founder Pratham Aggarwal, and sourcing/quality process in Surat.
-- [Fabric Catalogue](https://www.mappscreation.in/catalogue): Browsable catalogue of Lycra, knitted, polyester-lycra, melange, twill and matty fabrics with indicative rates.
+- [Fabric Catalogue](https://www.mappscreation.in/catalogue): Browsable catalogue of knitted fabrics with GSM and indicative rates per kg.
+- [T-Shirt Fabric](https://www.mappscreation.in/fabrics/t-shirt-fabric): Knitted t-shirt fabric qualities with GSM and indicative rates per kg.
+- [Bottomwear Fabric](https://www.mappscreation.in/fabrics/bottomwear-fabric): Knitted bottomwear (lower) fabric qualities with GSM and indicative rates per kg.
+- [Co-ord Set Fabric](https://www.mappscreation.in/fabrics/co-ord-set-fabric): Knitted co-ord set fabric qualities with GSM and indicative rates per kg.
 - [Wholesale Partner Program](https://www.mappscreation.in/wholesale): How to register as a wholesale buyer, order process and dispatch terms.
 - [Contact](https://www.mappscreation.in/contact): WhatsApp, phone and enquiry form for fabric requirements.
 - [FAQ](https://www.mappscreation.in/faq): Answers on MOQ, pricing, payment, GST billing, and dispatch coverage.

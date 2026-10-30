@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Mail, MapPin, Phone } from "lucide-react";
-import { FABRIC_TYPE_CATEGORIES, OTHERS_CATEGORY } from "@/data/catalog";
+import { OTHERS_CATEGORY } from "@/data/catalog";
 import { SITE } from "@/lib/seo";
 import { LogoMark } from "./LogoMark";
 
@@ -10,7 +10,7 @@ const DEVELOPER_WHATSAPP = `https://wa.me/918595475007?text=${encodeURIComponent
   "Hello, I’m interested in developing a website.",
 )}`;
 
-export function Footer() {
+export function Footer({ fabricLinks }: { fabricLinks: { slug: string; label: string }[] }) {
   return (
     <footer id="site-footer" className="border-border border-t pb-23 md:pb-0">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-4 md:px-10 md:py-20">
@@ -55,14 +55,14 @@ export function Footer() {
         <div>
           <h3 className="label-caps text-primary">Fabrics</h3>
           <ul className="mt-5 space-y-2.5 text-sm">
-            {FABRIC_TYPE_CATEGORIES.map((category) => (
-              <li key={category}>
+            {fabricLinks.map((page) => (
+              <li key={page.slug}>
                 <Link
-                  to="/catalogue"
-                  search={{ category }}
+                  to="/fabrics/$slug"
+                  params={{ slug: page.slug }}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {category}
+                  {page.label}
                 </Link>
               </li>
             ))}

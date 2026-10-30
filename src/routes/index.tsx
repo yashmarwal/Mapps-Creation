@@ -108,7 +108,7 @@ const FAQS = [
   },
   {
     q: "Do you sell by kilogram or by meter?",
-    a: "Both. Knitted qualities are usually traded by kg and woven qualities such as twill and matty by meter. We quote in whichever unit suits your costing.",
+    a: "Mostly by kilogram: knitted qualities, including twill and matty, are traded by kg. We quote in whichever unit suits your costing.",
   },
   {
     q: "Can I get samples before ordering?",
