@@ -135,6 +135,76 @@ Single admin user (P Agarwal), no self-signup:
 
 1. **Authentication → Users → Add user** (email + password).
 2. Sign in at `/admin/login` with those credentials.
+3. **Turn public signups off** (see "Lock down admin access" below). Supabase
+   allows anyone with the public anon key to create an account by default, and
+   the policies above treat *any* signed-in account as the admin.
+
+## Lock down admin access (do this once, in this order)
+
+**Step A — disable signups (no risk, do first).** Authentication → Sign In /
+Providers → turn **off** "Allow new users to sign up" (labelled "Enable sign
+ups" in older dashboards). Your existing admin user keeps working; you can still
+add users manually from Authentication → Users.
+
+**Step B — restrict writes to the admin user only.** Copy your admin's
+**User UID** (Authentication → Users), put it in place of `<ADMIN_UUID>`
+below, and run in the SQL editor. Test `/admin` right after (edit a product,
+upload an image). To undo, run this same block again with every
+`(select auth.uid()) = '<ADMIN_UUID>'::uuid` replaced by
+`auth.role() = 'authenticated'` (the drop-then-create statements make it safe
+to re-run; re-running the original `create policy` lines alone would fail
+because the names already exist).
+
+```sql
+-- products
+drop policy if exists "Admin write products"  on products;
+drop policy if exists "Admin update products" on products;
+drop policy if exists "Admin delete products" on products;
+create policy "Admin write products"  on products for insert with check ((select auth.uid()) = '<ADMIN_UUID>'::uuid);
+create policy "Admin update products" on products for update using ((select auth.uid()) = '<ADMIN_UUID>'::uuid);
+create policy "Admin delete products" on products for delete using ((select auth.uid()) = '<ADMIN_UUID>'::uuid);
+
+-- site_images
+drop policy if exists "Admin write site_images"  on site_images;
+drop policy if exists "Admin delete site_images" on site_images;
+create policy "Admin write site_images"  on site_images for insert with check ((select auth.uid()) = '<ADMIN_UUID>'::uuid);
+create policy "Admin delete site_images" on site_images for delete using ((select auth.uid()) = '<ADMIN_UUID>'::uuid);
+
+-- site_settings
+drop policy if exists "Admin write site_settings"  on site_settings;
+drop policy if exists "Admin update site_settings" on site_settings;
+create policy "Admin write site_settings"  on site_settings for insert with check ((select auth.uid()) = '<ADMIN_UUID>'::uuid);
+create policy "Admin update site_settings" on site_settings for update using ((select auth.uid()) = '<ADMIN_UUID>'::uuid);
+
+-- storage buckets
+drop policy if exists "Admin upload product-images" on storage.objects;
+drop policy if exists "Admin upload site-images"    on storage.objects;
+drop policy if exists "Admin delete product-images" on storage.objects;
+drop policy if exists "Admin delete site-images"    on storage.objects;
+create policy "Admin upload product-images" on storage.objects for insert with check (bucket_id = 'product-images' and (select auth.uid()) = '<ADMIN_UUID>'::uuid);
+create policy "Admin upload site-images"    on storage.objects for insert with check (bucket_id = 'site-images'    and (select auth.uid()) = '<ADMIN_UUID>'::uuid);
+create policy "Admin delete product-images" on storage.objects for delete using (bucket_id = 'product-images' and (select auth.uid()) = '<ADMIN_UUID>'::uuid);
+create policy "Admin delete site-images"    on storage.objects for delete using (bucket_id = 'site-images'    and (select auth.uid()) = '<ADMIN_UUID>'::uuid);
+```
+
+Policies are OR-ed together, so an old permissive policy under a *different*
+name would silently keep the hole open. Confirm none is left:
+
+```sql
+select schemaname, tablename, policyname, cmd, qual, with_check
+from pg_policies
+where schemaname in ('public', 'storage') and cmd <> 'SELECT'
+order by 1, 2, 3;
+```
+
+Every non-SELECT row should reference `auth.uid()`, not `auth.role()`.
+
+**Step C — optional extras.** Turn on MFA for the admin user if your plan
+offers it. If you never upload SVGs, you can also set each bucket's "Allowed
+MIME types" (Storage → bucket → Edit) to
+`image/jpeg, image/png, image/webp, image/gif, image/avif, video/mp4, video/webm, video/quicktime, video/x-m4v, video/ogg`.
+The admin panel accepts any `image/*` / `video/*`, so a shorter list can make an
+upload fail with a storage error — test one image and one video after changing it.
 
 ## 5. Seed products (optional)
 

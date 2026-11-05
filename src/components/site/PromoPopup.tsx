@@ -28,12 +28,20 @@ export const PROMO_DEFAULT: PromoPopupSettings = {
 
 const SCROLL_TRIGGER = 0.2;
 
+// The link/image come from an admin-editable row — only let through the
+// schemes the admin panel's own placeholder shows (web, site path, mail, tel).
+const SAFE_LINK = /^(https?:\/\/|mailto:|tel:|\/|#)/i;
+const SAFE_IMAGE = /^(https?:\/\/|\/)/i;
+const onlyIf = (re: RegExp, value: string) => (re.test(value.trim()) ? value.trim() : "");
+
 export function PromoPopup() {
   const { value: settings, loaded } = useSiteSetting<PromoPopupSettings>(
     "promo_popup",
     PROMO_DEFAULT,
   );
   const [show, setShow] = useState(false);
+  const ctaLink = onlyIf(SAFE_LINK, settings.ctaLink ?? "");
+  const imageUrl = onlyIf(SAFE_IMAGE, settings.imageUrl ?? "");
 
   useEffect(() => {
     if (!loaded || !settings.enabled || !settings.title.trim()) return;
@@ -93,13 +101,9 @@ export function PromoPopup() {
               <X className="h-4 w-4" />
             </button>
 
-            {settings.imageUrl && (
+            {imageUrl && (
               <div className="relative h-44 w-full bg-slate-950">
-                <img
-                  src={settings.imageUrl}
-                  alt={settings.title}
-                  className="h-full w-full object-cover"
-                />
+                <img src={imageUrl} alt={settings.title} className="h-full w-full object-cover" />
               </div>
             )}
 
@@ -115,10 +119,10 @@ export function PromoPopup() {
                   {settings.message}
                 </p>
               )}
-              {settings.ctaLink && (
+              {ctaLink && (
                 <a
-                  href={settings.ctaLink}
-                  target={settings.ctaLink.startsWith("http") ? "_blank" : undefined}
+                  href={ctaLink}
+                  target={ctaLink.startsWith("http") ? "_blank" : undefined}
                   rel="noopener noreferrer"
                   className="bg-primary text-primary-foreground font-semibold label-caps mt-6 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl active:scale-98 transition-all cursor-pointer text-xs tracking-wider shadow-md"
                 >

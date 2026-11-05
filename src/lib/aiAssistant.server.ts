@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { supabase } from "./supabase";
 import { SITE } from "./seo";
 
@@ -6,6 +7,13 @@ import { SITE } from "./seo";
 // not a heavy task, so there's no reason to reach for a bigger model.
 // Override via GEMINI_MODEL if you ever want to.
 const DEFAULT_MODEL = "gemini-3.5-flash-lite";
+
+// Caps what one request can push into the Gemini prompt — the endpoint is
+// public, so an unbounded message is an unbounded bill.
+const MAX_MESSAGE_CHARS = 500;
+const messageSchema = z.object({
+  message: z.string().transform((m) => m.trim().slice(0, MAX_MESSAGE_CHARS)),
+});
 
 type KnowledgeSetting = { text?: string };
 
@@ -60,23 +68,24 @@ type GeminiResponse = {
  * answers instead of ever showing a broken chat.
  */
 export const askAiAssistant = createServerFn({ method: "POST" })
-  .validator((data: { message: string }) => data)
+  .validator((data: unknown) => messageSchema.parse(data))
   .handler(async ({ data }): Promise<string | null> => {
     const apiKey = process.env["GEMINI_API_KEY"];
-    if (!apiKey || !data.message.trim()) return null;
+    if (!apiKey || !data.message) return null;
 
     const knowledge = await loadKnowledgeText();
     if (!knowledge) return null;
 
     const model = process.env["GEMINI_MODEL"] || DEFAULT_MODEL;
-    const prompt = buildPrompt(knowledge, data.message.trim());
+    const prompt = buildPrompt(knowledge, data.message);
 
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          // Header, not ?key= — URLs end up in proxy/platform logs.
+          headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
           body: JSON.stringify({
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             generationConfig: { temperature: 0.3, maxOutputTokens: 300 },

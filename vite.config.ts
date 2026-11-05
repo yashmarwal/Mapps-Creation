@@ -76,7 +76,35 @@ export default defineConfig(({ mode, command }) => {
         },
       }),
       // nitro only matters for `vite build` — no-op during `vite dev`.
-      ...(command === "build" ? [nitro({ preset: "vercel" })] : []),
+      // Response headers are the no-regret subset only (no CSP: the SSR
+      // hydration/JSON-LD inline scripts and third-party embeds make a strict
+      // one a breakage risk — add it Report-Only first if ever wanted).
+      ...(command === "build"
+        ? [
+            nitro({
+              preset: "vercel",
+              // `continue: true` is what makes Vercel apply the headers and then
+              // keep routing to the filesystem / SSR handler. nitro's own
+              // routeRules.headers output omits it, so declare the route here.
+              vercel: {
+                config: {
+                  version: 3,
+                  routes: [
+                    {
+                      src: "/(.*)",
+                      headers: {
+                        "X-Content-Type-Options": "nosniff",
+                        "X-Frame-Options": "SAMEORIGIN",
+                        "Referrer-Policy": "strict-origin-when-cross-origin",
+                      },
+                      continue: true,
+                    },
+                  ],
+                },
+              },
+            }),
+          ]
+        : []),
       viteReact(),
     ],
   };
