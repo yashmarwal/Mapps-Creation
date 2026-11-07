@@ -137,14 +137,14 @@ export function Footer({ fabricLinks }: { fabricLinks: { slug: string; label: st
       </div>
 
       <div className="border-border text-muted-foreground border-t py-4 text-center text-xs">
-        Developed by{" "}
+        Built by{" "}
         <a
           href={DEVELOPER_WHATSAPP}
           target="_blank"
           rel="noopener noreferrer"
           className="text-primary hover:text-foreground underline underline-offset-2 transition-colors"
         >
-          Yash Marwal
+          Phaseline
         </a>
       </div>
     </footer>
