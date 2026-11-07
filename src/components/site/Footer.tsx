@@ -3,12 +3,9 @@ import { Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { OTHERS_CATEGORY } from "@/data/catalog";
 import { SITE } from "@/lib/seo";
 import { LogoMark } from "./LogoMark";
+import PhaselineCredit from "./PhaselineCredit";
 
 const INSTAGRAM_URL = "https://www.instagram.com/mappscreation?igsi=MWsxdjNycThiNmY3dw==";
-
-const DEVELOPER_WHATSAPP = `https://wa.me/918595475007?text=${encodeURIComponent(
-  "Hello, I’m interested in developing a website.",
-)}`;
 
 export function Footer({ fabricLinks }: { fabricLinks: { slug: string; label: string }[] }) {
   return (
@@ -114,7 +111,9 @@ export function Footer({ fabricLinks }: { fabricLinks: { slug: string; label: st
 
       <div className="hairline" />
       <div className="text-muted-foreground mx-auto flex max-w-7xl flex-col gap-3 px-5 py-6 text-xs md:flex-row md:items-center md:justify-between md:px-10">
-        <p>© {new Date().getFullYear()} Mapps Creation. All rights reserved.</p>
+        <p className="md:whitespace-nowrap">
+          © {new Date().getFullYear()} Mapps Creation. All rights reserved.
+        </p>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
           <span>Inquiry-only B2B · Wholesale &amp; bulk supply from Surat</span>
           {[
@@ -134,18 +133,9 @@ export function Footer({ fabricLinks }: { fabricLinks: { slug: string; label: st
             </span>
           ))}
         </p>
-      </div>
-
-      <div className="border-border text-muted-foreground border-t py-4 text-center text-xs">
-        Built by{" "}
-        <a
-          href={DEVELOPER_WHATSAPP}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary hover:text-foreground underline underline-offset-2 transition-colors"
-        >
-          Phaseline
-        </a>
+        <div className="flex justify-center md:justify-end">
+          <PhaselineCredit />
+        </div>
       </div>
     </footer>
   );
